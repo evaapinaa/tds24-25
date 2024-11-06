@@ -30,6 +30,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.Color;
 import javax.swing.ImageIcon;
+import java.awt.Toolkit;
 
 public class VentanaPrincipal extends JFrame {
 
@@ -57,6 +58,7 @@ public class VentanaPrincipal extends JFrame {
 	 * Create the frame.
 	 */
 	public VentanaPrincipal() {
+		setIconImage(Toolkit.getDefaultToolkit().getImage(VentanaPrincipal.class.getResource("/umu/tds/apps/resources/icono.png")));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		contentPane = new JPanel();

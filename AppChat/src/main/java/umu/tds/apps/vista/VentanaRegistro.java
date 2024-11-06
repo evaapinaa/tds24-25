@@ -85,7 +85,7 @@ public class VentanaRegistro extends JFrame {
 	 * Create the frame.
 	 */
 	public VentanaRegistro() {
-		setIconImage(Toolkit.getDefaultToolkit().getImage(VentanaRegistro.class.getResource("/resources/icono.png")));
+		setIconImage(Toolkit.getDefaultToolkit().getImage(VentanaRegistro.class.getResource("/umu/tds/apps/resources/icono.png")));
 		setTitle("AppChat");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 501, 326);
@@ -287,7 +287,7 @@ public class VentanaRegistro extends JFrame {
 		textField_3.setColumns(10);
 		
 		lblNewLabel_8 = new JLabel("");
-		lblNewLabel_8.setIcon(new ImageIcon(VentanaRegistro.class.getResource("/resources/imagenUsuario.png")));
+		lblNewLabel_8.setIcon(new ImageIcon(VentanaRegistro.class.getResource("/umu/tds/apps/resources/imagenUsuario.png")));
 		GridBagConstraints gbc_lblNewLabel_8 = new GridBagConstraints();
 		gbc_lblNewLabel_8.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_8.gridx = 4;

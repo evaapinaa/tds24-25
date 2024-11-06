@@ -97,7 +97,7 @@ public class VentanaLogin {
 	 */
 	private void initialize() {
 		frmAppchat = new JFrame();
-		frmAppchat.setIconImage(Toolkit.getDefaultToolkit().getImage(VentanaLogin.class.getResource("/resources/icono.png")));
+		frmAppchat.setIconImage(Toolkit.getDefaultToolkit().getImage(VentanaLogin.class.getResource("/umu/tds/apps/resources/icono.png")));
 		frmAppchat.setTitle("AppChat");
 		frmAppchat.setBounds(300, 300, 450, 261);
 		frmAppchat.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -204,7 +204,7 @@ public class VentanaLogin {
 		JLabel logo = new JLabel("");
 		logo.setPreferredSize(new Dimension(256, 96));
 		logo.setHorizontalAlignment(SwingConstants.CENTER);
-		logo.setIcon(new ImageIcon(VentanaLogin.class.getResource("/resources/titulo.png")));
+		logo.setIcon(new ImageIcon(VentanaLogin.class.getResource("/umu/tds/apps/resources/titulo.png")));
 		frmAppchat.getContentPane().add(logo, BorderLayout.NORTH);
 		
 	}
