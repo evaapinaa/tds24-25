@@ -3,14 +3,17 @@ package umu.tds.apps.modelo;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 public class Usuario {
 	
 	// ATRIBUTOS
 	
 	private String usuario;
-	private String contaseña;
+	private String contraseña;
 	private String telefono;
+	private String email;
+	private Optional<String> imagenPerfil;  // Foto es opcional
 	private LocalDate fechaNacimiento;
 	private List<Contacto> listaContactos;
 	private List<Mensaje> listaMensajes;
@@ -26,11 +29,11 @@ public class Usuario {
 	}
 	
 	public String getContaseña() {
-		return contaseña;
+		return contraseña;
 	}
 	
 	public void setContaseña(String contaseña) {
-		this.contaseña = contaseña;
+		this.contraseña = contaseña;
 	}
 	
 	public String getTelefono() {
@@ -50,7 +53,7 @@ public class Usuario {
 	}
 	
 	public List<Contacto> getListaContactos() {
-		return new LinkedList<Contacto>(listaContactos); // Comprobar
+		return new LinkedList<Contacto>(listaContactos); // comprobar
 	}
 	
 	public void setListaContactos(List<Contacto> listaContactos) {
@@ -58,16 +61,21 @@ public class Usuario {
 	}
 	
 	public List<Mensaje> getListaMensajes() {
-		return new LinkedList<Mensaje>(listaMensajes); // Comprobar
+		return new LinkedList<Mensaje>(listaMensajes); // comprobar
 	}
 	
 	public void setListaMensajes(List<Mensaje> listaMensajes) {
 		this.listaMensajes = listaMensajes;
 	}
 	
-	public Usuario(String nombre) {
-		this.usuario = nombre;
-	}
-	
-	
+    public Usuario(String nombre, LocalDate fechaNacimiento, String email, String telefono, String contraseña, Optional<String> imagenPerfil) {
+        this.usuario = nombre;
+        this.fechaNacimiento = fechaNacimiento;
+        this.email = email;
+        this.telefono = telefono;
+        this.contraseña = contraseña;
+        this.imagenPerfil = imagenPerfil;
+        this.listaContactos = new LinkedList<Contacto>();
+        this.listaMensajes = new LinkedList<Mensaje>();
+    }
 }
