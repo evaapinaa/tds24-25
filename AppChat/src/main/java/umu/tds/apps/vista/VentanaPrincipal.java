@@ -23,6 +23,9 @@ import javax.swing.JList;
 import javax.swing.AbstractListModel;
 import javax.swing.JTextField;
 import java.awt.Font;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.FlowLayout;
 import javax.swing.border.TitledBorder;
 import javax.swing.border.CompoundBorder;
@@ -73,8 +76,8 @@ public class VentanaPrincipal extends JFrame {
 		contentPane.setLayout(new BorderLayout(0, 0));
 		
 		JPanel panelNorte = new JPanel();
-		panelNorte.setBackground(new Color(173, 216, 230));
-		panelNorte.setBorder(new CompoundBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), new LineBorder(new Color(173, 216, 230), 8, true)));
+		panelNorte.setBackground(new Color(0, 107, 107));
+		panelNorte.setBorder(new CompoundBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), new LineBorder(new Color(0, 107, 107), 8, true)));
 		contentPane.add(panelNorte, BorderLayout.NORTH);
 		panelNorte.setLayout(new BoxLayout(panelNorte, BoxLayout.X_AXIS));
 		
@@ -122,7 +125,8 @@ public class VentanaPrincipal extends JFrame {
 		panelNorte.add(horizontalGlue);
 		
 		JLabel lblNewLabel = new JLabel("Usuario Actual");
-		lblNewLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+		lblNewLabel.setForeground(new Color(248, 248, 255));
+		lblNewLabel.setFont(new Font("Arial", Font.BOLD, 11));
 		lblNewLabel.setIcon(null);
 		panelNorte.add(lblNewLabel);
 		
@@ -136,7 +140,7 @@ public class VentanaPrincipal extends JFrame {
 		
 		JList<Mensaje> list = new JList<Mensaje>();
 		list.setSelectionBackground(new Color(176, 224, 230));
-		list.setBackground(new Color(240, 248, 255));
+		list.setBackground(new Color(205, 235, 234));
 		list.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		list.setFont(new Font("Arial", Font.PLAIN, 11));
 		list.setCellRenderer(new MensajeCellRenderer());
@@ -157,7 +161,7 @@ public class VentanaPrincipal extends JFrame {
 		contentPane.add(panelCentro, BorderLayout.CENTER);
 		panelCentro.setLayout(new BorderLayout(0, 0));
 		
-		JPanel panelChat = new JPanel();
+		JPanel panelChat = new JPanelGradient();
 		panelChat.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		panelChat.setBackground(new Color(119, 136, 153));
 		panelCentro.add(panelChat, BorderLayout.CENTER);
@@ -178,5 +182,25 @@ public class VentanaPrincipal extends JFrame {
 		
 		
 	}
+	
+	@SuppressWarnings("serial")
+	class JPanelGradient extends JPanel {
+	    @Override
+	    protected void paintComponent(Graphics g) {
+	        super.paintComponent(g);
+	        Graphics2D g2d = (Graphics2D) g;
+	        int width = getWidth();
+	        int height = getHeight();
 
+	        // Colores más suaves y armoniosos
+	        Color color1 = new Color(0, 128, 128); // Turquesa oscuro
+	        Color color2 = new Color(172, 225, 175); // Verde celadón
+
+
+	        GradientPaint gp = new GradientPaint(0, 0, color1, 0, height, color2); // Degradado vertical
+
+	        g2d.setPaint(gp);
+	        g2d.fillRect(0, 0, width, height);
+	    }
+	}
 }
