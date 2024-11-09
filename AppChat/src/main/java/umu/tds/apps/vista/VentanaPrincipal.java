@@ -31,6 +31,8 @@ import javax.swing.border.MatteBorder;
 import java.awt.Color;
 import javax.swing.ImageIcon;
 import java.awt.Toolkit;
+import javax.swing.SwingConstants;
+import javax.swing.border.LineBorder;
 
 public class VentanaPrincipal extends JFrame {
 
@@ -68,37 +70,47 @@ public class VentanaPrincipal extends JFrame {
 		contentPane.setLayout(new BorderLayout(0, 0));
 		
 		JPanel panelNorte = new JPanel();
+		panelNorte.setBorder(new LineBorder(new Color(245, 245, 245), 5, true));
 		contentPane.add(panelNorte, BorderLayout.NORTH);
 		panelNorte.setLayout(new BoxLayout(panelNorte, BoxLayout.X_AXIS));
 		
 		JComboBox comboBoxContactos = new JComboBox();
 		panelNorte.add(comboBoxContactos);
 		
-		JButton btnNewButton = new JButton("Enviar");
+		JButton btnNewButton = new JButton("");
+		btnNewButton.setIcon(new ImageIcon(VentanaPrincipal.class.getResource("/umu/tds/apps/resources/enviar.png")));
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
 		panelNorte.add(btnNewButton);
 		
-		JButton btnNewButton_1 = new JButton("Lupa");
+		JButton btnNewButton_1 = new JButton("");
+		btnNewButton_1.setIcon(new ImageIcon(VentanaPrincipal.class.getResource("/umu/tds/apps/resources/lupa.png")));
 		btnNewButton_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
 		panelNorte.add(btnNewButton_1);
 		
-		JButton btnNewButton_2 = new JButton("Contactos");
+		JButton btnNewButton_2 = new JButton(" Contactos");
+		btnNewButton_2.setIcon(new ImageIcon(VentanaPrincipal.class.getResource("/umu/tds/apps/resources/personas.png")));
 		panelNorte.add(btnNewButton_2);
 		
-		JButton btnNewButton_3 = new JButton("Premium");
+		JButton btnNewButton_3 = new JButton(" Premium");
+		btnNewButton_3.setIcon(new ImageIcon(VentanaPrincipal.class.getResource("/umu/tds/apps/resources/garantia.png")));
 		panelNorte.add(btnNewButton_3);
 		
 		Component horizontalGlue = Box.createHorizontalGlue();
 		panelNorte.add(horizontalGlue);
 		
-		JLabel lblNewLabel = new JLabel("Nombre Usuario");
+		JLabel lblNewLabel = new JLabel("Usuario Actual");
+		lblNewLabel.setIcon(null);
 		panelNorte.add(lblNewLabel);
+		
+		JLabel lblNewLabel_1 = new JLabel("");
+		lblNewLabel_1.setIcon(new ImageIcon(VentanaPrincipal.class.getResource("/umu/tds/apps/resources/avatar.png")));
+		panelNorte.add(lblNewLabel_1);
 		
 		JPanel panelMensajes = new JPanel();
 		contentPane.add(panelMensajes, BorderLayout.WEST);

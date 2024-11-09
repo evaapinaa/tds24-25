@@ -1,9 +1,12 @@
 package umu.tds.apps.modelo;
 
+import java.util.LinkedList;
+
 public class Contacto {
 	
 	// ATRIBUTOS
 	private String nombre;
+	
 	
 	
 	// GETTERS Y SETTERS
