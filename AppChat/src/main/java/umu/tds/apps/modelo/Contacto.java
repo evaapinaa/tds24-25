@@ -3,21 +3,21 @@ package umu.tds.apps.modelo;
 public class Contacto {
 	
 	// ATRIBUTOS
-	private String usuario;
+	private String nombre;
 	
 	
 	// GETTERS Y SETTERS
 	
-	public String getUsuario() {
-		return usuario;
+	public String getNombre() {
+		return nombre;
 	}
 	
-	public void setUsuario(String usuario) {
-		this.usuario = usuario;
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
 	}
 	
 	public Contacto(String nombre) {
-		this.usuario = nombre;
+		this.nombre = nombre;
 	}
 
 }
