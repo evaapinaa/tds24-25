@@ -33,6 +33,9 @@ import javax.swing.ImageIcon;
 import java.awt.Toolkit;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
+import java.awt.Dimension;
+import javax.swing.border.SoftBevelBorder;
+import javax.swing.border.BevelBorder;
 
 public class VentanaPrincipal extends JFrame {
 
@@ -64,13 +67,14 @@ public class VentanaPrincipal extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPane.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 
 		setContentPane(contentPane);
 		contentPane.setLayout(new BorderLayout(0, 0));
 		
 		JPanel panelNorte = new JPanel();
-		panelNorte.setBorder(new LineBorder(new Color(245, 245, 245), 5, true));
+		panelNorte.setBackground(new Color(173, 216, 230));
+		panelNorte.setBorder(new CompoundBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), new LineBorder(new Color(173, 216, 230), 8, true)));
 		contentPane.add(panelNorte, BorderLayout.NORTH);
 		panelNorte.setLayout(new BoxLayout(panelNorte, BoxLayout.X_AXIS));
 		
@@ -78,14 +82,21 @@ public class VentanaPrincipal extends JFrame {
 		panelNorte.add(comboBoxContactos);
 		
 		JButton btnNewButton = new JButton("");
+		btnNewButton.setBackground(new Color(245, 245, 245));
+		btnNewButton.setBorder(new CompoundBorder(new TitledBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), "", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), new EmptyBorder(5, 17, 5, 17)));
 		btnNewButton.setIcon(new ImageIcon(VentanaPrincipal.class.getResource("/umu/tds/apps/resources/enviar.png")));
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
+		
+		Component rigidArea = Box.createRigidArea(new Dimension(20, 20));
+		panelNorte.add(rigidArea);
 		panelNorte.add(btnNewButton);
 		
 		JButton btnNewButton_1 = new JButton("");
+		btnNewButton_1.setBackground(new Color(245, 245, 245));
+		btnNewButton_1.setBorder(new CompoundBorder(new TitledBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), "", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), new EmptyBorder(5, 17, 5, 17)));
 		btnNewButton_1.setIcon(new ImageIcon(VentanaPrincipal.class.getResource("/umu/tds/apps/resources/lupa.png")));
 		btnNewButton_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -93,11 +104,17 @@ public class VentanaPrincipal extends JFrame {
 		});
 		panelNorte.add(btnNewButton_1);
 		
-		JButton btnNewButton_2 = new JButton(" Contactos");
+		JButton btnNewButton_2 = new JButton(" Contactos ");
+		btnNewButton_2.setBackground(new Color(245, 245, 245));
+		btnNewButton_2.setBorder(new CompoundBorder(new TitledBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), "", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), new EmptyBorder(5, 17, 5, 17)));
+		btnNewButton_2.setFont(new Font("Arial", Font.PLAIN, 11));
 		btnNewButton_2.setIcon(new ImageIcon(VentanaPrincipal.class.getResource("/umu/tds/apps/resources/personas.png")));
 		panelNorte.add(btnNewButton_2);
 		
-		JButton btnNewButton_3 = new JButton(" Premium");
+		JButton btnNewButton_3 = new JButton(" Premium ");
+		btnNewButton_3.setBackground(new Color(245, 245, 245));
+		btnNewButton_3.setBorder(new CompoundBorder(new TitledBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), "", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), new EmptyBorder(5, 17, 5, 17)));
+		btnNewButton_3.setFont(new Font("Arial", Font.PLAIN, 11));
 		btnNewButton_3.setIcon(new ImageIcon(VentanaPrincipal.class.getResource("/umu/tds/apps/resources/garantia.png")));
 		panelNorte.add(btnNewButton_3);
 		
@@ -105,6 +122,7 @@ public class VentanaPrincipal extends JFrame {
 		panelNorte.add(horizontalGlue);
 		
 		JLabel lblNewLabel = new JLabel("Usuario Actual");
+		lblNewLabel.setFont(new Font("Arial", Font.PLAIN, 11));
 		lblNewLabel.setIcon(null);
 		panelNorte.add(lblNewLabel);
 		
@@ -141,7 +159,7 @@ public class VentanaPrincipal extends JFrame {
 		
 		JPanel panelChat = new JPanel();
 		panelChat.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panelChat.setBackground(new Color(175, 238, 238));
+		panelChat.setBackground(new Color(119, 136, 153));
 		panelCentro.add(panelChat, BorderLayout.CENTER);
 		
 		JPanel panelEnvio = new JPanel();
@@ -155,6 +173,7 @@ public class VentanaPrincipal extends JFrame {
 		textField.setColumns(10);
 		
 		JButton btnNewButton_4 = new JButton("Enviar");
+		btnNewButton_4.setFont(new Font("Arial", Font.PLAIN, 11));
 		panelEnvio.add(btnNewButton_4, BorderLayout.EAST);
 		
 		
