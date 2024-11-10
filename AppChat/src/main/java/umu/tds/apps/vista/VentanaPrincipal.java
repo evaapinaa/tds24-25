@@ -341,6 +341,14 @@ public class VentanaPrincipal extends JFrame {
 				}
 			}
 		});
+		
+		// ENVIAR MENSAJE CON ENTER
+		txtMensaje.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                btnNewButton_4.doClick();
+            }
+         });
+		
 		btnNewButton_4.setIcon(new ImageIcon(VentanaPrincipal.class.getResource("/umu/tds/apps/resources/enviar-mensaje.png")));
 		btnNewButton_4.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnNewButton_4.setBackground(new Color(240, 255, 240));
