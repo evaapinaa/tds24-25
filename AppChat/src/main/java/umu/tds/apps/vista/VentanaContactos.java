@@ -19,7 +19,9 @@ public class VentanaContactos extends JPanel {
 
     // Constructor principal que acepta una lista de contactos
     public VentanaContactos(List<String> contactos) {
-        setLayout(new BorderLayout());
+        setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
 
         // Panel izquierdo para contactos
         JPanel panelContactos = new JPanel(new BorderLayout());
@@ -28,7 +30,13 @@ public class VentanaContactos extends JPanel {
         contactos.forEach(modeloContactos::addElement);
         listaContactos = new JList<>(modeloContactos);
         listaContactos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        panelContactos.add(new JScrollPane(listaContactos), BorderLayout.CENTER);
+        
+        // ScrollPane para la lista de contactos
+        JScrollPane scrollPaneContactos = new JScrollPane(listaContactos);
+        scrollPaneContactos.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollPaneContactos.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        panelContactos.add(scrollPaneContactos, BorderLayout.CENTER);
+        
         btnAgregarContacto = new JButton("Añadir Contacto");
         panelContactos.add(btnAgregarContacto, BorderLayout.SOUTH);
 
@@ -38,7 +46,13 @@ public class VentanaContactos extends JPanel {
         modeloGrupos = new DefaultListModel<>();
         listaGrupos = new JList<>(modeloGrupos);
         listaGrupos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        panelGrupos.add(new JScrollPane(listaGrupos), BorderLayout.CENTER);
+        
+        // ScrollPane para la lista de grupos
+        JScrollPane scrollPaneGrupos = new JScrollPane(listaGrupos);
+        scrollPaneGrupos.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollPaneGrupos.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        panelGrupos.add(scrollPaneGrupos, BorderLayout.CENTER);
+        
         btnAgregarGrupo = new JButton("Añadir Grupo");
         panelGrupos.add(btnAgregarGrupo, BorderLayout.SOUTH);
 
@@ -49,10 +63,30 @@ public class VentanaContactos extends JPanel {
         panelBotones.add(btnMoverDerecha);
         panelBotones.add(btnMoverIzquierda);
 
-        // Añadir paneles a la ventana principal
-        add(panelContactos, BorderLayout.WEST);
-        add(panelGrupos, BorderLayout.EAST);
-        add(panelBotones, BorderLayout.CENTER);
+        // Añadir los paneles al layout
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridheight = 2;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 0.5;
+        gbc.weighty = 1.0;
+        add(panelContactos, gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.gridheight = 2;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
+        gbc.weighty = 0;
+        add(panelBotones, gbc);
+
+        gbc.gridx = 2;
+        gbc.gridy = 0;
+        gbc.gridheight = 2;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 0.5;
+        gbc.weighty = 1.0;
+        add(panelGrupos, gbc);
 
         // Acción para añadir un contacto
         btnAgregarContacto.addActionListener(new ActionListener() {
