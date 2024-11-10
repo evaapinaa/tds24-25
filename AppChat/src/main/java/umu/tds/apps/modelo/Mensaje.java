@@ -78,6 +78,9 @@ public class Mensaje {
 		this.receptor = receptor; // Controlador método -> devolverListaMensajesOrdenadaRecientesPorUsuario(usuarioActual)
 								// devuelve lista de mensajes que necesita el renderizador
 								// paquete modelo, no appchat
+		this.fecha = LocalDate.now();
+		this.hora = LocalDateTime.now();
+		
 	}
 		
 }

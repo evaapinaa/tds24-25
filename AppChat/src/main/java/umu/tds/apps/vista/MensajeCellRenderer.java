@@ -20,6 +20,12 @@ import umu.tds.apps.modelo.Mensaje;
 
 public class MensajeCellRenderer extends JPanel 
 		implements ListCellRenderer<Mensaje> {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	
 	private JLabel nameLabel;
 	private JLabel messageLabel;
 	private JLabel imageLabel;
@@ -45,12 +51,13 @@ public class MensajeCellRenderer extends JPanel
 
 		// Load the image from a random URL (for example, using "https://robohash.org")
 		try {
+			@SuppressWarnings("deprecation")
 			URL imageUrl = new URL("https://robohash.org/" + mensaje.getEmisor().getUsuario() + "?size=50x50");
 			
 			Image image = ImageIO.read(imageUrl);
 			ImageIcon imageIcon = new ImageIcon(image.getScaledInstance(50, 50, Image.SCALE_SMOOTH));
 			imageLabel.setIcon(imageIcon);
-			messageLabel.setText(mensaje.getTexto());
+			messageLabel.setText(mensaje.getTexto() + "  " + mensaje.getHora().getHour() + ":" + mensaje.getHora().getMinute());
 			
 			
 		} catch (IOException e) {

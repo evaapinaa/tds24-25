@@ -4,7 +4,6 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
 import java.awt.GridBagLayout;
 import javax.swing.JLabel;
 import java.awt.GridBagConstraints;
@@ -22,23 +21,17 @@ import javax.swing.Box;
 import javax.swing.JScrollPane;
 import com.toedter.calendar.JDateChooser;
 
-import umu.tds.apps.vista.VentanaLogin.JPanelGradient;
 
 import javax.swing.ImageIcon;
 import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import javax.swing.border.TitledBorder;
-import javax.swing.UIManager;
-import javax.swing.border.EtchedBorder;
-import java.awt.Dimension;
 import java.awt.Toolkit;
 import javax.swing.border.BevelBorder;
-import javax.swing.border.SoftBevelBorder;
-import javax.swing.border.MatteBorder;
+import java.awt.Cursor;
 
 public class VentanaRegistro extends JFrame {
 
@@ -94,13 +87,8 @@ public class VentanaRegistro extends JFrame {
 		contentPane.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		
 		//JPanelGradient gradientPanel = new JPanelGradient();
-	    //gradientPanel.setLayout(new BorderLayout());
-	    //this.setContentPane(gradientPanel);
-	    
-	    //contentPane = new JPanel();
-	    //contentPane.setOpaque(false);
-	    //contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-	    //gradientPanel.add(contentPane, BorderLayout.CENTER); 
+        //Color color1 = new Color(60, 179, 113);
+        //Color color2 = new Color(135, 206, 235);
 	    
 		setContentPane(contentPane);
 		
@@ -112,7 +100,7 @@ public class VentanaRegistro extends JFrame {
 		contentPane.setLayout(gbl_contentPane);
 		
 		JLabel lblNewLabel = new JLabel("Nombre:");
-		lblNewLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+		lblNewLabel.setFont(new Font("Arial", Font.PLAIN,13));
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
 		gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
@@ -123,7 +111,7 @@ public class VentanaRegistro extends JFrame {
 		textField = new JTextField();
 		textField.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		textField.setBackground(new Color(245, 245, 245));
-		textField.setFont(new Font("Arial", Font.PLAIN, 11));
+		textField.setFont(new Font("Arial", Font.PLAIN, 13));
 		GridBagConstraints gbc_textField = new GridBagConstraints();
 		gbc_textField.gridwidth = 3;
 		gbc_textField.insets = new Insets(0, 0, 5, 5);
@@ -134,7 +122,7 @@ public class VentanaRegistro extends JFrame {
 		textField.setColumns(10);
 		
 		JLabel lblNewLabel_1 = new JLabel("Apellidos:");
-		lblNewLabel_1.setFont(new Font("Arial", Font.PLAIN, 11));
+		lblNewLabel_1.setFont(new Font("Arial", Font.PLAIN, 13));
 		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
 		gbc_lblNewLabel_1.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
@@ -145,7 +133,7 @@ public class VentanaRegistro extends JFrame {
 		textField_1 = new JTextField();
 		textField_1.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		textField_1.setBackground(new Color(245, 245, 245));
-		textField_1.setFont(new Font("Arial", Font.PLAIN, 11));
+		textField_1.setFont(new Font("Arial", Font.PLAIN, 13));
 		GridBagConstraints gbc_textField_1 = new GridBagConstraints();
 		gbc_textField_1.gridwidth = 3;
 		gbc_textField_1.insets = new Insets(0, 0, 5, 5);
@@ -156,7 +144,7 @@ public class VentanaRegistro extends JFrame {
 		textField_1.setColumns(10);
 		
 		lblNewLabel_2 = new JLabel("Teléfono:");
-		lblNewLabel_2.setFont(new Font("Arial", Font.PLAIN, 11));
+		lblNewLabel_2.setFont(new Font("Arial", Font.PLAIN, 13));
 		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
 		gbc_lblNewLabel_2.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
@@ -167,7 +155,7 @@ public class VentanaRegistro extends JFrame {
 		textField_2 = new JTextField();
 		textField_2.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		textField_2.setBackground(new Color(245, 245, 245));
-		textField_2.setFont(new Font("Arial", Font.PLAIN, 11));
+		textField_2.setFont(new Font("Arial", Font.PLAIN, 13));
 		GridBagConstraints gbc_textField_2 = new GridBagConstraints();
 		gbc_textField_2.insets = new Insets(0, 0, 5, 5);
 		gbc_textField_2.fill = GridBagConstraints.HORIZONTAL;
@@ -177,7 +165,7 @@ public class VentanaRegistro extends JFrame {
 		textField_2.setColumns(10);
 		
 		lblNewLabel_3 = new JLabel("Contraseña:");
-		lblNewLabel_3.setFont(new Font("Arial", Font.PLAIN, 11));
+		lblNewLabel_3.setFont(new Font("Arial", Font.PLAIN, 13));
 		GridBagConstraints gbc_lblNewLabel_3 = new GridBagConstraints();
 		gbc_lblNewLabel_3.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_3.insets = new Insets(0, 0, 5, 5);
@@ -188,7 +176,7 @@ public class VentanaRegistro extends JFrame {
 		passwordField = new JPasswordField();
 		passwordField.setBackground(new Color(245, 245, 245));
 		passwordField.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		passwordField.setFont(new Font("Arial", Font.PLAIN, 11));
+		passwordField.setFont(new Font("Arial", Font.PLAIN, 13));
 		passwordField.setColumns(10);
 		GridBagConstraints gbc_passwordField = new GridBagConstraints();
 		gbc_passwordField.insets = new Insets(0, 0, 5, 5);
@@ -198,7 +186,7 @@ public class VentanaRegistro extends JFrame {
 		contentPane.add(passwordField, gbc_passwordField);
 		
 		lblNewLabel_4 = new JLabel("Contraseña:");
-		lblNewLabel_4.setFont(new Font("Arial", Font.PLAIN, 11));
+		lblNewLabel_4.setFont(new Font("Arial", Font.PLAIN, 13));
 		GridBagConstraints gbc_lblNewLabel_4 = new GridBagConstraints();
 		gbc_lblNewLabel_4.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_4.insets = new Insets(0, 0, 5, 5);
@@ -209,7 +197,7 @@ public class VentanaRegistro extends JFrame {
 		passwordField_1 = new JPasswordField();
 		passwordField_1.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		passwordField_1.setBackground(new Color(245, 245, 245));
-		passwordField_1.setFont(new Font("Arial", Font.PLAIN, 11));
+		passwordField_1.setFont(new Font("Arial", Font.PLAIN, 13));
 		passwordField_1.setColumns(10);
 		GridBagConstraints gbc_passwordField_1 = new GridBagConstraints();
 		gbc_passwordField_1.insets = new Insets(0, 0, 5, 5);
@@ -219,7 +207,7 @@ public class VentanaRegistro extends JFrame {
 		contentPane.add(passwordField_1, gbc_passwordField_1);
 		
 		lblNewLabel_5 = new JLabel("Fecha:");
-		lblNewLabel_5.setFont(new Font("Arial", Font.PLAIN, 11));
+		lblNewLabel_5.setFont(new Font("Arial", Font.PLAIN, 13));
 		GridBagConstraints gbc_lblNewLabel_5 = new GridBagConstraints();
 		gbc_lblNewLabel_5.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_5.insets = new Insets(0, 0, 5, 5);
@@ -228,9 +216,10 @@ public class VentanaRegistro extends JFrame {
 		contentPane.add(lblNewLabel_5, gbc_lblNewLabel_5);
 		
 		dateChooser = new JDateChooser();
+		dateChooser.getCalendarButton().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		dateChooser.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		dateChooser.setBackground(new Color(245, 245, 245));
-		dateChooser.setFont(new Font("Arial", Font.PLAIN, 11));
+		dateChooser.setFont(new Font("Arial", Font.PLAIN, 13));
 		GridBagConstraints gbc_dateChooser = new GridBagConstraints();
 		gbc_dateChooser.insets = new Insets(0, 0, 5, 5);
 		gbc_dateChooser.fill = GridBagConstraints.BOTH;
@@ -239,7 +228,7 @@ public class VentanaRegistro extends JFrame {
 		contentPane.add(dateChooser, gbc_dateChooser);
 		
 		lblNewLabel_6 = new JLabel("Saludo:");
-		lblNewLabel_6.setFont(new Font("Arial", Font.PLAIN, 11));
+		lblNewLabel_6.setFont(new Font("Arial", Font.PLAIN, 13));
 		GridBagConstraints gbc_lblNewLabel_6 = new GridBagConstraints();
 		gbc_lblNewLabel_6.gridheight = 2;
 		gbc_lblNewLabel_6.anchor = GridBagConstraints.EAST;
@@ -249,7 +238,7 @@ public class VentanaRegistro extends JFrame {
 		contentPane.add(lblNewLabel_6, gbc_lblNewLabel_6);
 		
 		lblNewLabel_7 = new JLabel("Imagen:");
-		lblNewLabel_7.setFont(new Font("Arial", Font.PLAIN, 11));
+		lblNewLabel_7.setFont(new Font("Arial", Font.PLAIN, 13));
 		GridBagConstraints gbc_lblNewLabel_7 = new GridBagConstraints();
 		gbc_lblNewLabel_7.gridheight = 2;
 		gbc_lblNewLabel_7.anchor = GridBagConstraints.EAST;
@@ -277,7 +266,7 @@ public class VentanaRegistro extends JFrame {
 		textField_3 = new JTextField();
 		textField_3.setBackground(new Color(245, 245, 245));
 		textField_3.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		textField_3.setFont(new Font("Arial", Font.PLAIN, 11));
+		textField_3.setFont(new Font("Arial", Font.PLAIN, 13));
 		GridBagConstraints gbc_textField_3 = new GridBagConstraints();
 		gbc_textField_3.insets = new Insets(0, 0, 5, 5);
 		gbc_textField_3.fill = GridBagConstraints.HORIZONTAL;
@@ -295,7 +284,7 @@ public class VentanaRegistro extends JFrame {
 		contentPane.add(lblNewLabel_8, gbc_lblNewLabel_8);
 		
 		panel = new JPanel();
-		panel.setFont(new Font("Arial", Font.PLAIN, 11));
+		panel.setFont(new Font("Arial", Font.PLAIN, 13));
 		GridBagConstraints gbc_panel = new GridBagConstraints();
 		panel.setOpaque(false);
 		gbc_panel.insets = new Insets(0, 0, 5, 5);
@@ -306,40 +295,25 @@ public class VentanaRegistro extends JFrame {
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 		
 		btnNewButton_1 = new JButton("Cancelar");
+		btnNewButton_1.setFocusPainted(false);
+		btnNewButton_1.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnNewButton_1.setBackground(new Color(245, 245, 245));
 		btnNewButton_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
-		btnNewButton_1.setFont(new Font("Arial", Font.PLAIN, 11));
+		btnNewButton_1.setFont(new Font("Arial", Font.PLAIN, 13));
 		panel.add(btnNewButton_1);
 		
 		horizontalGlue = Box.createHorizontalGlue();
 		panel.add(horizontalGlue);
 		
 		btnNewButton = new JButton("Aceptar");
+		btnNewButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		btnNewButton.setFocusPainted(false);
 		btnNewButton.setBackground(new Color(0, 128, 128));
-		btnNewButton.setFont(new Font("Arial", Font.BOLD, 11));
+		btnNewButton.setFont(new Font("Arial", Font.BOLD, 13));
 		panel.add(btnNewButton);
-	}
-
-	@SuppressWarnings("serial")
-	class JPanelGradient extends JPanel {
-	    @Override
-	    protected void paintComponent(Graphics g) {
-	        super.paintComponent(g);
-	        Graphics2D g2d = (Graphics2D) g;
-	        int width = getWidth();
-	        int height = getHeight();
-
-	        // Colores más suaves y armoniosos
-	        Color color1 = new Color(60, 179, 113);
-	        Color color2 = new Color(135, 206, 235);
-	        GradientPaint gp = new GradientPaint(0, 0, color1, 0, height, color2); // Degradado vertical
-
-	        g2d.setPaint(gp);
-	        g2d.fillRect(0, 0, width, height);
-	    }
 	}
 	
 }

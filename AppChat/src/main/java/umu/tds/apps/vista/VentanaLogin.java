@@ -7,27 +7,21 @@ import javax.swing.JLabel;
 import java.awt.BorderLayout;
 import javax.swing.SwingConstants;
 import java.awt.Font;
-import java.awt.GradientPaint;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import java.awt.FlowLayout;
 import java.awt.Dimension;
 
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import java.awt.Color;
 import javax.swing.JTextField;
-import javax.swing.JTextArea;
-import javax.swing.JScrollPane;
-import javax.swing.ScrollPaneConstants;
+
 import javax.swing.border.TitledBorder;
+
+import umu.tds.apps.vista.customcomponents.VisualUtils;
+
 import javax.swing.UIManager;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.BevelBorder;
@@ -60,6 +54,7 @@ import java.awt.Toolkit;
 import java.awt.SystemColor;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import java.awt.Cursor;
 
 public class VentanaLogin {
 
@@ -102,7 +97,7 @@ public class VentanaLogin {
 		frmAppchat.setBounds(300, 300, 450, 261);
 		frmAppchat.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		JPanelGradient gradientPanel = new JPanelGradient();
+		JPanel gradientPanel = new VisualUtils.JPanelGradient(new Color(60, 179, 113), new Color(135, 206, 235));
 	    gradientPanel.setLayout(new BorderLayout());
 	    frmAppchat.setContentPane(gradientPanel);
 	    
@@ -112,6 +107,8 @@ public class VentanaLogin {
 		frmAppchat.getContentPane().add(panelSur, BorderLayout.SOUTH);
 		
 		JButton btnRegistrar = new JButton("Registrar");
+		btnRegistrar.setFocusPainted(false);
+		btnRegistrar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnRegistrar.setBackground(new Color(0, 128, 128));
 		btnRegistrar.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		btnRegistrar.setFont(new Font("Arial", Font.BOLD, 11));
@@ -129,6 +126,8 @@ public class VentanaLogin {
 		});
 		
 		JButton btnLogin = new JButton("Login");
+		btnLogin.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		btnLogin.setFocusPainted(false);
 		btnLogin.setBackground(new Color(240, 255, 255));
 		btnLogin.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		btnLogin.setFont(new Font("Arial", Font.BOLD, 11));
@@ -147,7 +146,7 @@ public class VentanaLogin {
 		gbl_panelCentro.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panelCentro.setLayout(gbl_panelCentro);
 		
-		JLabelWithShadow lblTelefono = new JLabelWithShadow("Teléfono:");
+		JLabel lblTelefono = new VisualUtils.JLabelWithShadow("Teléfono:", new Color(0, 128, 128, 150));
 		lblTelefono.setForeground(Color.WHITE);
 		lblTelefono.setFont(new Font("Arial", Font.BOLD, 11));
 		GridBagConstraints gbc_lblTelefono = new GridBagConstraints();
@@ -169,7 +168,7 @@ public class VentanaLogin {
 		gbc_textField.gridy = 1;
 		panelCentro.add(textField, gbc_textField);
 		
-		JLabelWithShadow lblContrasea = new JLabelWithShadow("Contraseña:");
+		JLabel lblContrasea = new VisualUtils.JLabelWithShadow("Contraseña:", new Color(0, 128, 128, 150));
 		lblContrasea.setForeground(Color.WHITE);
 		lblContrasea.setFont(new Font("Arial", Font.BOLD, 11));
 		GridBagConstraints gbc_lblContrasea = new GridBagConstraints();
@@ -209,46 +208,6 @@ public class VentanaLogin {
 		
 	}
 	
-	@SuppressWarnings("serial")
-	class JPanelGradient extends JPanel {
-	    @Override
-	    protected void paintComponent(Graphics g) {
-	        super.paintComponent(g);
-	        Graphics2D g2d = (Graphics2D) g;
-	        int width = getWidth();
-	        int height = getHeight();
-
-	        // Colores más suaves y armoniosos
-	        Color color1 = new Color(60, 179, 113);
-	        Color color2 = new Color(135, 206, 235);
-	        GradientPaint gp = new GradientPaint(0, 0, color1, 0, height, color2); // Degradado vertical
-
-	        g2d.setPaint(gp);
-	        g2d.fillRect(0, 0, width, height);
-	    }
-	}
-	
-	public class JLabelWithShadow extends JLabel {
-
-	    public JLabelWithShadow(String text) {
-	        super(text);
-	    }
-
-	    @Override
-	    protected void paintComponent(Graphics g) {
-	        Graphics2D g2d = (Graphics2D) g.create();
-
-	        // Agregar la sombra: dibuja el texto con una ligera desviación
-	        g2d.setColor(new Color(0, 128, 128, 150)); 
-	        g2d.drawString(getText(), getInsets().left + 2, getInsets().top + getFontMetrics(getFont()).getAscent() + 2);
-
-	        // Dibuja el texto normal
-	        g2d.setColor(getForeground());
-	        g2d.drawString(getText(), getInsets().left, getInsets().top + getFontMetrics(getFont()).getAscent());
-
-	        g2d.dispose();
-	    }
-	}
 	//private static void addPopup(Component component, final JPopupMenu popup) {}
 	
 	private class SwingAction extends AbstractAction {
