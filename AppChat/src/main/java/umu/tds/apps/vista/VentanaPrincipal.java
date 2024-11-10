@@ -323,6 +323,22 @@ public class VentanaPrincipal extends JFrame {
 		btnNewButton_4.setForeground(new Color(0, 128, 128));
 		btnNewButton_4.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				String textoMensaje = txtMensaje.getText();  //Obtengo el texto del mensaje
+				if(!textoMensaje.trim().isEmpty()) {         // Compruebo que el mensaje no esté vacío
+					
+					//CREO UN MENSAJE NUEVO
+					BubbleText burbuja = new BubbleText(panelChatContenido, textoMensaje, Color.GREEN, "Usuario Actual", BubbleText.SENT, 18);
+		            panelChatContenido.add(burbuja);
+		            
+		            txtMensaje.setText(""); // Tengo que limpiar el campo después de enviarlo??
+		            
+		            // REFRESCO EL PANEL PARA QUE SE VEA EL MENSAJE ENVIADO
+					panelChatContenido.revalidate();
+					panelChatContenido.repaint();
+					
+					// BAJO EL SCROLL
+					scrollPane_1.getVerticalScrollBar().setValue(scrollPane_1.getVerticalScrollBar().getMaximum());
+				}
 			}
 		});
 		btnNewButton_4.setIcon(new ImageIcon(VentanaPrincipal.class.getResource("/umu/tds/apps/resources/enviar-mensaje.png")));
