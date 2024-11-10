@@ -19,6 +19,7 @@ import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
+import java.util.ArrayList;
 import java.util.List;
 import java.awt.event.ActionEvent;
 import javax.swing.JLabel;
@@ -136,6 +137,27 @@ public class VentanaPrincipal extends JFrame {
 		btnNewButton_2.setBorder(new CompoundBorder(new TitledBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), "", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), new EmptyBorder(5, 17, 5, 17)));
 		btnNewButton_2.setFont(new Font("Arial", Font.PLAIN, 11));
 		btnNewButton_2.setIcon(new ImageIcon(VentanaPrincipal.class.getResource("/umu/tds/apps/resources/personas.png")));
+		btnNewButton_2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+		        // Crear el marco que contendrá la ventana de contactos
+		        JFrame frameContactos = new JFrame("Ventana de Contactos");
+		        frameContactos.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Para cerrar solo esta ventana
+		        frameContactos.setSize(600, 400);
+
+		        // Crear una lista de contactos inicial o vacía
+		        List<String> contactosIniciales = new ArrayList<>();
+		        contactosIniciales.add("Contacto 1"); // EJEMPLO DE CONTACTO
+		        
+		        // Crear el panel VentanaContactos y lo añado al frame?????
+		        VentanaContactos ventanaContactos = new VentanaContactos(contactosIniciales);
+		        frameContactos.add(ventanaContactos);
+
+		        // Pongo visible el frame
+		        frameContactos.setVisible(true);
+
+			}
+		});
 		panelNorte.add(btnNewButton_2);
 		
 		JButton btnNewButton_3 = new JButton(" Premium ");
