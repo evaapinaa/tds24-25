@@ -167,6 +167,15 @@ public class VentanaPrincipal extends JFrame {
 		btnNewButton_3.setFont(new Font("Arial", Font.PLAIN, 11));
 		btnNewButton_3.setIcon(new ImageIcon(VentanaPrincipal.class.getResource("/umu/tds/apps/resources/garantia.png")));
 		panelNorte.add(btnNewButton_3);
+		btnNewButton_3.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        // Abre la ventana de premium
+		        VentanaPremium ventanaPremium = new VentanaPremium();
+		        ventanaPremium.setVisible(true);
+		    }
+		});
+		
+		
 		
 		Component horizontalGlue = Box.createHorizontalGlue();
 		panelNorte.add(horizontalGlue);

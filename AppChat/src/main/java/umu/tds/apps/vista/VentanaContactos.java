@@ -6,6 +6,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.EmptyBorder;
 
 public class VentanaContactos extends JPanel {
     private JList<String> listaContactos;
@@ -19,16 +24,17 @@ public class VentanaContactos extends JPanel {
 
     // Constructor principal que acepta una lista de contactos
     public VentanaContactos(List<String> contactos) {
+    	setBorder(new EmptyBorder(20, 20, 20, 20));
+    	setBackground(new Color(240, 240, 240));
         setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
 
         // Panel izquierdo para contactos
         JPanel panelContactos = new JPanel(new BorderLayout());
-        panelContactos.setBorder(BorderFactory.createTitledBorder("Lista Contactos"));
+        panelContactos.setBackground(new Color(240, 240, 240));
         modeloContactos = new DefaultListModel<>();
         contactos.forEach(modeloContactos::addElement);
         listaContactos = new JList<>(modeloContactos);
+        listaContactos.setBackground(new Color(102, 205, 170));
         listaContactos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
         // ScrollPane para la lista de contactos
@@ -38,13 +44,18 @@ public class VentanaContactos extends JPanel {
         panelContactos.add(scrollPaneContactos, BorderLayout.CENTER);
         
         btnAgregarContacto = new JButton("Añadir Contacto");
+        btnAgregarContacto.setPreferredSize(new Dimension(9, 23));
+        btnAgregarContacto.setForeground(new Color(255, 255, 255));
+        btnAgregarContacto.setBorder(new LineBorder(new Color(128, 128, 150), 2));
+        btnAgregarContacto.setBackground(new Color(0, 128, 128));
         panelContactos.add(btnAgregarContacto, BorderLayout.SOUTH);
 
         // Panel derecho para grupos
         JPanel panelGrupos = new JPanel(new BorderLayout());
-        panelGrupos.setBorder(BorderFactory.createTitledBorder("Grupos"));
+        panelGrupos.setBackground(new Color(240, 240, 240));
         modeloGrupos = new DefaultListModel<>();
         listaGrupos = new JList<>(modeloGrupos);
+        listaGrupos.setBackground(new Color(102, 205, 170));
         listaGrupos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
         // ScrollPane para la lista de grupos
@@ -54,39 +65,53 @@ public class VentanaContactos extends JPanel {
         panelGrupos.add(scrollPaneGrupos, BorderLayout.CENTER);
         
         btnAgregarGrupo = new JButton("Añadir Grupo");
+        btnAgregarGrupo.setBorder(new LineBorder(new Color(143, 239, 208), 2));
+        btnAgregarGrupo.setForeground(new Color(255, 255, 255));
+        btnAgregarGrupo.setBackground(new Color(0, 128, 128));
         panelGrupos.add(btnAgregarGrupo, BorderLayout.SOUTH);
 
         // Panel central con botones de transferencia
         JPanel panelBotones = new JPanel(new GridLayout(2, 1, 5, 5));
+        panelBotones.setBackground(new Color(240, 240, 240));
         btnMoverDerecha = new JButton(">>");
+        btnMoverDerecha.setForeground(new Color(255, 255, 255));
+        btnMoverDerecha.setFont(new Font("Arial", Font.BOLD, 11));
+        btnMoverDerecha.setBackground(new Color(51, 134, 151));
         btnMoverIzquierda = new JButton("<<");
+        btnMoverIzquierda.setForeground(new Color(255, 255, 255));
+        btnMoverIzquierda.setFont(new Font("Arial", Font.BOLD, 11));
+        btnMoverIzquierda.setBackground(new Color(51, 134, 151));
         panelBotones.add(btnMoverDerecha);
         panelBotones.add(btnMoverIzquierda);
 
-        // Añadir los paneles al layout
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridheight = 2;
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.weightx = 0.5;
-        gbc.weighty = 1.0;
-        add(panelContactos, gbc);
+        // Añadir los paneles al layout con instancias diferentes de GridBagConstraints
+        GridBagConstraints gbcContactos = new GridBagConstraints();
+        gbcContactos.gridx = 0;
+        gbcContactos.gridy = 0;
+        gbcContactos.gridheight = 2;
+        gbcContactos.fill = GridBagConstraints.BOTH;
+        gbcContactos.weightx = 0.5;
+        gbcContactos.weighty = 1.0;
+        add(panelContactos, gbcContactos);
 
-        gbc.gridx = 1;
-        gbc.gridy = 0;
-        gbc.gridheight = 2;
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.weightx = 0;
-        gbc.weighty = 0;
-        add(panelBotones, gbc);
+        GridBagConstraints gbcBotones = new GridBagConstraints();
+        gbcBotones.insets = new Insets(5, 5, 5, 5);
+        gbcBotones.gridx = 1;
+        gbcBotones.gridy = 0;
+        gbcBotones.gridheight = 2;
+        gbcBotones.fill = GridBagConstraints.NONE;
+        gbcBotones.weightx = 0;
+        gbcBotones.weighty = 0;
+        add(panelBotones, gbcBotones);
 
-        gbc.gridx = 2;
-        gbc.gridy = 0;
-        gbc.gridheight = 2;
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.weightx = 0.5;
-        gbc.weighty = 1.0;
-        add(panelGrupos, gbc);
+        GridBagConstraints gbcGrupos = new GridBagConstraints();
+        gbcGrupos.gridx = 2;
+        gbcGrupos.gridy = 0;
+        gbcGrupos.gridheight = 2;
+        gbcGrupos.fill = GridBagConstraints.BOTH;
+        gbcGrupos.weightx = 0.5;
+        gbcGrupos.weighty = 1.0;
+        add(panelGrupos, gbcGrupos);
 
         // Acción para añadir un contacto
         btnAgregarContacto.addActionListener(new ActionListener() {
@@ -151,7 +176,7 @@ public class VentanaContactos extends JPanel {
                     contactosEjemplo.add("Contacto 3");
 
                     VentanaContactos panelContactos = new VentanaContactos(contactosEjemplo);
-                    frame.add(panelContactos);
+                    frame.getContentPane().add(panelContactos);
                     frame.setVisible(true);
                 } catch (Exception e) {
                     e.printStackTrace();

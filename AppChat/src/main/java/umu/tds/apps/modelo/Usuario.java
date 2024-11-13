@@ -75,6 +75,19 @@ public class Usuario {
 		return fechaNacimiento;
 	}
 	
+	// Método para obtener el número de mensajes enviados en el último mes (DESCUENTO)
+	public int getNumeroMensajesUltimoMes() {
+	    LocalDate ahora = LocalDate.now();
+	    LocalDate inicioDelMes = ahora.withDayOfMonth(1);
+
+	    return (int) listaMensajes.stream()
+	        .filter(mensaje -> {
+	            LocalDate fechaEnvio = mensaje.getFecha();
+	            return (fechaEnvio.isEqual(inicioDelMes) || (fechaEnvio.isAfter(inicioDelMes) && fechaEnvio.isBefore(ahora.plusDays(1))));
+	        })
+	        .count();
+	}
+	
 	public void setFechaNacimiento(LocalDate fechaNacimiento) {
 		this.fechaNacimiento = fechaNacimiento;
 	}
