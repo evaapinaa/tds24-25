@@ -56,7 +56,7 @@ public class VentanaPremium extends JDialog {
         gbl_panelPremium.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
         panelPremium.setLayout(gbl_panelPremium);
 
-        // Campo para fecha de registro
+        // Campo para fech de registro
         JLabel lblFechaRegistro = new JLabel("Fecha de Registro (yyyy-mm-dd):");
         lblFechaRegistro.setFont(new Font("Arial", Font.BOLD, 11));
         GridBagConstraints gbc_lblFechaRegistro = new GridBagConstraints();

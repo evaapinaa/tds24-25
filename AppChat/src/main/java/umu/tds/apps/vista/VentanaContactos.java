@@ -44,7 +44,6 @@ public class VentanaContactos extends JPanel {
         panelContactos.add(scrollPaneContactos, BorderLayout.CENTER);
         
         btnAgregarContacto = new JButton("Añadir Contacto");
-        btnAgregarContacto.setPreferredSize(new Dimension(9, 23));
         btnAgregarContacto.setForeground(new Color(255, 255, 255));
         btnAgregarContacto.setBorder(new LineBorder(new Color(128, 128, 150), 2));
         btnAgregarContacto.setBackground(new Color(0, 128, 128));
@@ -135,7 +134,7 @@ public class VentanaContactos extends JPanel {
             }
         });
 
-        // Acción para mover un contacto al grupo
+        // Acción para mover un contacto al grup
         btnMoverDerecha.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

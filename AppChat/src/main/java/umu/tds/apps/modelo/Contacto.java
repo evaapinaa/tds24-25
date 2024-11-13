@@ -8,7 +8,6 @@ public class Contacto {
 	private String nombre;
 	
 	
-	
 	// GETTERS Y SETTERS
 	
 	public String getNombre() {

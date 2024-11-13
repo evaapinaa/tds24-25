@@ -214,6 +214,7 @@ public class VentanaPrincipal extends JFrame {
 				return mensajes.get(index);
 			}
 		});
+		// Añadir un menú emergente??
 		
 		JScrollPane scrollPane = new JScrollPane(list);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
