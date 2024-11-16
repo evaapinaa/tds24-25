@@ -312,7 +312,7 @@ public class VentanaPrincipal extends JFrame {
 				int numEmoji = Integer.parseInt(e.getActionCommand());
 				
 				// CAMBIAR USUARIO
-				BubbleText burbuja=new BubbleText(panelChatContenido, numEmoji, Color.GREEN, "J.Ramón", BubbleText.SENT,18);
+				BubbleText burbuja=new BubbleText(panelChatContenido, numEmoji, Color.GREEN, "Usuario Actual", BubbleText.SENT,18);
 				panelChatContenido.add(burbuja);
 			}
 		});
@@ -365,11 +365,11 @@ public class VentanaPrincipal extends JFrame {
 		            txtMensaje.setText(""); // Tengo que limpiar el campo después de enviarlo??
 		            
 		            // REFRESCO EL PANEL PARA QUE SE VEA EL MENSAJE ENVIADO
-					panelChatContenido.revalidate();
-					panelChatContenido.repaint();
+					//panelChatContenido.revalidate();
+					//panelChatContenido.repaint();
 					
 					// BAJO EL SCROLL
-					scrollPane_1.getVerticalScrollBar().setValue(scrollPane_1.getVerticalScrollBar().getMaximum());
+					//scrollPane_1.getVerticalScrollBar().setValue(scrollPane_1.getVerticalScrollBar().getMaximum());
 				}
 			}
 		});
