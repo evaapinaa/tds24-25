@@ -5,33 +5,45 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import java.awt.GridBagLayout;
+import java.awt.Image;
+
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
 
 import javax.swing.JTextField;
 import javax.swing.JPasswordField;
 import javax.swing.JTextArea;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
+
 import java.awt.Component;
+
+import javax.imageio.ImageIO;
 import javax.swing.Box;
 import javax.swing.JScrollPane;
 import com.toedter.calendar.JDateChooser;
 
+import umu.tds.apps.vista.customcomponents.VisualUtils;
 
 import javax.swing.ImageIcon;
 import java.awt.Font;
-import java.awt.GradientPaint;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Color;
 import javax.swing.border.TitledBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
 import java.awt.Toolkit;
 import javax.swing.border.BevelBorder;
 import java.awt.Cursor;
+import java.net.URL;
 
 public class VentanaRegistro extends JFrame {
 
@@ -56,7 +68,6 @@ public class VentanaRegistro extends JFrame {
 	private JLabel lblNewLabel_8;
 	private JScrollPane scrollPane;
 	private JDateChooser dateChooser;
-	private JTextField textField_3;
 
 	/**
 	 * Launch the application.
@@ -81,14 +92,9 @@ public class VentanaRegistro extends JFrame {
 		setIconImage(Toolkit.getDefaultToolkit().getImage(VentanaRegistro.class.getResource("/umu/tds/apps/resources/icono.png")));
 		setTitle("AppChat");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 501, 326);
-		contentPane = new JPanel();
-		contentPane.setBackground(new Color(95, 158, 160));
+		setBounds(100, 100, 561, 421);
+		contentPane = new VisualUtils.JPanelGradient(new Color(60, 179, 113), new Color(135, 206, 235));
 		contentPane.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-		
-		//JPanelGradient gradientPanel = new JPanelGradient();
-        //Color color1 = new Color(60, 179, 113);
-        //Color color2 = new Color(135, 206, 235);
 	    
 		setContentPane(contentPane);
 		
@@ -96,7 +102,7 @@ public class VentanaRegistro extends JFrame {
 		gbl_contentPane.columnWidths = new int[]{20, 0, 0, 0, 0, 20, 0};
 		gbl_contentPane.rowHeights = new int[]{20, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0};
 		gbl_contentPane.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
-		gbl_contentPane.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_contentPane.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
 		contentPane.setLayout(gbl_contentPane);
 		
 		JLabel lblNewLabel = new JLabel("Nombre:");
@@ -263,25 +269,75 @@ public class VentanaRegistro extends JFrame {
 		scrollPane.setViewportView(textArea);
 		textArea.setColumns(10);
 		
-		textField_3 = new JTextField();
-		textField_3.setBackground(new Color(245, 245, 245));
-		textField_3.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		textField_3.setFont(new Font("Arial", Font.PLAIN, 13));
-		GridBagConstraints gbc_textField_3 = new GridBagConstraints();
-		gbc_textField_3.insets = new Insets(0, 0, 5, 5);
-		gbc_textField_3.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField_3.gridx = 4;
-		gbc_textField_3.gridy = 6;
-		contentPane.add(textField_3, gbc_textField_3);
-		textField_3.setColumns(10);
-		
 		lblNewLabel_8 = new JLabel("");
-		lblNewLabel_8.setIcon(new ImageIcon(VentanaRegistro.class.getResource("/umu/tds/apps/resources/imagenUsuario.png")));
+		lblNewLabel_8.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		lblNewLabel_8.setIcon(new ImageIcon(VentanaRegistro.class.getResource("/umu/tds/apps/resources/usuario.png")));
 		GridBagConstraints gbc_lblNewLabel_8 = new GridBagConstraints();
+		gbc_lblNewLabel_8.fill = GridBagConstraints.VERTICAL;
+		gbc_lblNewLabel_8.gridheight = 2;
 		gbc_lblNewLabel_8.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_8.gridx = 4;
-		gbc_lblNewLabel_8.gridy = 7;
+		gbc_lblNewLabel_8.gridy = 6;
 		contentPane.add(lblNewLabel_8, gbc_lblNewLabel_8);
+		
+		lblNewLabel_8.addMouseListener(new MouseAdapter() {
+		    @Override
+		    public void mouseClicked(MouseEvent e) {
+		        //  introducir un enlace o elegir archivo local
+		        String[] opciones = {"Introducir enlace", "Seleccionar archivo"};
+		        int seleccion = JOptionPane.showOptionDialog(
+		            contentPane,
+		            "Seleccione cómo desea cargar la imagen:",
+		            "Cargar Imagen",
+		            JOptionPane.DEFAULT_OPTION,
+		            JOptionPane.INFORMATION_MESSAGE,
+		            null,
+		            opciones,
+		            opciones[0]
+		        );
+
+		        if (seleccion == 0) {
+		            // introducir enlace
+		            String urlImagen = JOptionPane.showInputDialog(
+		                contentPane,
+		                "Introduzca el enlace de la imagen:",
+		                "Cargar Imagen desde URL",
+		                JOptionPane.PLAIN_MESSAGE
+		            );
+		            
+		            
+		            
+		            
+
+		            if (urlImagen != null && !urlImagen.isEmpty()) {
+		                try {
+		                    // cargar imagen desde URL
+		                    @SuppressWarnings("deprecation")
+							Image imagen = ImageIO.read(new URL(urlImagen));
+		                    ImageIcon icono = new ImageIcon(imagen.getScaledInstance(100, 100, Image.SCALE_SMOOTH));
+		                    lblNewLabel_8.setIcon(icono);
+		                } catch (IOException ex) {
+		                    JOptionPane.showMessageDialog(contentPane, "No se pudo cargar la imagen desde el enlace.", "Error", JOptionPane.ERROR_MESSAGE);
+		                }
+		            }
+		        } else if (seleccion == 1) {
+		            // seleccionar archivo local
+		            JFileChooser fileChooser = new JFileChooser();
+		            fileChooser.setFileFilter(new FileNameExtensionFilter("Imágenes", "jpg", "jpeg", "png", "gif"));
+		            int resultado = fileChooser.showOpenDialog(contentPane);
+		            if (resultado == JFileChooser.APPROVE_OPTION) {
+		                try {
+		                    // imagen seleccionada
+		                    Image imagen = ImageIO.read(fileChooser.getSelectedFile());
+		                    ImageIcon icono = new ImageIcon(imagen.getScaledInstance(100, 100, Image.SCALE_SMOOTH));
+		                    lblNewLabel_8.setIcon(icono);
+		                } catch (IOException ex) {
+		                    JOptionPane.showMessageDialog(contentPane, "No se pudo cargar la imagen desde el archivo.", "Error", JOptionPane.ERROR_MESSAGE);
+		                }
+		            }
+		        }
+		    }
+		});
 		
 		panel = new JPanel();
 		panel.setFont(new Font("Arial", Font.PLAIN, 13));
@@ -299,8 +355,20 @@ public class VentanaRegistro extends JFrame {
 		btnNewButton_1.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnNewButton_1.setBackground(new Color(245, 245, 245));
 		btnNewButton_1.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
+		    public void actionPerformed(ActionEvent e) {
+		        try {
+		            VentanaLogin login = new VentanaLogin();
+		            login.setVisible(true);
+		            dispose();
+		        } catch (Exception ex) {
+		            JOptionPane.showMessageDialog(
+		                contentPane,
+		                "No se pudo abrir la ventana de inicio de sesión.",
+		                "Error",
+		                JOptionPane.ERROR_MESSAGE
+		            );
+		        }
+		    }
 		});
 		btnNewButton_1.setFont(new Font("Arial", Font.PLAIN, 13));
 		panel.add(btnNewButton_1);

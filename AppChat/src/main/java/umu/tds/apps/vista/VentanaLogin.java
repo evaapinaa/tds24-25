@@ -22,38 +22,24 @@ import javax.swing.border.TitledBorder;
 
 import umu.tds.apps.vista.customcomponents.VisualUtils;
 
-import javax.swing.UIManager;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.BevelBorder;
-import javax.swing.BoxLayout;
-import javax.swing.JRadioButton;
+
 import javax.swing.ButtonGroup;
-import javax.swing.JComboBox;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JMenuBar;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JSeparator;
-import javax.swing.JPopupMenu;
-import java.awt.Component;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import javax.swing.JPasswordField;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import javax.swing.border.MatteBorder;
-import javax.swing.border.SoftBevelBorder;
+
 import javax.swing.border.LineBorder;
-import java.awt.Rectangle;
+
 import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
+
 import java.awt.Toolkit;
 import java.awt.SystemColor;
 import javax.swing.AbstractAction;
-import javax.swing.Action;
+
 import java.awt.Cursor;
 
 public class VentanaLogin {
@@ -85,6 +71,12 @@ public class VentanaLogin {
 	 */
 	public VentanaLogin() {
 		initialize();
+	}
+	
+	
+	// Metodo publico que permite hacer visible la ventana
+	public void setVisible(boolean visible) {
+		frmAppchat.setVisible(visible);
 	}
 
 	/**
@@ -210,20 +202,4 @@ public class VentanaLogin {
 	
 	//private static void addPopup(Component component, final JPopupMenu popup) {}
 	
-	private class SwingAction extends AbstractAction {
-		public SwingAction() {
-			putValue(NAME, "SwingAction");
-			putValue(SHORT_DESCRIPTION, "Some short description");
-		}
-		public void actionPerformed(ActionEvent e) {
-		}
-	}
-	private class SwingAction_1 extends AbstractAction {
-		public SwingAction_1() {
-			putValue(NAME, "SwingAction_1");
-			putValue(SHORT_DESCRIPTION, "Some short description");
-		}
-		public void actionPerformed(ActionEvent e) {
-		}
-	}
 }
