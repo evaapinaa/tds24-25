@@ -12,7 +12,9 @@ public class Mensaje {
 	private LocalDate fecha;
 	private LocalDateTime hora;
 	private Usuario emisor;
-	private Contacto receptor;
+	private Usuario receptor;
+	private Chat chat;
+	private int codigo;
 	
 
 	// GETTERS Y SETTES
@@ -64,15 +66,24 @@ public class Mensaje {
 		this.emisor = emisor;
 	}
 	
-	public Contacto getReceptor() {
+	public Usuario getReceptor() {
 		return receptor;
 	}
 	
-	public void setReceptor(Contacto receptor) {
+	public void setReceptor(Usuario receptor) {
 		this.receptor = receptor;
 	}
 	
-	public Mensaje(Usuario emisor, String texto, Contacto receptor) {
+	public int getCodigo() {
+		return codigo;
+	}
+	
+	public void setCodigo(int codigo) {
+		this.codigo = codigo;
+	}
+	
+	
+	public Mensaje(Usuario emisor, String texto, Usuario receptor) {
 		this.emisor = emisor;
 		this.texto = texto;
 		this.receptor = receptor; // Controlador método -> devolverListaMensajesOrdenadaRecientesPorUsuario(usuarioActual)

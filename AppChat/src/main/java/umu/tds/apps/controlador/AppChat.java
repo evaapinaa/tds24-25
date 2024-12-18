@@ -7,13 +7,15 @@ import java.util.Optional;
 
 import umu.tds.apps.modelo.Contacto;
 import umu.tds.apps.modelo.Mensaje;
+import umu.tds.apps.modelo.RepositorioUsuarios;
 import umu.tds.apps.modelo.Usuario;
 
 
-
+// convertir controlador en singleton
 public class AppChat {
 	
-	//private Usuario usuario;
+	private Usuario usuarioActual;
+	private RepositorioUsuarios repositorioUsuarios;
 	
 	public static List<Mensaje> obtenerListaMensajesRecientesPorUsuario() {
 		Mensaje[] values = new Mensaje[] {

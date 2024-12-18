@@ -6,27 +6,27 @@ import java.util.List;
 public class Chat {
 
 	// ATRIBUTOS
-	private Usuario usuario1;
-	private Usuario usuario2;
+	private Usuario usuario;
+	private Usuario otroUsuarioChat;
 	private List<Mensaje> mensajes;
 
 	// GETTERS Y SETTERS
 
-	public Usuario getUsuario1() {
-		return usuario1;
+	public Usuario getUsuario() {
+		return usuario;
 	}
 	
-	public void setUsuario1(Usuario usuario1) {
-		this.usuario1 = usuario1;
+	public void setUsuario(Usuario usuario) {
+		this.usuario = usuario;
 	}
 	
-	public Usuario getUsuario2() {
-		return usuario2;
+	public Usuario getOtroUsuarioChat() {
+		return otroUsuarioChat;
 	}
 	
 	
-	public void setUsuario2(Usuario usuario2) {
-		this.usuario2 = usuario2;
+	public void setUsuario2(Usuario otroUsuarioChat) {
+		this.otroUsuarioChat = otroUsuarioChat;
 	}
 	
 	public List<Mensaje> getMensajes() {
@@ -38,9 +38,9 @@ public class Chat {
 	}
 	
 
-	public Chat(Usuario usuario1, Usuario usuario2) {
-        this.usuario1 = usuario1;
-        this.usuario2 = usuario2;
+	public Chat(Usuario usuario, Usuario otroUsuarioChat) {
+        this.usuario = usuario;
+        this.otroUsuarioChat = otroUsuarioChat;
         this.mensajes = new ArrayList<>();
     }
 }

@@ -17,9 +17,16 @@ public class Usuario {
 	private String imagenPerfil;
 	private LocalDate fechaNacimiento;
 	private List<Contacto> listaContactos;
-	private List<Mensaje> listaMensajes;
+	private List<Mensaje> listaMensajesEnviados;
+	private List<Mensaje> listaMensajesRecibidos;
+	private List<Chat> listaChats;
+	private boolean premium;
+	private int codigo;
 	
 	// GETTERS AND SETTERS
+	
+	// mensajesEnviados
+	// mensajesRecibidos
 	
 	public String getUsuario() {
 		return usuario;
@@ -75,6 +82,30 @@ public class Usuario {
 		return fechaNacimiento;
 	}
 	
+	public int getCodigo() {
+		return codigo;
+	}
+	
+	public void setCodigo(int codigo) {
+        this.codigo = codigo;
+    }
+	
+	public boolean isPremium() {
+		return premium;
+	}
+	
+	public void setPremium(boolean premium) {
+		this.premium = premium;
+	}
+	
+	
+	}
+	// Método para comprobar si la clave es válida
+	public boolean isClaveValida(String clave) {
+		return this.contraseña.equals(clave);
+	}
+	
+	
 	// Método para obtener el número de mensajes enviados en el último mes (DESCUENTO)
 	public int getNumeroMensajesUltimoMes() {
 	    LocalDate ahora = LocalDate.now();
@@ -123,5 +154,5 @@ public class Usuario {
 		
 	}
     
-    
+
 }
