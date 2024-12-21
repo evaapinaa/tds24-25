@@ -9,6 +9,7 @@ import javax.swing.border.EmptyBorder;
 
 import umu.tds.apps.controlador.AppChat;
 import umu.tds.apps.modelo.Mensaje;
+import umu.tds.apps.modelo.Usuario;
 import umu.tds.apps.vista.customcomponents.VisualUtils;
 
 import java.awt.Adjustable;
@@ -28,6 +29,7 @@ import javax.swing.JLayeredPane;
 import java.awt.Component;
 import javax.swing.Box;
 import javax.swing.JList;
+import javax.imageio.ImageIO;
 import javax.swing.AbstractListModel;
 import javax.swing.JTextField;
 import java.awt.Font;
@@ -48,13 +50,18 @@ import javax.swing.border.BevelBorder;
 import javax.swing.ScrollPaneConstants;
 import java.awt.Cursor;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import java.awt.MediaTracker;
 import java.awt.Point;
 
 import javax.swing.JPopupMenu;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 
 public class VentanaPrincipal extends JFrame {
 
@@ -176,11 +183,12 @@ public class VentanaPrincipal extends JFrame {
 		});
 		
 		
+		Usuario usuarioActual = AppChat.getUsuarioActual();
 		
 		Component horizontalGlue = Box.createHorizontalGlue();
 		panelNorte.add(horizontalGlue);
 		
-		JLabel lblNewLabel = new JLabel("Usuario Actual");
+		JLabel lblNewLabel = new JLabel(usuarioActual.getUsuario());
 		lblNewLabel.setForeground(new Color(248, 248, 255));
 		lblNewLabel.setFont(new Font("Arial", Font.BOLD, 11));
 		lblNewLabel.setIcon(null);
@@ -190,7 +198,12 @@ public class VentanaPrincipal extends JFrame {
 		panelNorte.add(rigidArea_1);
 		
 		JLabel lblNewLabel_1 = new JLabel("");
-		lblNewLabel_1.setIcon(new ImageIcon(VentanaPrincipal.class.getResource("/umu/tds/apps/resources/avatar.png")));
+		//lblNewLabel_1.setPreferredSize(new Dimension(55,55));
+
+		
+		String path = usuarioActual.getImagenPerfil().getDescription();
+		cargarImagenEnLabel(lblNewLabel_1, path);
+		
 		panelNorte.add(lblNewLabel_1);
 		
 		JPanel panelMensajes = new JPanel();
@@ -413,4 +426,34 @@ public class VentanaPrincipal extends JFrame {
 			}
 		});
 	}
+	
+	private void cargarImagenEnLabel(JLabel label, String path) {
+	    if (path == null || path.isEmpty()) {
+	        // Ruta vacía => icono por defecto
+	        label.setIcon(new ImageIcon(getClass().getResource("/umu/tds/apps/resources/usuario.png")));
+	        return;
+	    }
+
+	    try {
+	        Image imagen;
+	        if (path.startsWith("http")) {
+	            // URL remota
+	            imagen = ImageIO.read(new URL(path));
+	        } else {
+	            // Ruta local
+	            imagen = ImageIO.read(new File(path));
+	        }
+	        if (imagen == null) {
+	            // Si no se pudo leer nada
+	            throw new IOException("La imagen devuelta es nula");
+	        }
+	        // Redimensionas si quieres
+	        ImageIcon icon = new ImageIcon(imagen.getScaledInstance(50, 50, Image.SCALE_SMOOTH));
+	        label.setIcon(icon);
+	    } catch (IOException e) {
+	        // Si falla la carga, pon la imagen por defecto
+	        label.setIcon(new ImageIcon(getClass().getResource("/umu/tds/apps/resources/usuario.png")));
+	    }
+	}
+
 }

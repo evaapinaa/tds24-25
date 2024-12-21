@@ -4,6 +4,8 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
 import java.awt.BorderLayout;
 import javax.swing.SwingConstants;
 import java.awt.Font;
@@ -20,6 +22,7 @@ import javax.swing.JTextField;
 
 import javax.swing.border.TitledBorder;
 
+import umu.tds.apps.controlador.AppChat;
 import umu.tds.apps.vista.customcomponents.VisualUtils;
 
 
@@ -48,6 +51,7 @@ public class VentanaLogin {
 	private final ButtonGroup buttonGroup = new ButtonGroup();
 	private JTextField textField;
 	private JPasswordField passwordField;
+	private static AppChat controlador;
 
 
 	/**
@@ -69,7 +73,14 @@ public class VentanaLogin {
 	/**
 	 * Create the application.
 	 */
+		
 	public VentanaLogin() {
+		controlador = AppChat.getUnicaInstancia();
+	    if (controlador == null) {
+	        System.err.println("Error: No se pudo inicializar el controlador AppChat.");
+	        JOptionPane.showMessageDialog(null, "Error crítico al iniciar la aplicación. Por favor, contacte al soporte.");
+	        System.exit(1); // Finaliza la aplicación si no se puede inicializar
+	    }
 		initialize();
 	}
 	
@@ -126,6 +137,32 @@ public class VentanaLogin {
 		btnLogin.setIcon(null);
 		btnLogin.setPreferredSize(new Dimension(115, 23));
 		panelSur.add(btnLogin);
+		btnLogin.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				// Login
+				// Comprobar que el usuario y la contraseña son correctos
+				// Si son correctos, mostrar la ventana principal
+				
+				String usuario = textField.getText();
+				char[] contraseña = passwordField.getPassword();
+				
+				if(controlador.iniciarSesion(usuario, contraseña)) {
+					
+					// mostrar ventana principal
+					VentanaPrincipal ventanaPrincipal = new VentanaPrincipal();
+					ventanaPrincipal.setVisible(true);
+					frmAppchat.setVisible(false);
+				} else {
+					textField.setBackground(new Color(255, 200, 200));
+					passwordField.setBackground(new Color(255, 200, 200));
+					Toolkit.getDefaultToolkit().beep(); // Sonido de error
+				}
+				
+				
+				
+			}
+		});
 		
 		JPanel panelCentro = new JPanel();
 		panelCentro.setFont(new Font("Arial", Font.BOLD, 11));

@@ -4,11 +4,19 @@ package umu.tds.apps.modelo;
 public class Contacto {
 	
 	// ATRIBUTOS
+	private int codigo;
 	private String nombre;
 	private Usuario usuario;
 	
 	
 	// GETTERS Y SETTERS
+	public int getCodigo() {
+		return codigo;
+	}
+	
+	public void setCodigo(int codigo) {
+		this.codigo = codigo;
+	}
 	
 	public String getNombre() {
 		return nombre;

@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.swing.ImageIcon;
+
 public class Usuario {
 	
 	// ATRIBUTOS
@@ -14,7 +16,7 @@ public class Usuario {
 	private String telefono;
 	private String email;
 	private Optional<String> saludo;  // Saludo es opcional
-	private String imagenPerfil;
+	private ImageIcon imagenPerfil;
 	private LocalDate fechaNacimiento;
 	private List<Contacto> listaContactos;
 	private List<Mensaje> listaMensajesEnviados;
@@ -25,9 +27,6 @@ public class Usuario {
 	
 	// GETTERS AND SETTERS
 	
-	// mensajesEnviados
-	// mensajesRecibidos
-	
 	public String getUsuario() {
 		return usuario;
 	}
@@ -36,11 +35,11 @@ public class Usuario {
 		this.usuario = usuario;
 	}
 	
-	public String getContaseña() {
+	public String getContraseña() {
 		return contraseña;
 	}
 	
-	public void setContaseña(String contaseña) {
+	public void setContraseña(String contaseña) {
 		this.contraseña = contaseña;
 	}
 	
@@ -69,11 +68,11 @@ public class Usuario {
 		this.saludo = saludo;
 	}
 	
-	public String getImagenPerfil() {
+	public ImageIcon getImagenPerfil() {
 		return imagenPerfil;
 	}
 	
-	public void setImagenPerfil(String imagenPerfil) {
+	public void setImagenPerfil(ImageIcon imagenPerfil) {
 		this.imagenPerfil = imagenPerfil;
 	}
 	
@@ -98,20 +97,26 @@ public class Usuario {
 		this.premium = premium;
 	}
 	
-	
+	public List<Chat> getListaChats() {
+		return listaChats;
 	}
+	
+	public void setListaChats(List<Chat> listaChats) {
+		this.listaChats = listaChats;
+	}
+
 	// Método para comprobar si la clave es válida
-	public boolean isClaveValida(String clave) {
-		return this.contraseña.equals(clave);
+	public boolean isClaveValida(String contraseña) {
+		return this.contraseña.equals(contraseña);
 	}
 	
 	
 	// Método para obtener el número de mensajes enviados en el último mes (DESCUENTO)
-	public int getNumeroMensajesUltimoMes() {
+	public long getNumeroMensajesUltimoMes() {
 	    LocalDate ahora = LocalDate.now();
 	    LocalDate inicioDelMes = ahora.withDayOfMonth(1);
 
-	    return (int) listaMensajes.stream()
+	    return listaMensajesEnviados.stream()
 	        .filter(mensaje -> {
 	            LocalDate fechaEnvio = mensaje.getFecha();
 	            return (fechaEnvio.isEqual(inicioDelMes) || (fechaEnvio.isAfter(inicioDelMes) && fechaEnvio.isBefore(ahora.plusDays(1))));
@@ -131,17 +136,25 @@ public class Usuario {
 		this.listaContactos = listaContactos;
 	}
 	
-	public List<Mensaje> getListaMensajes() {
-		return new LinkedList<Mensaje>(listaMensajes); // comprobar
+	public List<Mensaje> getListaMensajesEnviados() {
+		return new LinkedList<Mensaje>(listaMensajesEnviados); // comprobar
 	}
 	
-	public void setListaMensajes(List<Mensaje> listaMensajes) {
-		this.listaMensajes = listaMensajes;
+	public void setListaMensajesEnviados(List<Mensaje> listaMensajesEnviados) {
+		this.listaMensajesEnviados = listaMensajesEnviados;
+	}
+	
+	public List<Mensaje> getListaMensajesRecibidos() {
+		return new LinkedList<Mensaje>(listaMensajesRecibidos); // comprobar
+	}
+	
+	public void setListaMensajesRecibidos(List<Mensaje> listaMensajesRecibidos) {
+		this.listaMensajesRecibidos = listaMensajesRecibidos;
 	}
 	
     // CONSTRUCTOR
 	
-	public Usuario(String usuario, String contraseña, String telefono, String email, Optional<String> saludo, String imagenPerfil, LocalDate fechaNacimiento) {
+	public Usuario(String usuario, String contraseña, String telefono, String email, Optional<String> saludo, ImageIcon imagenPerfil, LocalDate fechaNacimiento) {
 		this.usuario = usuario;
 		this.contraseña = contraseña;
 		this.telefono = telefono;
@@ -150,9 +163,12 @@ public class Usuario {
 		this.imagenPerfil = imagenPerfil;
 		this.fechaNacimiento = fechaNacimiento;
 		this.listaContactos = new LinkedList<Contacto>();
-		this.listaMensajes = new LinkedList<Mensaje>();
+		this.listaMensajesEnviados = new LinkedList<Mensaje>();
+		this.listaMensajesRecibidos = new LinkedList<Mensaje>();
 		
 	}
+	
+	
     
 
 }

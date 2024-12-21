@@ -6,12 +6,20 @@ import java.util.List;
 public class Chat {
 
 	// ATRIBUTOS
+	private int codigo;
 	private Usuario usuario;
 	private Usuario otroUsuarioChat;
 	private List<Mensaje> mensajes;
 
 	// GETTERS Y SETTERS
-
+	public int getCodigo() {
+		return codigo;
+	}
+	
+	public void setCodigo(int codigo) {
+        this.codigo = codigo;
+    }
+	
 	public Usuario getUsuario() {
 		return usuario;
 	}

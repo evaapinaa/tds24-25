@@ -1,147 +1,202 @@
 package umu.tds.apps.persistencia;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.StringTokenizer;
+
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+
+import java.net.URL;
 
 import tds.driver.FactoriaServicioPersistencia;
 import tds.driver.ServicioPersistencia;
+import umu.tds.apps.modelo.Contacto;
+import umu.tds.apps.modelo.Mensaje;
 import umu.tds.apps.modelo.Usuario;
 import beans.Entidad;
 import beans.Propiedad;
 
 
-//Usa un pool para evitar problemas doble referencia con ventas
 public class AdaptadorUsuarioTDS implements IAdaptadorUsuarioDAO {
-	private static ServicioPersistencia servPersistencia;
-	private static AdaptadorUsuarioTDS unicaInstancia = null;
+    private static ServicioPersistencia servPersistencia;
+    private static AdaptadorUsuarioTDS unicaInstancia = null;
 
-	public static AdaptadorUsuarioTDS getUnicaInstancia() { // patron singleton
-		if (unicaInstancia == null)
-			return new AdaptadorUsuarioTDS();
-		else
-			return unicaInstancia;
-	}
+    public static AdaptadorUsuarioTDS getUnicaInstancia() {
+        if (unicaInstancia == null)
+            return new AdaptadorUsuarioTDS();
+        else
+            return unicaInstancia;
+    }
 
-	private AdaptadorUsuarioTDS() {
-		servPersistencia = FactoriaServicioPersistencia.getInstance().getServicioPersistencia();
-	}
+    private AdaptadorUsuarioTDS() {
+        servPersistencia = FactoriaServicioPersistencia.getInstance().getServicioPersistencia();
+    }
 
-	/* cuando se registra un cliente se le asigna un identificador �nico */
-	public void registrarUsuario(Usuario usuario) {
-		Entidad eUsuario = null;
+    @Override
+    public void registrarUsuario(Usuario usuario) {
+        Entidad eUsuario = null;
 
-		// Si la entidad esta registrada no la registra de nuevo
-		try {
-			eUsuario = servPersistencia.recuperarEntidad(usuario.getCodigo());
-		} catch (NullPointerException e) {}
-		if (eUsuario != null) return;
+        try {
+            eUsuario = servPersistencia.recuperarEntidad(usuario.getCodigo());
+        } catch (NullPointerException e) {}
+        if (eUsuario != null) return;
 
-		// registrar primero los atributos que son objetos
-		AdaptadorUsuarioTDS adaptadorVenta = AdaptadorUsuarioTDS.getUnicaInstancia();
-		for (Usuario u : usuario.getUsuarios())
-			adaptadorVenta.registrarVenta(v);
+        eUsuario = new Entidad();
+        eUsuario.setNombre("usuario");
+        eUsuario.setPropiedades(new ArrayList<>(Arrays.asList(
+            new Propiedad("nombre", usuario.getUsuario()),
+            new Propiedad("telefono", usuario.getTelefono()),
+            new Propiedad("email", usuario.getEmail()),
+            new Propiedad("contraseña", usuario.getContraseña()),
+            new Propiedad("saludo", usuario.getSaludo().orElse("")),
+            new Propiedad("contactos", obtenerCodigosContactos(usuario.getListaContactos())),
+            new Propiedad("imagenPerfil", usuario.getImagenPerfil().getDescription()),
+            new Propiedad("mensajesEnviados", obtenerCodigosMensajes(usuario.getListaMensajesEnviados())),
+            new Propiedad("mensajesRecibidos", obtenerCodigosMensajes(usuario.getListaMensajesRecibidos()))
+        )));
+        
+        eUsuario = servPersistencia.registrarEntidad(eUsuario);
+        usuario.setCodigo(eUsuario.getId());
+    }
 
-		// crear entidad Cliente
-		eCliente = new Entidad();
-		eCliente.setNombre("cliente");
-		eCliente.setPropiedades(new ArrayList<Propiedad>(
-				Arrays.asList(new Propiedad("dni", cliente.getDni()), new Propiedad("nombre", cliente.getNombre()),
-						new Propiedad("ventas", obtenerCodigosVentas(cliente.getVentas())))));
 
-		// registrar entidad cliente
-		eCliente = servPersistencia.registrarEntidad(eCliente);
-		// asignar identificador unico
-		// Se aprovecha el que genera el servicio de persistencia
-		cliente.setCodigo(eCliente.getId());
-	}
+    @Override
+    public void modificarUsuario(Usuario usuario) {
+        Entidad eUsuario = servPersistencia.recuperarEntidad(usuario.getCodigo());
 
-	public void modificarCliente(Cliente cliente) {
+        for (Propiedad prop : eUsuario.getPropiedades()) {
+            switch (prop.getNombre()) {
+                case "nombre":
+                    prop.setValor(usuario.getUsuario());
+                    break;
+                case "telefono":
+                    prop.setValor(usuario.getTelefono());
+                    break;
+                case "email":
+                    prop.setValor(usuario.getEmail());
+                    break;
+                case "saludo":
+                    prop.setValor(usuario.getSaludo().orElse(""));
+                    break;
+                case "imagenPerfil":
+					prop.setValor(usuario.getImagenPerfil().getDescription());
+					break;
+				case "contraseña":
+					prop.setValor(usuario.getContraseña());
+					break;
+                case "contactos":
+                    prop.setValor(obtenerCodigosContactos(usuario.getListaContactos()));
+                    break;
+                case "mensajesEnviados":
+                    prop.setValor(obtenerCodigosMensajes(usuario.getListaMensajesEnviados()));
+                    break;
+                case "mensajesRecibidos":
+                    prop.setValor(obtenerCodigosMensajes(usuario.getListaMensajesRecibidos()));
+                    break;
+            }
+            servPersistencia.modificarPropiedad(prop);
+        }
+    }
 
-		Entidad eCliente = servPersistencia.recuperarEntidad(cliente.getCodigo());
+    @Override
+    public Usuario recuperarUsuario(int codigo) {
+        if (PoolDAO.getUnicaInstancia().contiene(codigo))
+            return (Usuario) PoolDAO.getUnicaInstancia().getObjeto(codigo);
 
-		for (Propiedad prop : eCliente.getPropiedades()) {
-			if (prop.getNombre().equals("codigo")) {
-				prop.setValor(String.valueOf(cliente.getCodigo()));
-			} else if (prop.getNombre().equals("dni")) {
-				prop.setValor(cliente.getDni());
-			} else if (prop.getNombre().equals("nombre")) {
-				prop.setValor(cliente.getNombre());
-			} else if (prop.getNombre().equals("ventas")) {
-				String ventas = obtenerCodigosVentas(cliente.getVentas());
-				prop.setValor(ventas);
-			}
-			servPersistencia.modificarPropiedad(prop);
-		}
+        Entidad eUsuario = servPersistencia.recuperarEntidad(codigo);
 
-	}
+        String nombre = servPersistencia.recuperarPropiedadEntidad(eUsuario, "nombre");
+        String telefono = servPersistencia.recuperarPropiedadEntidad(eUsuario, "telefono");
+        String contraseña = servPersistencia.recuperarPropiedadEntidad(eUsuario, "contraseña");
+        String email = servPersistencia.recuperarPropiedadEntidad(eUsuario, "email");
+        String rutaImagenPerfil = servPersistencia.recuperarPropiedadEntidad(eUsuario, "imagenPerfil");
+        ImageIcon imagenPerfil = cargarImagenDesdeRuta(rutaImagenPerfil);
+        String saludo = servPersistencia.recuperarPropiedadEntidad(eUsuario, "saludo");
+        
+        Usuario usuario = new Usuario(nombre, contraseña, telefono, email, Optional.ofNullable(saludo), imagenPerfil, null);
+        usuario.setCodigo(codigo);
 
-	public Usuario recuperarUsuario(int codigo) {
+        PoolDAO.getUnicaInstancia().addObjeto(codigo, usuario);
 
-		// Si la entidad est� en el pool la devuelve directamente
-		if (PoolDAO.getUnicaInstancia().contiene(codigo))
-			return (Usuario) PoolDAO.getUnicaInstancia().getObjeto(codigo);
+        usuario.setListaContactos(obtenerContactosDesdeCodigos(
+            servPersistencia.recuperarPropiedadEntidad(eUsuario, "contactos")
+        ));
+        usuario.setListaMensajesEnviados(obtenerMensajesDesdeCodigos(
+            servPersistencia.recuperarPropiedadEntidad(eUsuario, "mensajesEnviados")
+        ));
+        usuario.setListaMensajesRecibidos(obtenerMensajesDesdeCodigos(
+            servPersistencia.recuperarPropiedadEntidad(eUsuario, "mensajesRecibidos")
+        ));
 
-		// si no, la recupera de la base de datos
-		Entidad eCliente;
-		List<Venta> ventas = new LinkedList<Venta>();
-		String dni;
-		String nombre;
+        return usuario;
+    }
 
-		// recuperar entidad
-		eCliente = servPersistencia.recuperarEntidad(codigo);
+    @Override
+    public List<Usuario> recuperarTodosUsuarios() {
+        List<Entidad> eUsuarios = servPersistencia.recuperarEntidades("usuario");
+        List<Usuario> usuarios = new LinkedList<>();
 
-		// recuperar propiedades que no son objetos
-		dni = servPersistencia.recuperarPropiedadEntidad(eCliente, "dni");
-		nombre = servPersistencia.recuperarPropiedadEntidad(eCliente, "nombre");
+        for (Entidad eUsuario : eUsuarios) {
+            usuarios.add(recuperarUsuario(eUsuario.getId()));
+        }
+        return usuarios;
+    }
 
-		Cliente cliente = new Cliente(dni, nombre);
-		cliente.setCodigo(codigo);
+    // Métodos auxiliares
+    private String obtenerCodigosContactos(List<Contacto> listaContactos) {
+        StringBuilder codigos = new StringBuilder();
+        for (Contacto contacto : listaContactos) {
+            codigos.append(contacto.getCodigo()).append(" ");
+        }
+        return codigos.toString().trim();
+    }
 
-		// IMPORTANTE:a�adir el cliente al pool antes de llamar a otros
-		// adaptadores
-		PoolDAO.getUnicaInstancia().addObjeto(codigo, cliente);
+    private List<Contacto> obtenerContactosDesdeCodigos(String codigos) {
+        List<Contacto> listaContactos = new LinkedList<>();
+        StringTokenizer tokenizer = new StringTokenizer(codigos, " ");
+        AdaptadorContactoIndividualTDS adaptadorContacto = AdaptadorContactoIndividualTDS.getUnicaInstancia();
 
-		// recuperar propiedades que son objetos llamando a adaptadores
-		// ventas
-		ventas = obtenerVentasDesdeCodigos(servPersistencia.recuperarPropiedadEntidad(eCliente, "ventas"));
+        while (tokenizer.hasMoreTokens()) {
+            listaContactos.add(adaptadorContacto.recuperarContactoIndividual(Integer.valueOf((String) tokenizer.nextElement())));
+        }
+        return listaContactos;
+    }
 
-		for (Venta v : ventas)
-			cliente.addVenta(v);
+    private String obtenerCodigosMensajes(List<Mensaje> listaMensajes) {
+        StringBuilder codigos = new StringBuilder();
+        for (Mensaje mensaje : listaMensajes) {
+            codigos.append(mensaje.getCodigo()).append(" ");
+        }
+        return codigos.toString().trim();
+    }
 
-		return cliente;
-	}
+    private List<Mensaje> obtenerMensajesDesdeCodigos(String codigos) {
+        List<Mensaje> listaMensajes = new LinkedList<>();
+        StringTokenizer tokenizer = new StringTokenizer(codigos, " ");
+        AdaptadorMensajeTDS adaptadorMensaje = AdaptadorMensajeTDS.getUnicaInstancia();
 
-	public List<Usuario> recuperarTodosUsuarios() {
+        while (tokenizer.hasMoreTokens()) {
+            int codigo = Integer.parseInt(tokenizer.nextToken());
+            listaMensajes.add(adaptadorMensaje.recuperarMensaje(codigo));
+        }
+        return listaMensajes;
+    }
+    
+    @SuppressWarnings("deprecation")
+    private ImageIcon cargarImagenDesdeRuta(String rutaImagen) {
+        // Ya no hacemos la carga real; solo creamos un ImageIcon vacío con la description puesta.
+        ImageIcon icono = new ImageIcon();
+        icono.setDescription(rutaImagen);  // guardamos la ruta para luego usarla en la vista
+        return icono;
+    }
 
-		List<Entidad> eUsuarios = servPersistencia.recuperarEntidades("usuario");
-		List<Usuario> usuarios = new LinkedList<Usuario>();
 
-		for (Entidad eUsuario: eUsuarios) {
-			usuarios.add(recuperarUsuario(eUsuario.getId()));
-		}
-		return usuarios;
-	}
-
-	// -------------------Funciones auxiliares-----------------------------
-	private String obtenerCodigosVentas(List<Venta> listaVentas) {
-		String aux = "";
-		for (Venta v : listaVentas) {
-			aux += v.getCodigo() + " ";
-		}
-		return aux.trim();
-	}
-
-	private List<Venta> obtenerVentasDesdeCodigos(String ventas) {
-
-		List<Venta> listaVentas = new LinkedList<Venta>();
-		StringTokenizer strTok = new StringTokenizer(ventas, " ");
-		AdaptadorVentaTDS adaptadorV = AdaptadorVentaTDS.getUnicaInstancia();
-		while (strTok.hasMoreTokens()) {
-			listaVentas.add(adaptadorV.recuperarVenta(Integer.valueOf((String) strTok.nextElement())));
-		}
-		return listaVentas;
-	}
+    
 }

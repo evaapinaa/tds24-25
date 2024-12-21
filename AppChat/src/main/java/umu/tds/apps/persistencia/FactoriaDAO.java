@@ -6,7 +6,7 @@ package umu.tds.apps.persistencia;
 public abstract class FactoriaDAO {
 	private static FactoriaDAO unicaInstancia;
 	
-	public static final String DAO_TDS = "persistencia.TDSFactoriaDAO";
+	public static final String DAO_TDS = "umu.tds.apps.persistencia.TDSFactoriaDAO";
 		
 	/** 
 	 * Crea un tipo de factoria DAO.
@@ -34,5 +34,6 @@ public abstract class FactoriaDAO {
 	// Metodos factoria que devuelven adaptadores que implementen estos interfaces
 	public abstract IAdaptadorUsuarioDAO getUsuarioDAO();
 	public abstract IAdaptadorMensajeDAO getMensajeDAO();
+	public abstract IAdaptadorContactoIndividualDAO getContactoIndividualDAO();
 
 }

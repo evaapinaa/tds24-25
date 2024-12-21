@@ -7,7 +7,6 @@ import java.util.Map;
 
 import umu.tds.apps.persistencia.DAOException;
 import umu.tds.apps.persistencia.FactoriaDAO;
-import umu.tds.apps.persistencia.IAdaptadorClienteDAO;
 import umu.tds.apps.persistencia.IAdaptadorUsuarioDAO;
 
 // Patrón Singleton. No permitir crear más de una instancia de la clase. Impedir que se pueda hacer new RepositorioUsuarios()
@@ -22,10 +21,11 @@ public class RepositorioUsuarios {
 	private IAdaptadorUsuarioDAO adaptadorUsuario;
 	
 	private RepositorioUsuarios() {
+		usuarios = new HashMap<String,Usuario>();
 		try {
   			dao = FactoriaDAO.getInstancia(FactoriaDAO.DAO_TDS);
   			adaptadorUsuario = dao.getUsuarioDAO();
-  			usuarios = new HashMap<String,Usuario>();
+  			
   			this.cargarCatalogo();
   		} catch (DAOException eDAO) {
   			eDAO.printStackTrace();
@@ -50,8 +50,8 @@ public class RepositorioUsuarios {
 		}
 		return null;
 	}
-	public Usuario getUsuario(String dni) {
-		return usuarios.get(dni); 
+	public Usuario getUsuario(String telefono) {
+		return usuarios.get(telefono); 
 	}
 	
 	public void addUsuario(Usuario usu) {

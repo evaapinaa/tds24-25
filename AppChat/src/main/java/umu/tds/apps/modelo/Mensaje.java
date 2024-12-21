@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 public class Mensaje {
 	
 	// ATRIBUTOS
-	private String imagen;
 	private String texto;
 	private int emoticono;
 	private LocalDate fecha;
@@ -18,14 +17,6 @@ public class Mensaje {
 	
 
 	// GETTERS Y SETTES
-	public String getImagen() {
-		return imagen;
-	}
-	
-	public void setImagen(String imagen) {
-		this.imagen = imagen;
-	}
-	
 	public String getTexto() {
 		return texto;
 	}
@@ -81,6 +72,15 @@ public class Mensaje {
 	public void setCodigo(int codigo) {
 		this.codigo = codigo;
 	}
+	
+	public Chat getChat() {
+		return chat;
+	}
+	
+	public void setChat(Chat chat) {
+		this.chat = chat;
+	}
+	
 	
 	
 	public Mensaje(Usuario emisor, String texto, Usuario receptor) {

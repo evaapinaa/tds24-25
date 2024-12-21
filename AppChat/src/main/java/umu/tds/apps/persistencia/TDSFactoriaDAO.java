@@ -13,6 +13,12 @@ public class TDSFactoriaDAO extends FactoriaDAO {
 	public IAdaptadorMensajeDAO getMensajeDAO() {
 		return AdaptadorMensajeTDS.getUnicaInstancia();
 	}
+	
+	@Override
+	public IAdaptadorContactoIndividualDAO getContactoIndividualDAO() {
+		return AdaptadorContactoIndividualTDS.getUnicaInstancia();
+	}
+	
 
 
 }
