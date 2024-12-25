@@ -16,6 +16,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import javax.swing.JTextField;
@@ -285,50 +286,11 @@ public class VentanaRegistro extends JFrame {
 		gbc_lblNewLabel_8.gridy = 6;
 		contentPane.add(lblNewLabel_8, gbc_lblNewLabel_8);
 		lblNewLabel_8.addMouseListener(new MouseAdapter() {
-		    @Override
-		    public void mouseClicked(MouseEvent e) {
-		        // Opciones para URL o archivo local
-		        String[] opciones = { "Introducir enlace", "Seleccionar archivo" };
-		        int seleccion = JOptionPane.showOptionDialog(contentPane, "Seleccione cómo desea cargar la imagen:",
-		                "Cargar Imagen", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, opciones,
-		                opciones[0]);
-
-		        if (seleccion == 0) {
-		            // Cargar imagen desde URL
-		            String urlImagen = JOptionPane.showInputDialog(contentPane, "Introduzca el enlace de la imagen:",
-		                    "Cargar Imagen desde URL", JOptionPane.PLAIN_MESSAGE);
-
-		            if (urlImagen != null && !urlImagen.isEmpty()) {
-		                try {
-		                    Image imagen = ImageIO.read(new URL(urlImagen));
-		                    ImageIcon icono = new ImageIcon(imagen.getScaledInstance(100, 100, Image.SCALE_SMOOTH));
-		                    icono.setDescription(urlImagen); // Guardar la URL como descripción
-		                    lblNewLabel_8.setIcon(icono);
-		                } catch (IOException ex) {
-		                    JOptionPane.showMessageDialog(contentPane, "No se pudo cargar la imagen desde el enlace.",
-		                            "Error", JOptionPane.ERROR_MESSAGE);
-		                }
-		            }
-		        } else if (seleccion == 1) {
-		            // Cargar imagen desde archivo local
-		            JFileChooser fileChooser = new JFileChooser();
-		            fileChooser.setFileFilter(new FileNameExtensionFilter("Imágenes", "jpg", "jpeg", "png", "gif"));
-		            int resultado = fileChooser.showOpenDialog(contentPane);
-		            if (resultado == JFileChooser.APPROVE_OPTION) {
-		                try {
-		                    Image imagen = ImageIO.read(fileChooser.getSelectedFile());
-		                    ImageIcon icono = new ImageIcon(imagen.getScaledInstance(100, 100, Image.SCALE_SMOOTH));
-		                    icono.setDescription(fileChooser.getSelectedFile().getAbsolutePath()); // Guardar la ruta local como descripción
-		                    lblNewLabel_8.setIcon(icono);
-		                } catch (IOException ex) {
-		                    JOptionPane.showMessageDialog(contentPane, "No se pudo cargar la imagen desde el archivo.",
-		                            "Error", JOptionPane.ERROR_MESSAGE);
-		                }
-		            }
-		        }
-		    }
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				seleccionarFotoPerfil();
+			}
 		});
-
 
 		panel = new JPanel();
 		panel.setFont(new Font("Arial", Font.PLAIN, 13));
@@ -416,15 +378,63 @@ public class VentanaRegistro extends JFrame {
 		});
 
 	}
+	
+	
+	private void seleccionarFotoPerfil() {
+		// Opciones para URL o archivo local
+		String[] opciones = { "Introducir enlace", "Seleccionar archivo" };
+		int seleccion = JOptionPane.showOptionDialog(contentPane, "Seleccione cómo desea cargar la imagen:",
+				"Cargar Imagen", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, opciones,
+				opciones[0]);
+
+		if (seleccion == 0) {
+			// Cargar imagen desde URL
+			String urlImagen = JOptionPane.showInputDialog(contentPane, "Introduzca el enlace de la imagen:",
+					"Cargar Imagen desde URL", JOptionPane.PLAIN_MESSAGE);
+
+			if (urlImagen != null && !urlImagen.isEmpty()) {
+				try {
+					BufferedImage imagen = ImageIO.read(new URL(urlImagen));
+					ImageIcon icono = new ImageIcon(imagen.getScaledInstance(100, 100, Image.SCALE_SMOOTH));
+					icono = VisualUtils.createCircularIcon(imagen, 100);
+					icono.setDescription(urlImagen); // Guardar la URL como descripción
+					lblNewLabel_8.setIcon(icono);
+				} catch (IOException ex) {
+					JOptionPane.showMessageDialog(contentPane, "No se pudo cargar la imagen desde el enlace.", "Error",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		} else if (seleccion == 1) {
+			// Cargar imagen desde archivo local
+			JFileChooser fileChooser = new JFileChooser();
+			fileChooser.setFileFilter(new FileNameExtensionFilter("Imágenes", "jpg", "jpeg", "png", "gif"));
+			int resultado = fileChooser.showOpenDialog(contentPane);
+			if (resultado == JFileChooser.APPROVE_OPTION) {
+				try {
+					BufferedImage imagen = ImageIO.read(fileChooser.getSelectedFile());
+					ImageIcon icono = new ImageIcon(imagen.getScaledInstance(100, 100, Image.SCALE_SMOOTH));
+					icono = VisualUtils.createCircularIcon(imagen, 100);
+					icono.setDescription(fileChooser.getSelectedFile().getAbsolutePath()); // Guardar la ruta local como
+																							// descripción
+					lblNewLabel_8.setIcon(icono);
+				} catch (IOException ex) {
+					JOptionPane.showMessageDialog(contentPane, "No se pudo cargar la imagen desde el archivo.", "Error",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		}
+
+	}
 
 	private boolean contraseñasCoinciden() {
-	    boolean coinciden = passwordField.getText().equals(passwordField_1.getText());
+		boolean coinciden = passwordField.getText().equals(passwordField_1.getText());
 
 		if (!coinciden) {
 			passwordField.setBackground(new Color(255, 200, 200));
 			passwordField_1.setBackground(new Color(255, 200, 200));
 		}
 
-	    return coinciden;
+		return coinciden;
 	}
+
 }

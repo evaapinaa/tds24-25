@@ -2,6 +2,7 @@ package umu.tds.apps.controlador;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,6 +10,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
 import umu.tds.apps.modelo.Contacto;
+import umu.tds.apps.modelo.ContactoIndividual;
 import umu.tds.apps.modelo.Mensaje;
 import umu.tds.apps.modelo.RepositorioUsuarios;
 import umu.tds.apps.modelo.Usuario;
@@ -124,6 +126,54 @@ public class AppChat {
 
 	public static Usuario getUsuarioActual() {
 		return unicaInstancia.usuarioActual;
+	}
+
+	
+	// Obtener todos los mensajes enviados por el usuario actual
+	public List<Mensaje> obtenerMensajesEnviados() {
+	    if (usuarioActual == null) {
+	        throw new IllegalStateException("No hay un usuario autenticado.");
+	    }
+	    return usuarioActual.getListaMensajesEnviados();
+	}
+
+	
+	
+	// Obtener todos los mensajes recibidos por el usuario actual
+	public List<Mensaje> obtenerMensajesRecibidos() {
+	    if (usuarioActual == null) {
+	        throw new IllegalStateException("No hay un usuario autenticado.");
+	    }
+	    return usuarioActual.getListaMensajesRecibidos();
+	}
+
+	
+	public List<Mensaje> obtenerMensajesConContacto(Usuario contacto) {
+	    List<Mensaje> mensajesConContacto = new LinkedList<>();
+
+	    // Filtrar mensajes enviados al contacto
+	    for (Mensaje mensaje : usuarioActual.getListaMensajesEnviados()) {
+	        if (mensaje.getReceptor().equals(contacto)) {
+	            mensajesConContacto.add(mensaje);
+	        }
+	    }
+
+	    // Filtrar mensajes recibidos del contacto
+	    for (Mensaje mensaje : usuarioActual.getListaMensajesRecibidos()) {
+	        if (mensaje.getEmisor().equals(contacto)) {
+	            mensajesConContacto.add(mensaje);
+	        }
+	    }
+
+	    // Ordenar por fecha y hora
+	    mensajesConContacto.sort((m1, m2) -> {
+	        if (m1.getFecha().equals(m2.getFecha())) {
+	            return m1.getHora().compareTo(m2.getHora());
+	        }
+	        return m1.getFecha().compareTo(m2.getFecha());
+	    });
+
+	    return mensajesConContacto;
 	}
 
 }
