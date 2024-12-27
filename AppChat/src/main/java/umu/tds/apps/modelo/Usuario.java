@@ -152,6 +152,13 @@ public class Usuario {
 		this.listaMensajesRecibidos = listaMensajesRecibidos;
 	}
 	
+	// Cambio
+	public void añadirContacto(Contacto contacto) {
+		if (!listaContactos.contains(contacto)) {
+			listaContactos.add(contacto);
+		}
+	}
+	
     // CONSTRUCTOR
 	
 	public Usuario(String usuario, String contraseña, String telefono, String email, Optional<String> saludo, ImageIcon imagenPerfil, LocalDate fechaNacimiento) {

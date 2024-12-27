@@ -9,6 +9,12 @@ import java.util.List;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
+
+import umu.tds.apps.modelo.ContactoIndividual;
+import umu.tds.apps.modelo.RepositorioUsuarios;
+import umu.tds.apps.modelo.Usuario;
+import umu.tds.apps.persistencia.AdaptadorContactoIndividualTDS;
+
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.EmptyBorder;
 
@@ -116,12 +122,39 @@ public class VentanaContactos extends JPanel {
         btnAgregarContacto.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String nuevoContacto = JOptionPane.showInputDialog("Introduce el nombre del nuevo contacto:");
-                if (nuevoContacto != null && !nuevoContacto.trim().isEmpty()) {
-                    modeloContactos.addElement(nuevoContacto.trim());
+                // nombre del contacto
+                String nuevoContactoNombre = JOptionPane.showInputDialog("Introduce el nombre del nuevo contacto:");
+                if (nuevoContactoNombre == null || nuevoContactoNombre.trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "El nombre del contacto no puede estar vacío.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
+
+                // número del contacto
+                String nuevoContactoTelefono = JOptionPane.showInputDialog("Introduce el número del nuevo contacto:");
+                if (nuevoContactoTelefono == null || nuevoContactoTelefono.trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "El número del contacto no puede estar vacío.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // vemos si el numero de telefono existe en el repositorio
+                Usuario usuarioExistente = RepositorioUsuarios.getUnicaInstancia().getUsuario(nuevoContactoTelefono);
+                if (usuarioExistente == null) {
+                    JOptionPane.showMessageDialog(null, "El número introducido no pertenece a ningún usuario registrado.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // creamos el contacto individual
+                ContactoIndividual nuevoContacto = new ContactoIndividual(nuevoContactoNombre, nuevoContactoTelefono, usuarioExistente);
+
+                // guardamos el contacto en la base de datos
+                AdaptadorContactoIndividualTDS.getUnicaInstancia().registrarContactoIndividual(nuevoContacto);
+
+                // metemos el contacto a la lista de contactos
+                modeloContactos.addElement(nuevoContactoNombre);
+                JOptionPane.showMessageDialog(null, "Contacto añadido correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
             }
         });
+
 
         // Acción para añadir un grupo
         btnAgregarGrupo.addActionListener(new ActionListener() {

@@ -14,6 +14,7 @@ import umu.tds.apps.modelo.ContactoIndividual;
 import umu.tds.apps.modelo.Mensaje;
 import umu.tds.apps.modelo.RepositorioUsuarios;
 import umu.tds.apps.modelo.Usuario;
+import umu.tds.apps.persistencia.AdaptadorContactoIndividualTDS;
 import umu.tds.apps.persistencia.DAOException;
 import umu.tds.apps.persistencia.FactoriaDAO;
 import umu.tds.apps.persistencia.IAdaptadorMensajeDAO;
@@ -175,5 +176,33 @@ public class AppChat {
 
 	    return mensajesConContacto;
 	}
+	
+	public boolean añadirContacto(String nombre, String telefono) {
+	    // miro si el telefono existe
+	    Usuario usuarioContacto = RepositorioUsuarios.getUnicaInstancia().getUsuario(telefono);
+	    if (usuarioContacto == null) {
+	        return false; // el numero no existe, no esta asociado a nadie
+	    }
+
+	    // creo el contacto
+	    ContactoIndividual nuevoContacto = new ContactoIndividual(nombre, telefono, usuarioContacto);
+
+	    // revisamos a ver si no lo tiene ya añadido
+	    Usuario usuarioActual = getUsuarioActual();
+
+	    if (usuarioActual.getListaContactos().stream().anyMatch(c -> c instanceof ContactoIndividual && 
+	                                                                ((ContactoIndividual) c).getTelefono().equals(telefono))) {
+	        return false; // lo tiene en contactos ya
+	    }
+
+	    // añadimos contacto
+	    usuarioActual.añadirContacto(nuevoContacto);
+
+	    // guardamos el contacto en el servidor de persistencia
+	    AdaptadorContactoIndividualTDS.getUnicaInstancia().registrarContactoIndividual(nuevoContacto);
+
+	    return true;
+	}
+
 
 }
