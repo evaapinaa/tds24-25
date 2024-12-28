@@ -14,6 +14,7 @@ import umu.tds.apps.vista.customcomponents.VisualUtils;
 import java.awt.Adjustable;
 import java.awt.BorderLayout;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
@@ -28,11 +29,13 @@ import javax.swing.JLayeredPane;
 import java.awt.Component;
 import javax.swing.Box;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.imageio.ImageIO;
 import javax.swing.AbstractListModel;
 import javax.swing.JTextField;
 import java.awt.Font;
 import javax.swing.border.TitledBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import tds.BubbleText;
 
@@ -128,10 +131,12 @@ public class VentanaPrincipal extends JFrame {
         panelNorte.setLayout(new BoxLayout(panelNorte, BoxLayout.X_AXIS));
         
         JComboBox<String> comboBoxContactos = new JComboBox<>();
+        comboBoxContactos.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         panelNorte.add(comboBoxContactos);
         
         // Botones de la barra superior
         JButton btnNewButton = new JButton("");
+        btnNewButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnNewButton.setFocusPainted(false);
         btnNewButton.setBackground(new Color(245, 245, 245));
         btnNewButton.setBorder(new CompoundBorder(
@@ -152,6 +157,7 @@ public class VentanaPrincipal extends JFrame {
         panelNorte.add(btnNewButton);
         
         JButton btnNewButton_1 = new JButton("");
+        btnNewButton_1.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnNewButton_1.setFocusPainted(false);
         btnNewButton_1.setBackground(new Color(245, 245, 245));
         btnNewButton_1.setBorder(new CompoundBorder(
@@ -168,9 +174,14 @@ public class VentanaPrincipal extends JFrame {
             VentanaBusqueda ventanaBusqueda = new VentanaBusqueda();
             ventanaBusqueda.setVisible(true);
         });
+        
+        
+        Component rigidArea_1_1 = Box.createRigidArea(new Dimension(20, 20));
+        panelNorte.add(rigidArea_1_1);
         panelNorte.add(btnNewButton_1);
         
         JButton btnNewButton_2 = new JButton(" Contactos ");
+        btnNewButton_2.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnNewButton_2.setFocusPainted(false);
         btnNewButton_2.setBackground(new Color(245, 245, 245));
         btnNewButton_2.setBorder(new CompoundBorder(
@@ -196,12 +207,13 @@ public class VentanaPrincipal extends JFrame {
 
             // Crear el panel VentanaContactos y añadir al frame
             VentanaContactos ventanaContactos = new VentanaContactos(contactosIniciales);
-            frameContactos.add(ventanaContactos);
+            frameContactos.getContentPane().add(ventanaContactos);
             frameContactos.setVisible(true);
         });
         panelNorte.add(btnNewButton_2);
         
         JButton btnNewButton_3 = new JButton(" Premium ");
+        btnNewButton_3.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnNewButton_3.setFocusPainted(false);
         btnNewButton_3.setBackground(new Color(245, 245, 245));
         btnNewButton_3.setBorder(new CompoundBorder(
@@ -238,9 +250,17 @@ public class VentanaPrincipal extends JFrame {
         panelNorte.add(rigidArea_1);
         
         JLabel lblNewLabel_1 = new JLabel("");
+        lblNewLabel_1.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         String path = usuarioActual.getImagenPerfil().getDescription();
         cargarImagenPerfil(lblNewLabel_1, path);
         panelNorte.add(lblNewLabel_1);
+        
+        lblNewLabel_1.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                seleccionarFotoPerfil(lblNewLabel_1);
+            }
+        });
 
         /* ------------------------------------------------------------------
          * Panel IZQUIERDO (Lista de Mensajes Recientes)
@@ -279,15 +299,71 @@ public class VentanaPrincipal extends JFrame {
         panelCentro = new JPanel(new BorderLayout());
         contentPane.add(panelCentro, BorderLayout.CENTER);
 
-        // Panel de Bienvenida (se ve al inicio)
-        panelBienvenida = new JPanel(new BorderLayout());
-        panelBienvenida.setBackground(new Color(240, 248, 255));
-        JLabel lblBienvenida = new JLabel("Seleccione un chat para comenzar a hablar", SwingConstants.CENTER);
+        // Panel de bienvenida (se ve al inicio)
+        panelBienvenida = new JPanel();
+        panelBienvenida.setBackground(new Color(255, 255, 255));
+        panelBienvenida.setLayout(new GridBagLayout()); // Usamos GridBagLayout para adaptabilidad
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 1.0; // Para que ocupe todo el espacio horizontal disponible
+        gbc.weighty = 1.0; // Para que ocupe todo el espacio vertical disponible
+        gbc.anchor = GridBagConstraints.CENTER; // Centra los elementos en el medio
+        gbc.fill = GridBagConstraints.NONE; // No estira los componentes
+
+     // Etiqueta para el GIF
+        JLabel gifLabel = new JLabel();
+        gifLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        gifLabel.setVerticalAlignment(SwingConstants.CENTER);
+
+        // Usar un nuevo GridBagConstraints para gifLabel
+        GridBagConstraints gbcGifLabel = new GridBagConstraints();
+        gbcGifLabel.gridx = 0;
+        gbcGifLabel.gridy = 0;
+        gbcGifLabel.weightx = 1.0; // Para que ocupe todo el espacio horizontal disponible
+        gbcGifLabel.weighty = 1.0; // Para que ocupe todo el espacio vertical disponible
+        gbcGifLabel.anchor = GridBagConstraints.CENTER; // Centra los elementos en el medio
+        gbcGifLabel.fill = GridBagConstraints.NONE; // No estira los componentes
+
+        panelBienvenida.add(gifLabel, gbcGifLabel); // Añadimos el logo al panel
+
+        // Configuración del texto debajo del GIF
+        JLabel lblBienvenida = new JLabel("Seleccione un chat para comenzar a hablar");
         lblBienvenida.setFont(new Font("Arial", Font.BOLD, 18));
         lblBienvenida.setForeground(new Color(100, 100, 100));
-        panelBienvenida.add(lblBienvenida, BorderLayout.CENTER);
+        lblBienvenida.setHorizontalAlignment(SwingConstants.CENTER); // Alineación horizontal
+        lblBienvenida.setVerticalAlignment(SwingConstants.CENTER); // Alineación vertical
 
-        // Lo ponemos por defecto en el centro
+        // Usar un nuevo GridBagConstraints para lblBienvenida
+        GridBagConstraints gbcLblBienvenida = new GridBagConstraints();
+        gbcLblBienvenida.gridx = 0;
+        gbcLblBienvenida.gridy = 1; // Colocar debajo del GIF
+        gbcLblBienvenida.weightx = 1.0; // Expandir horizontalmente
+        gbcLblBienvenida.weighty = 0.2; // Ajustar peso verticalmente
+        gbcLblBienvenida.insets = new Insets(20, 0, 0, 0); // Margen superior para separarlo del GIF
+        gbcLblBienvenida.anchor = GridBagConstraints.CENTER; // Centrar el componente
+        gbcLblBienvenida.fill = GridBagConstraints.HORIZONTAL; // Hacerlo ocupar todo el ancho
+
+        panelBienvenida.add(lblBienvenida, gbcLblBienvenida);
+
+        // Configurar el tamaño dinámico del GIF
+        ImageIcon gifIcon = new ImageIcon(getClass().getResource("/umu/tds/apps/resources/revision-de-chat.gif"));
+        panelBienvenida.addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentResized(java.awt.event.ComponentEvent e) {
+                // Obtener el tamaño del panel
+                Dimension size = panelBienvenida.getSize();
+                int scaledWidth = (int) (size.width * 0.4); // GIF será el 40% del ancho del panel
+                int scaledHeight = (int) (scaledWidth * gifIcon.getIconHeight() / gifIcon.getIconWidth()); // Mantener proporción
+                
+                // Escalar el GIF
+                Image scaledImage = gifIcon.getImage().getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_DEFAULT);
+                gifLabel.setIcon(new ImageIcon(scaledImage));
+            }
+        });
+
+        // Añadir el panelBienvenida al panelCentro
         panelCentro.add(panelBienvenida, BorderLayout.CENTER);
 
         // Panel de chat (lo creamos, pero NO se añade aún a “panelCentro”)
@@ -525,6 +601,76 @@ public class VentanaPrincipal extends JFrame {
             
         }
     }
+    
+    private void seleccionarFotoPerfil(JLabel label) {
+        String[] opciones = { "Introducir enlace", "Seleccionar archivo" };
+        int seleccion = JOptionPane.showOptionDialog(
+            contentPane,
+            "Seleccione cómo desea cargar la imagen:",
+            "Cargar Imagen",
+            JOptionPane.DEFAULT_OPTION,
+            JOptionPane.INFORMATION_MESSAGE,
+            null,
+            opciones,
+            opciones[0]
+        );
+
+        if (seleccion == 0) {
+            // Desde URL
+            String urlImagen = JOptionPane.showInputDialog(
+                contentPane,
+                "Introduzca el enlace de la imagen:",
+                "Cargar Imagen desde URL",
+                JOptionPane.PLAIN_MESSAGE
+            );
+
+            if (urlImagen != null && !urlImagen.isEmpty()) {
+                try {
+                    BufferedImage imagen = ImageIO.read(new URL(urlImagen));
+                    ImageIcon icono = new ImageIcon(imagen.getScaledInstance(50, 50, Image.SCALE_SMOOTH));
+                    icono.setDescription(urlImagen);
+
+                    // Cambiar modelo
+                    AppChat.getUnicaInstancia().cambiarImagenPerfil(icono);
+
+                    // Actualizar JLabel
+                    label.setIcon(VisualUtils.createCircularIcon(imagen, 50));
+                    label.revalidate();
+                    label.repaint();
+
+                    JOptionPane.showMessageDialog(contentPane, "Foto de perfil actualizada correctamente.");
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(contentPane, "No se pudo cargar la imagen desde el enlace.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } else if (seleccion == 1) {
+            // Desde archivo local
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileFilter(new FileNameExtensionFilter("Imágenes", "jpg", "jpeg", "png", "gif"));
+            int resultado = fileChooser.showOpenDialog(contentPane);
+            if (resultado == JFileChooser.APPROVE_OPTION) {
+                try {
+                    File archivo = fileChooser.getSelectedFile();
+                    BufferedImage imagen = ImageIO.read(archivo);
+                    ImageIcon icono = new ImageIcon(imagen.getScaledInstance(50, 50, Image.SCALE_SMOOTH));
+                    icono.setDescription(archivo.getAbsolutePath());
+
+                    // Cambiar modelo
+                    AppChat.getUnicaInstancia().cambiarImagenPerfil(icono);
+
+                    // Actualizar JLabel
+                    label.setIcon(VisualUtils.createCircularIcon(imagen, 50));
+                    label.revalidate();
+                    label.repaint();
+
+                    JOptionPane.showMessageDialog(contentPane, "Foto de perfil actualizada correctamente.");
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(contentPane, "No se pudo cargar la imagen desde el archivo.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
+    }
+
 
     /**
      * Si quieres cargar todo el chat de un usuario, puedes usar algo como esto:

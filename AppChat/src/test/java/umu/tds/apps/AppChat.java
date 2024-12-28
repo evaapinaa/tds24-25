@@ -1,4 +1,4 @@
-package umu.tds.apps.controlador;
+package umu.tds.apps;
 
 import java.time.LocalDate;
 import java.util.Arrays;
