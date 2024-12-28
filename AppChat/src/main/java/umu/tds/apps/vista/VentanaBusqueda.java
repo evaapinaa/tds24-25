@@ -11,6 +11,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -24,6 +25,9 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
+import umu.tds.apps.controlador.AppChat;
+import umu.tds.apps.modelo.FactoriaBusqueda;
+import umu.tds.apps.modelo.Mensaje;
 import umu.tds.apps.vista.customcomponents.VisualUtils;
 
 import javax.swing.ScrollPaneConstants;
@@ -138,7 +142,18 @@ public class VentanaBusqueda extends JDialog {
         gbc_btnNewButton.gridx = 5;
         gbc_btnNewButton.gridy = 2;
         panelBuscar.add(btnBuscar, gbc_btnNewButton);
+        
+        btnBuscar.addActionListener(e -> {
+            String texto = txtTexto.getText();
+            String telefono = textField_1.getText();
+            String contacto = textField_2.getText();
+            
+            AppChat controlador = AppChat.getUnicaInstancia();
+            List<Mensaje> resultados = controlador.filtrarMensajes(texto, telefono, contacto);
+            mostrarMensajes(resultados); // Los pintas en el JPanel
+        });
 
+        
         // foco inicial al abrir la ventana, en el botón de buscar y así poder ver el texto de los textfields
         addWindowListener(new WindowAdapter() {
             @Override
@@ -190,4 +205,12 @@ public class VentanaBusqueda extends JDialog {
             }
         });
     }
+    
+	private void mostrarMensajes(List<Mensaje> mensajes) {
+		// Aquí pintas los mensajes en el JPanel
+		// Por ejemplo, creando JLabels con el texto de cada mensaje
+		// y añadiéndolos al JPanel que contiene los mensajes
+	}
+    
+    
 }
