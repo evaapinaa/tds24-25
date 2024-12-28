@@ -9,8 +9,12 @@ import java.util.Optional;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
+import umu.tds.apps.modelo.BusquedaPorContacto;
+import umu.tds.apps.modelo.BusquedaPorTelefono;
+import umu.tds.apps.modelo.BusquedaPorTexto;
 import umu.tds.apps.modelo.Contacto;
 import umu.tds.apps.modelo.ContactoIndividual;
+import umu.tds.apps.modelo.EstrategiaBusquedaMensaje;
 import umu.tds.apps.modelo.Mensaje;
 import umu.tds.apps.modelo.RepositorioUsuarios;
 import umu.tds.apps.modelo.Usuario;
@@ -27,7 +31,8 @@ public class AppChat {
 	private RepositorioUsuarios repositorioUsuarios;
 	private IAdaptadorUsuarioDAO adaptadorUsuario;
 	private IAdaptadorMensajeDAO adaptadorMensaje;
-
+	private List<Mensaje> listaMensajes;
+	
 	private static AppChat unicaInstancia = null;
 
 	// singleton
@@ -203,6 +208,31 @@ public class AppChat {
 
 	    return true;
 	}
+	
+	
+	public List<Mensaje> filtrarMensajes(String texto, String telefono, String contacto) {
+	    // Creamos la "EstrategiaBusquedaMensaje" para esta búsqueda
+	    EstrategiaBusquedaMensaje estrategia = new EstrategiaBusquedaMensaje();
+	    
+	    // Si han escrito en 'texto', añadimos la estrategia de texto
+	    if (texto != null && !texto.trim().isEmpty() && !texto.equals("Texto")) {
+	        estrategia.addEstrategiaBusqueda(new BusquedaPorTexto(texto));
+	    }
+	    
+	    // Si han escrito en 'telefono', añadimos la de teléfono
+	    if (telefono != null && !telefono.trim().isEmpty() && !telefono.equals("Teléfono")) {
+	        estrategia.addEstrategiaBusqueda(new BusquedaPorTelefono(telefono));
+	    }
+	    
+	    // Si han escrito en 'contacto', añadimos la de contacto
+	    if (contacto != null && !contacto.trim().isEmpty() && !contacto.equals("Contacto")) {
+	        estrategia.addEstrategiaBusqueda(new BusquedaPorContacto(contacto));
+	    }
+
+	    // Aplicamos TODAS las búsquedas (en modo AND) a la lista general de mensajes
+	    return estrategia.ejecutarBusqueda(listaMensajes); 
+	}
+
 
 
 }
