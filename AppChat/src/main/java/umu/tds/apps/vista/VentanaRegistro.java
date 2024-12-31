@@ -46,7 +46,6 @@ import java.awt.Toolkit;
 import javax.swing.border.BevelBorder;
 import java.awt.Cursor;
 import java.net.URL;
-import java.util.Date;
 import java.util.Optional;
 
 public class VentanaRegistro extends JFrame {
@@ -394,6 +393,7 @@ public class VentanaRegistro extends JFrame {
 
 			if (urlImagen != null && !urlImagen.isEmpty()) {
 				try {
+					@SuppressWarnings("deprecation")
 					BufferedImage imagen = ImageIO.read(new URL(urlImagen));
 					ImageIcon icono = new ImageIcon(imagen.getScaledInstance(100, 100, Image.SCALE_SMOOTH));
 					icono = VisualUtils.createCircularIcon(imagen, 100);
@@ -427,6 +427,7 @@ public class VentanaRegistro extends JFrame {
 	}
 
 	private boolean contraseñasCoinciden() {
+		@SuppressWarnings("deprecation")
 		boolean coinciden = passwordField.getText().equals(passwordField_1.getText());
 
 		if (!coinciden) {

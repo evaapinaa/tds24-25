@@ -164,6 +164,9 @@ public class VentanaLogin {
 			}
 		});
 		
+		// Enter para pulsar el botón de login
+		frmAppchat.getRootPane().setDefaultButton(btnLogin);
+		
 		JPanel panelCentro = new JPanel();
 		panelCentro.setFont(new Font("Arial", Font.BOLD, 11));
 		panelCentro.setOpaque(false);
@@ -237,6 +240,5 @@ public class VentanaLogin {
 		
 	}
 	
-	//private static void addPopup(Component component, final JPopupMenu popup) {}
 	
 }

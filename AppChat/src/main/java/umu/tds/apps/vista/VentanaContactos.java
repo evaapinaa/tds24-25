@@ -6,16 +6,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.border.CompoundBorder;
 import javax.swing.border.LineBorder;
-import javax.swing.border.TitledBorder;
 
 import umu.tds.apps.modelo.ContactoIndividual;
 import umu.tds.apps.modelo.RepositorioUsuarios;
 import umu.tds.apps.modelo.Usuario;
 import umu.tds.apps.persistencia.AdaptadorContactoIndividualTDS;
 
-import javax.swing.border.EtchedBorder;
 import javax.swing.border.EmptyBorder;
 
 public class VentanaContactos extends JPanel {
