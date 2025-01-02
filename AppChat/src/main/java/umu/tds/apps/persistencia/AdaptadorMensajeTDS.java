@@ -1,79 +1,114 @@
 package umu.tds.apps.persistencia;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import tds.driver.FactoriaServicioPersistencia;
-import tds.driver.ServicioPersistencia;
-import umu.tds.apps.modelo.Mensaje;
-import umu.tds.apps.modelo.Usuario;
 import beans.Entidad;
 import beans.Propiedad;
 
+import tds.driver.FactoriaServicioPersistencia;
+import tds.driver.ServicioPersistencia;
 
+import umu.tds.apps.modelo.Chat;
+import umu.tds.apps.modelo.Mensaje;
+import umu.tds.apps.modelo.Usuario;
 
 public class AdaptadorMensajeTDS implements IAdaptadorMensajeDAO {
+
     private static ServicioPersistencia servPersistencia;
     private static AdaptadorMensajeTDS unicaInstancia = null;
-
-    public static AdaptadorMensajeTDS getUnicaInstancia() {
-        if (unicaInstancia == null)
-            return new AdaptadorMensajeTDS();
-        else
-            return unicaInstancia;
-    }
 
     private AdaptadorMensajeTDS() {
         servPersistencia = FactoriaServicioPersistencia.getInstance().getServicioPersistencia();
     }
 
+    public static AdaptadorMensajeTDS getUnicaInstancia() {
+        if (unicaInstancia == null) {
+            unicaInstancia = new AdaptadorMensajeTDS();
+        }
+        return unicaInstancia;
+    }
+
     @Override
     public void registrarMensaje(Mensaje mensaje) {
-        Entidad eMensaje = null;
-
-        // Si la entidad está registrada, no la registra de nuevo
+        // Ver si ya existe
         try {
-            eMensaje = servPersistencia.recuperarEntidad(mensaje.getCodigo());
-        } catch (NullPointerException e) {}
-        if (eMensaje != null) return;
+            Entidad eMensaje = servPersistencia.recuperarEntidad(mensaje.getCodigo());
+            if (eMensaje != null) return; // ya está
+        } catch (NullPointerException e) {
+            // no pasa nada, eMensaje sigue siendo null
+        }
 
-        // Crear entidad Mensaje
-        eMensaje = new Entidad();
+        // Crear entidad
+        Entidad eMensaje = new Entidad();
         eMensaje.setNombre("mensaje");
         eMensaje.setPropiedades(new ArrayList<>(Arrays.asList(
             new Propiedad("texto", mensaje.getTexto()),
             new Propiedad("emisor", String.valueOf(mensaje.getEmisor().getCodigo())),
             new Propiedad("receptor", String.valueOf(mensaje.getReceptor().getCodigo())),
             new Propiedad("fecha", mensaje.getFecha().toString()),
-            new Propiedad("hora", mensaje.getHora().toString())
+            new Propiedad("hora", mensaje.getHora().toString()),
+            new Propiedad("chat", String.valueOf(mensaje.getChat().getCodigo()))
         )));
 
-        // Registrar entidad mensaje
+        // Registrar
         eMensaje = servPersistencia.registrarEntidad(eMensaje);
         mensaje.setCodigo(eMensaje.getId());
+        System.out.println("Mensaje registrado con ID: " + eMensaje.getId());
     }
 
     @Override
     public Mensaje recuperarMensaje(int codigo) {
-        if (PoolDAO.getUnicaInstancia().contiene(codigo))
+        // 1) PoolDAO check
+        if (PoolDAO.getUnicaInstancia().contiene(codigo)) {
             return (Mensaje) PoolDAO.getUnicaInstancia().getObjeto(codigo);
+        }
 
+        // 2) Entidad
         Entidad eMensaje = servPersistencia.recuperarEntidad(codigo);
+        if (eMensaje == null) {
+            System.err.println("No se encontró el mensaje con ID: " + codigo);
+            return null;
+        }
 
+        // 3) Tomar props
         String texto = servPersistencia.recuperarPropiedadEntidad(eMensaje, "texto");
         int emisorId = Integer.parseInt(servPersistencia.recuperarPropiedadEntidad(eMensaje, "emisor"));
         int receptorId = Integer.parseInt(servPersistencia.recuperarPropiedadEntidad(eMensaje, "receptor"));
+        int chatId = Integer.parseInt(servPersistencia.recuperarPropiedadEntidad(eMensaje, "chat"));
 
-        Usuario emisor = AdaptadorUsuarioTDS.getUnicaInstancia().recuperarUsuario(emisorId);
-        Usuario receptor = AdaptadorUsuarioTDS.getUnicaInstancia().recuperarUsuario(receptorId);
+        String fechaStr = servPersistencia.recuperarPropiedadEntidad(eMensaje, "fecha");
+        String horaStr = servPersistencia.recuperarPropiedadEntidad(eMensaje, "hora");
 
-        Mensaje mensaje = new Mensaje(emisor, texto, receptor);
+        // 4) Crear Mensaje "parcial" usando el constructor "especial" sin check
+        Mensaje mensaje = new Mensaje(); 
         mensaje.setCodigo(codigo);
 
+        // 5) Añadir a PoolDAO
         PoolDAO.getUnicaInstancia().addObjeto(codigo, mensaje);
+
+        // 6) Recuperar Emisor, Receptor y Chat
+        Usuario emisor = AdaptadorUsuarioTDS.getUnicaInstancia().recuperarUsuario(emisorId);
+        Usuario receptor = AdaptadorUsuarioTDS.getUnicaInstancia().recuperarUsuario(receptorId);
+        Chat chat = AdaptadorChatTDS.getUnicaInstancia().recuperarChat(chatId);
+
+        // 7) Asignar campos
+        mensaje.setEmisor(emisor);
+        mensaje.setReceptor(receptor);
+        mensaje.setChat(chat);  // Ya no lanza IllegalArgumentException
+        mensaje.setTexto(texto);
+
+        // 8) Fecha/Hora
+        java.time.LocalDate fecha = java.time.LocalDate.parse(fechaStr);
+        java.time.LocalDateTime hora = java.time.LocalDateTime.parse(horaStr);
+        mensaje.setFecha(fecha);
+        mensaje.setHora(hora);
+
+        System.out.println("Mensaje recuperado: ID " + codigo + " - " + texto);
         return mensaje;
     }
 
@@ -81,32 +116,14 @@ public class AdaptadorMensajeTDS implements IAdaptadorMensajeDAO {
     public List<Mensaje> recuperarTodosMensajes() {
         List<Entidad> eMensajes = servPersistencia.recuperarEntidades("mensaje");
         List<Mensaje> mensajes = new LinkedList<>();
-
         for (Entidad eMensaje : eMensajes) {
-            mensajes.add(recuperarMensaje(eMensaje.getId()));
+            Mensaje m = recuperarMensaje(eMensaje.getId());
+            if (m != null) {
+                mensajes.add(m);
+            }
         }
         return mensajes;
     }
     
-    private String obtenerCodigosMensajes(List<Mensaje> listaMensajes) {
-        StringBuilder codigos = new StringBuilder();
-        for (Mensaje mensaje : listaMensajes) {
-            codigos.append(mensaje.getCodigo()).append(" ");
-        }
-        return codigos.toString().trim(); // Devuelve la lista de códigos separados por espacio
-    }
-    
-    private List<Mensaje> obtenerMensajesDesdeCodigos(String codigos) {
-        List<Mensaje> listaMensajes = new LinkedList<>();
-        StringTokenizer tokenizer = new StringTokenizer(codigos, " ");
-        AdaptadorMensajeTDS adaptadorMensaje = AdaptadorMensajeTDS.getUnicaInstancia();
-        
-        while (tokenizer.hasMoreTokens()) {
-            int codigo = Integer.parseInt(tokenizer.nextToken());
-            listaMensajes.add(adaptadorMensaje.recuperarMensaje(codigo));
-        }
-        return listaMensajes;
-    }
-
 
 }

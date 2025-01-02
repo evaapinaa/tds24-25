@@ -3,6 +3,7 @@ package umu.tds.apps.modelo;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.swing.ImageIcon;
@@ -153,29 +154,103 @@ public class Usuario {
 	}
 	
 	// Cambio
-	public void añadirContacto(Contacto contacto) {
-		if (!listaContactos.contains(contacto)) {
-			listaContactos.add(contacto);
-		}
+	public boolean añadirContacto(Contacto contacto) {
+	    if (!listaContactos.contains(contacto)) {
+	        listaContactos.add(contacto);
+	        return true;
+	    }
+	    return false; // Ya existe el contacto
+	}
+
+	
+	public void añadirChat(Chat chat) {
+	    if (!listaChats.contains(chat)) {
+	        listaChats.add(chat);
+	    }
 	}
 	
+	public Chat obtenerChatCon(Usuario otroUsuario) {
+	    return listaChats.stream()
+	        .filter(ch -> ch.involucraUsuario(otroUsuario))
+	        .findFirst()
+	        .orElse(null);
+	}
+	
+
+	
+	public List<Mensaje> obtenerMensajesCon(Usuario otroUsuario) {
+	    List<Mensaje> mensajes = new LinkedList<>();
+	    for (Mensaje mensaje : listaMensajesEnviados) {
+	        if (mensaje.getReceptor().equals(otroUsuario)) {
+	            mensajes.add(mensaje);
+	        }
+	    }
+	    for (Mensaje mensaje : listaMensajesRecibidos) {
+	        if (mensaje.getEmisor().equals(otroUsuario)) {
+	            mensajes.add(mensaje);
+	        }
+	    }
+	    mensajes.sort((m1, m2) -> {
+	        if (m1.getFecha().equals(m2.getFecha())) {
+	            return m1.getHora().compareTo(m2.getHora());
+	        }
+	        return m1.getFecha().compareTo(m2.getFecha());
+	    });
+	    return mensajes;
+	}
+	
+	public void activarPremium() {
+	    this.premium = true;
+	}
+
+	public void desactivarPremium() {
+	    this.premium = false;
+	}
+
+	public Chat getChatMensajes(Usuario otroUsuario) {
+		return listaChats.stream()
+				.filter(chat -> chat.getOtroUsuarioChat().equals(otroUsuario))
+				.findFirst()
+				.orElse(null);
+	}
+
     // CONSTRUCTOR
 	
 	public Usuario(String usuario, String contraseña, String telefono, String email, Optional<String> saludo, ImageIcon imagenPerfil, LocalDate fechaNacimiento) {
-		this.usuario = usuario;
-		this.contraseña = contraseña;
-		this.telefono = telefono;
-		this.email = email;
-		this.saludo = saludo;
-		this.imagenPerfil = imagenPerfil;
-		this.fechaNacimiento = fechaNacimiento;
-		this.listaContactos = new LinkedList<Contacto>();
-		this.listaMensajesEnviados = new LinkedList<Mensaje>();
-		this.listaMensajesRecibidos = new LinkedList<Mensaje>();
-		
+	    this.usuario = usuario;
+	    this.contraseña = contraseña;
+	    this.telefono = telefono;
+	    this.email = email;
+	    this.saludo = saludo;
+	    this.imagenPerfil = imagenPerfil;
+	    this.fechaNacimiento = fechaNacimiento;
+	    this.listaContactos = new LinkedList<>();
+	    this.listaMensajesEnviados = new LinkedList<>();
+	    this.listaMensajesRecibidos = new LinkedList<>();
+	    this.listaChats = new LinkedList<>();
 	}
-	
-	
-    
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Usuario other = (Usuario) obj;
+        if (telefono == null) {
+            if (other.telefono != null)
+                return false;
+        } else if (!telefono.equals(other.telefono))
+            return false;
+        return true;
+    }
+
+	@Override
+	public int hashCode() {
+	    return telefono.hashCode();
+	}
+
 
 }
