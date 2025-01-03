@@ -46,6 +46,7 @@ import java.awt.Toolkit;
 import javax.swing.border.BevelBorder;
 import java.awt.Cursor;
 import java.net.URL;
+import java.time.LocalDate;
 import java.util.Optional;
 
 public class VentanaRegistro extends JFrame {
@@ -355,7 +356,9 @@ public class VentanaRegistro extends JFrame {
 					String rutaImagen = ((ImageIcon) lblNewLabel_8.getIcon()).getDescription();
 					resultado = controlador.registrarUsuario(nombre, contraseña.toCharArray(), telefono, "",
 							Optional.ofNullable(textArea.getText()), new ImageIcon(rutaImagen),
-							dateChooser.getDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
+							dateChooser.getDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate(),
+							LocalDate.now());
+					
 					System.out.println("Ruta de la imagen seleccionada: " + rutaImagen);
 				} catch (Exception ex) {
 					ex.printStackTrace();

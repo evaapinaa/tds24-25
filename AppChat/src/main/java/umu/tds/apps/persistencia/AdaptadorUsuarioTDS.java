@@ -1,5 +1,6 @@
 package umu.tds.apps.persistencia;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -53,6 +54,9 @@ public class AdaptadorUsuarioTDS implements IAdaptadorUsuarioDAO {
             new Propiedad("email", usuario.getEmail()),
             new Propiedad("contraseña", usuario.getContraseña()),
             new Propiedad("saludo", usuario.getSaludo().orElse("")),
+            
+            new Propiedad("fechaRegistro", usuario.getFechaRegistro().toString()),   //GUARDAMOS LA FECHA DE REGISTRO EN LA BD
+
 
             new Propiedad("contactos", obtenerCodigosContactos(usuario.getListaContactos())),
             new Propiedad("imagenPerfil", (usuario.getImagenPerfil() != null)
@@ -149,9 +153,17 @@ public class AdaptadorUsuarioTDS implements IAdaptadorUsuarioDAO {
             email,
             Optional.ofNullable(saludo),
             imagenPerfil,
-            null
+            null,
+            null // fechaRegistro NULL???
         );
         usuario.setCodigo(codigo);
+        
+        
+        // Recuperar la fecha de registro
+        String fechaRegistroStr = servPersistencia.recuperarPropiedadEntidad(eUsuario, "fechaRegistro");
+        if (fechaRegistroStr != null) {
+            usuario.setFechaRegistro(LocalDate.parse(fechaRegistroStr));
+        }
 
         // Añadir a PoolDAO antes de cargar sus referencias
         PoolDAO.getUnicaInstancia().addObjeto(codigo, usuario);

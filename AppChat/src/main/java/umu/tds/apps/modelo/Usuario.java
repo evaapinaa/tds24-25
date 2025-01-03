@@ -25,6 +25,7 @@ public class Usuario {
 	private List<Chat> listaChats;
 	private boolean premium;
 	private int codigo;
+	private LocalDate fechaRegistro;
 	
 	// GETTERS AND SETTERS
 	
@@ -81,6 +82,15 @@ public class Usuario {
 	public LocalDate getFechaNacimiento() {
 		return fechaNacimiento;
 	}
+	
+	public LocalDate getFechaRegistro() {
+	    return fechaRegistro;
+	}
+	
+	public void setFechaRegistro(LocalDate fechaRegistro) {
+		this.fechaRegistro = fechaRegistro;
+	}
+
 	
 	public int getCodigo() {
 		return codigo;
@@ -216,7 +226,8 @@ public class Usuario {
 
     // CONSTRUCTOR
 	
-	public Usuario(String usuario, String contraseña, String telefono, String email, Optional<String> saludo, ImageIcon imagenPerfil, LocalDate fechaNacimiento) {
+	public Usuario(String usuario, String contraseña, String telefono, String email, Optional<String> saludo, ImageIcon imagenPerfil, LocalDate fechaNacimiento,
+			LocalDate fechaRegistro) {
 	    this.usuario = usuario;
 	    this.contraseña = contraseña;
 	    this.telefono = telefono;
@@ -224,6 +235,7 @@ public class Usuario {
 	    this.saludo = saludo;
 	    this.imagenPerfil = imagenPerfil;
 	    this.fechaNacimiento = fechaNacimiento;
+	    this.fechaRegistro = LocalDate.now();
 	    this.listaContactos = new LinkedList<>();
 	    this.listaMensajesEnviados = new LinkedList<>();
 	    this.listaMensajesRecibidos = new LinkedList<>();

@@ -68,21 +68,21 @@ public class AppChat {
 		Mensaje[] values = new Mensaje[] {
 				new Mensaje(
 						new Usuario("Ana", "1234", "555-1234", "ana@example.com", Optional.ofNullable("Hola"),
-								new ImageIcon("hola"), LocalDate.of(1990, 1, 1)),
+								new ImageIcon("hola"), LocalDate.of(1990, 1, 1), LocalDate.of(2024, 12, 25)),
 						"Holaa",
 						new Usuario("Ana", "1234", "555-1234", "ana@example.com", Optional.ofNullable("Hola"),
-								new ImageIcon("hola"), LocalDate.of(1990, 1, 1))),
+								new ImageIcon("hola"), LocalDate.of(1990, 1, 1), LocalDate.of(2024, 12, 25))),
 				new Mensaje(
 						new Usuario("Rosa", "5678", "555-5678", "rosa@example.com", Optional.ofNullable("Hola"),
-								new ImageIcon("hola"), LocalDate.of(1991, 2, 2)),
+								new ImageIcon("hola"), LocalDate.of(1991, 2, 2), LocalDate.of(2024, 12, 26)),
 						"Ok",
 						new Usuario("Rosa", "1234", "555-1234", "ana@example.com", Optional.ofNullable("Hola"),
-								new ImageIcon("hola"), LocalDate.of(1990, 1, 1))),
+								new ImageIcon("hola"), LocalDate.of(1990, 1, 1), LocalDate.of(2024, 12, 27))),
 				new Mensaje(
 						new Usuario("Jose", "91011", "555-9101", "jose@example.com", Optional.ofNullable("Hola"),
-								new ImageIcon("hola"), LocalDate.of(1992, 3, 3)),
+								new ImageIcon("hola"), LocalDate.of(1992, 3, 3), LocalDate.of(2024, 12, 30)),
 						"Nos vemos", new Usuario("Jose", "1234", "555-1234", "ana@example.com",
-								Optional.ofNullable("Hola"), new ImageIcon("hola"), LocalDate.of(1990, 1, 1))) };
+								Optional.ofNullable("Hola"), new ImageIcon("hola"), LocalDate.of(1990, 1, 1), LocalDate.of(2024, 12, 31))) };
 		return Arrays.asList(values);
 	}
 
@@ -107,7 +107,7 @@ public class AppChat {
 
 	    ImageIcon iconoPerfil = rutaImagen != null ? new ImageIcon(rutaImagen) : null;
 
-	    Usuario nuevoUsuario = new Usuario(usuario, new String(contraseña), telefono, email, saludo, iconoPerfil, fechaNacimiento);
+	    Usuario nuevoUsuario = new Usuario(usuario, new String(contraseña), telefono, email, saludo, iconoPerfil, fechaNacimiento, LocalDate.now());
 
 	    // Verificar si el número de teléfono ya está registrado
 	    if (repositorioUsuarios.getUsuario(telefono) != null) {

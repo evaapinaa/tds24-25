@@ -118,7 +118,7 @@ public class AppChat {
 
     // registrar usuario
     public boolean registrarUsuario(String usuario, char[] contraseña, String telefono, String email,
-                                    Optional<String> saludo, Icon imagenPerfil, LocalDate fechaNacimiento) {
+                                    Optional<String> saludo, Icon imagenPerfil, LocalDate fechaNacimiento, LocalDate fechaRegistro) {
         String rutaImagen = null;
         if (imagenPerfil instanceof ImageIcon) {
             rutaImagen = ((ImageIcon) imagenPerfil).getDescription();
@@ -126,7 +126,7 @@ public class AppChat {
         ImageIcon iconoPerfil = (rutaImagen != null) ? new ImageIcon(rutaImagen) : null;
 
         Usuario nuevoUsuario = new Usuario(usuario, new String(contraseña), telefono, 
-                                           email, saludo, iconoPerfil, fechaNacimiento);
+                                           email, saludo, iconoPerfil, fechaNacimiento, fechaRegistro);
 
         // Verificar si el número de teléfono ya está registrado
         if (repositorioUsuarios.getUsuario(telefono) != null) {
