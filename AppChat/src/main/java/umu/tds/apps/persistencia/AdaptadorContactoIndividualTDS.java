@@ -9,6 +9,7 @@ import java.util.StringTokenizer;
 import tds.driver.FactoriaServicioPersistencia;
 import tds.driver.ServicioPersistencia;
 import umu.tds.apps.modelo.ContactoIndividual;
+import umu.tds.apps.modelo.Usuario;
 import beans.Entidad;
 import beans.Propiedad;
 
@@ -29,14 +30,11 @@ public class AdaptadorContactoIndividualTDS implements IAdaptadorContactoIndivid
 
     @Override
     public void registrarContactoIndividual(ContactoIndividual contacto) {
-        Entidad eContacto = null;
+        if (contacto.getUsuario() == null || contacto.getUsuario().getCodigo() <= 0) {
+            throw new IllegalArgumentException("El usuario asociado al contacto no es válido.");
+        }
 
-        try {
-            eContacto = servPersistencia.recuperarEntidad(contacto.getCodigo());
-        } catch (NullPointerException e) {}
-        if (eContacto != null) return;
-
-        eContacto = new Entidad();
+        Entidad eContacto = new Entidad();
         eContacto.setNombre("contactoIndividual");
         eContacto.setPropiedades(new ArrayList<>(Arrays.asList(
             new Propiedad("nombre", contacto.getNombre()),
@@ -47,6 +45,7 @@ public class AdaptadorContactoIndividualTDS implements IAdaptadorContactoIndivid
         eContacto = servPersistencia.registrarEntidad(eContacto);
         contacto.setCodigo(eContacto.getId());
     }
+
 
     @Override
     public void modificarContactoIndividual(ContactoIndividual contacto) {
@@ -83,14 +82,35 @@ public class AdaptadorContactoIndividualTDS implements IAdaptadorContactoIndivid
 
         String nombre = servPersistencia.recuperarPropiedadEntidad(eContacto, "nombre");
         String telefono = servPersistencia.recuperarPropiedadEntidad(eContacto, "telefono");
-        int usuarioId = Integer.parseInt(servPersistencia.recuperarPropiedadEntidad(eContacto, "usuario"));
+        String usuarioIdStr = servPersistencia.recuperarPropiedadEntidad(eContacto, "usuario");
 
-        ContactoIndividual contacto = new ContactoIndividual(nombre, telefono, AdaptadorUsuarioTDS.getUnicaInstancia().recuperarUsuario(usuarioId));
+        // Validar que usuarioIdStr no sea null o vacío
+        if (usuarioIdStr == null || usuarioIdStr.trim().isEmpty()) {
+            System.err.println("La propiedad 'usuario' es nula o inválida para el contacto con código: " + codigo);
+            return null; // Ignorar esta entidad
+        }
+
+        int usuarioId;
+        try {
+            usuarioId = Integer.parseInt(usuarioIdStr);
+        } catch (NumberFormatException e) {
+            System.err.println("Error al convertir la propiedad 'usuario' a entero: " + usuarioIdStr);
+            return null; // Ignorar esta entidad
+        }
+
+        Usuario usuario = AdaptadorUsuarioTDS.getUnicaInstancia().recuperarUsuario(usuarioId);
+        if (usuario == null) {
+            System.err.println("El usuario asociado con el ID " + usuarioId + " no existe.");
+            return null; // Ignorar esta entidad
+        }
+
+        ContactoIndividual contacto = new ContactoIndividual(nombre, telefono, usuario);
         contacto.setCodigo(codigo);
 
         PoolDAO.getUnicaInstancia().addObjeto(codigo, contacto);
         return contacto;
     }
+
 
     @Override
     public List<ContactoIndividual> recuperarTodosContactosIndividuales() {

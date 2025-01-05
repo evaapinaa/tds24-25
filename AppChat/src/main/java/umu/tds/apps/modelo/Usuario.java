@@ -1,12 +1,16 @@
 package umu.tds.apps.modelo;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import javax.swing.ImageIcon;
+
+import umu.tds.apps.persistencia.AdaptadorContactoIndividualTDS;
+import umu.tds.apps.persistencia.AdaptadorUsuarioTDS;
 
 public class Usuario {
 	
@@ -124,16 +128,29 @@ public class Usuario {
 	
 	// Método para obtener el número de mensajes enviados en el último mes (DESCUENTO)
 	public long getNumeroMensajesUltimoMes() {
+	    // Fecha actual
 	    LocalDate ahora = LocalDate.now();
-	    LocalDate inicioDelMes = ahora.withDayOfMonth(1);
 
+	    // Primer día y último día del mes actual
+	    LocalDate primerDiaDelMes = ahora.withDayOfMonth(1);
+	    LocalDate ultimoDiaDelMes = primerDiaDelMes.plusMonths(1).minusDays(1);
+
+	    // Contar los mensajes enviados por el usuario en el mes actual
 	    return listaMensajesEnviados.stream()
 	        .filter(mensaje -> {
+	            // Convertir LocalDateTime a LocalDate
 	            LocalDate fechaEnvio = mensaje.getFecha();
-	            return (fechaEnvio.isEqual(inicioDelMes) || (fechaEnvio.isAfter(inicioDelMes) && fechaEnvio.isBefore(ahora.plusDays(1))));
+
+	            // Verificar si la fecha está dentro del mes actual
+	            return !fechaEnvio.isBefore(primerDiaDelMes) && !fechaEnvio.isAfter(ultimoDiaDelMes);
 	        })
 	        .count();
 	}
+
+
+
+
+
 	
 	public void setFechaNacimiento(LocalDate fechaNacimiento) {
 		this.fechaNacimiento = fechaNacimiento;
@@ -164,14 +181,17 @@ public class Usuario {
 	}
 	
 	// Cambio
-	public boolean añadirContacto(Contacto contacto) {
-	    if (!listaContactos.contains(contacto)) {
-	        listaContactos.add(contacto);
-	        return true;
-	    }
-	    return false; // Ya existe el contacto
-	}
-
+    public boolean añadirContacto(Contacto contacto) {
+        if (!listaContactos.contains(contacto)) {
+            listaContactos.add(contacto);
+            
+            // Guardar los cambios del usuario en persistencia
+            AdaptadorUsuarioTDS.getUnicaInstancia().modificarUsuario(this);
+            
+            return true;
+        }
+        return false;
+    }
 	
 	public void añadirChat(Chat chat) {
 	    if (!listaChats.contains(chat)) {

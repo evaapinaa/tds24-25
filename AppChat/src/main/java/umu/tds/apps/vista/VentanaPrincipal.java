@@ -235,7 +235,7 @@ public class VentanaPrincipal extends JFrame {
 			contactosIniciales.add("Contacto 1"); // EJEMPLO
 
 			// Crear el panel VentanaContactos y añadir al frame
-			VentanaContactos ventanaContactos = new VentanaContactos(contactosIniciales);
+			VentanaContactos ventanaContactos = new VentanaContactos();
 			frameContactos.getContentPane().add(ventanaContactos);
 			frameContactos.setVisible(true);
 		});

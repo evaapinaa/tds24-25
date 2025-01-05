@@ -4,14 +4,16 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.border.LineBorder;
 
+import umu.tds.apps.controlador.AppChat;
+import umu.tds.apps.modelo.Contacto;
 import umu.tds.apps.modelo.ContactoIndividual;
 import umu.tds.apps.modelo.RepositorioUsuarios;
 import umu.tds.apps.modelo.Usuario;
 import umu.tds.apps.persistencia.AdaptadorContactoIndividualTDS;
+import umu.tds.apps.persistencia.AdaptadorUsuarioTDS;
 
 import javax.swing.border.EmptyBorder;
 
@@ -25,27 +27,33 @@ public class VentanaContactos extends JPanel {
     private JButton btnMoverDerecha;
     private JButton btnMoverIzquierda;
 
-    // Constructor principal que acepta una lista de contactos
-    public VentanaContactos(List<String> contactos) {
-    	setBorder(new EmptyBorder(20, 20, 20, 20));
-    	setBackground(new Color(240, 240, 240));
+    // Constructor principal
+    public VentanaContactos() {
+        // Obtener el usuario actual desde AppChat
+        Usuario usuarioActual = AppChat.getUsuarioActual();
+
+        // Inicializar la lista de contactos del usuario actual
+        List<Contacto> contactos = usuarioActual.getListaContactos();
+
+        setBorder(new EmptyBorder(20, 20, 20, 20));
+        setBackground(new Color(240, 240, 240));
         setLayout(new GridBagLayout());
 
         // Panel izquierdo para contactos
         JPanel panelContactos = new JPanel(new BorderLayout());
         panelContactos.setBackground(new Color(240, 240, 240));
         modeloContactos = new DefaultListModel<>();
-        contactos.forEach(modeloContactos::addElement);
+        contactos.forEach(contacto -> modeloContactos.addElement(contacto.getNombre()));
         listaContactos = new JList<>(modeloContactos);
         listaContactos.setBackground(new Color(102, 205, 170));
         listaContactos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        
+
         // ScrollPane para la lista de contactos
         JScrollPane scrollPaneContactos = new JScrollPane(listaContactos);
         scrollPaneContactos.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         scrollPaneContactos.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         panelContactos.add(scrollPaneContactos, BorderLayout.CENTER);
-        
+
         btnAgregarContacto = new JButton("Añadir Contacto");
         btnAgregarContacto.setForeground(new Color(255, 255, 255));
         btnAgregarContacto.setBorder(new LineBorder(new Color(128, 128, 150), 2));
@@ -59,13 +67,13 @@ public class VentanaContactos extends JPanel {
         listaGrupos = new JList<>(modeloGrupos);
         listaGrupos.setBackground(new Color(102, 205, 170));
         listaGrupos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        
+
         // ScrollPane para la lista de grupos
         JScrollPane scrollPaneGrupos = new JScrollPane(listaGrupos);
         scrollPaneGrupos.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         scrollPaneGrupos.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         panelGrupos.add(scrollPaneGrupos, BorderLayout.CENTER);
-        
+
         btnAgregarGrupo = new JButton("Añadir Grupo");
         btnAgregarGrupo.setBorder(new LineBorder(new Color(143, 239, 208), 2));
         btnAgregarGrupo.setForeground(new Color(255, 255, 255));
@@ -119,36 +127,44 @@ public class VentanaContactos extends JPanel {
         btnAgregarContacto.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // nombre del contacto
+                // Pedir nombre y teléfono del contacto
                 String nuevoContactoNombre = JOptionPane.showInputDialog("Introduce el nombre del nuevo contacto:");
                 if (nuevoContactoNombre == null || nuevoContactoNombre.trim().isEmpty()) {
                     JOptionPane.showMessageDialog(null, "El nombre del contacto no puede estar vacío.", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
-                // número del contacto
                 String nuevoContactoTelefono = JOptionPane.showInputDialog("Introduce el número del nuevo contacto:");
                 if (nuevoContactoTelefono == null || nuevoContactoTelefono.trim().isEmpty()) {
                     JOptionPane.showMessageDialog(null, "El número del contacto no puede estar vacío.", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
-                // vemos si el numero de telefono existe en el repositorio
+                // Buscar usuario en el repositorio
                 Usuario usuarioExistente = RepositorioUsuarios.getUnicaInstancia().getUsuario(nuevoContactoTelefono);
                 if (usuarioExistente == null) {
                     JOptionPane.showMessageDialog(null, "El número introducido no pertenece a ningún usuario registrado.", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
-                // creamos el contacto individual
-                ContactoIndividual nuevoContacto = new ContactoIndividual(nuevoContactoNombre, nuevoContactoTelefono, usuarioExistente);
+                // Registrar el usuario si no tiene código válido
+                if (usuarioExistente.getCodigo() <= 0) {
+                    AdaptadorUsuarioTDS.getUnicaInstancia().registrarUsuario(usuarioExistente);
+                }
 
-                // guardamos el contacto en la base de datos
+                // Crear y registrar el contacto
+                ContactoIndividual nuevoContacto = new ContactoIndividual(nuevoContactoNombre, nuevoContactoTelefono, usuarioExistente);
                 AdaptadorContactoIndividualTDS.getUnicaInstancia().registrarContactoIndividual(nuevoContacto);
 
-                // metemos el contacto a la lista de contactos
-                modeloContactos.addElement(nuevoContactoNombre);
-                JOptionPane.showMessageDialog(null, "Contacto añadido correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                // Asociar el contacto al usuario actual
+                Usuario usuarioActual = AppChat.getUsuarioActual();
+                if (usuarioActual.añadirContacto(nuevoContacto)) {
+                    AdaptadorUsuarioTDS.getUnicaInstancia().modificarUsuario(usuarioActual);
+                    modeloContactos.addElement(nuevoContactoNombre);
+                    JOptionPane.showMessageDialog(null, "Contacto añadido correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(null, "El contacto ya existe.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+                }
             }
         });
 
@@ -164,7 +180,7 @@ public class VentanaContactos extends JPanel {
             }
         });
 
-        // Acción para mover un contacto al grup
+        // Acción para mover un contacto al grupo
         btnMoverDerecha.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -198,13 +214,7 @@ public class VentanaContactos extends JPanel {
                     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                     frame.setSize(600, 400);
 
-                    // Inicializa VentanaContactos con algunos contactos de ejemplo
-                    List<String> contactosEjemplo = new ArrayList<>();
-                    contactosEjemplo.add("Contacto 1");
-                    contactosEjemplo.add("Contacto 2");
-                    contactosEjemplo.add("Contacto 3");
-
-                    VentanaContactos panelContactos = new VentanaContactos(contactosEjemplo);
+                    VentanaContactos panelContactos = new VentanaContactos();
                     frame.getContentPane().add(panelContactos);
                     frame.setVisible(true);
                 } catch (Exception e) {
