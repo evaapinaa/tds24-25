@@ -220,30 +220,6 @@ public class AppChat {
 	    return true;
 	}
 	
-	
-	public List<Mensaje> filtrarMensajes(String texto, String telefono, String contacto) {
-	    // Creamos la "EstrategiaBusquedaMensaje" para esta búsqueda
-	    EstrategiaBusquedaMensaje estrategia = new EstrategiaBusquedaMensaje();
-	    
-	    // Si han escrito en 'texto', añadimos la estrategia de texto
-	    if (texto != null && !texto.trim().isEmpty() && !texto.equals("Texto")) {
-	        estrategia.addEstrategiaBusqueda(new BusquedaPorTexto(texto));
-	    }
-	    
-	    // Si han escrito en 'telefono', añadimos la de teléfono
-	    if (telefono != null && !telefono.trim().isEmpty() && !telefono.equals("Teléfono")) {
-	        estrategia.addEstrategiaBusqueda(new BusquedaPorTelefono(telefono));
-	    }
-	    
-	    // Si han escrito en 'contacto', añadimos la de contacto
-	    if (contacto != null && !contacto.trim().isEmpty() && !contacto.equals("Contacto")) {
-	        estrategia.addEstrategiaBusqueda(new BusquedaPorContacto(contacto));
-	    }
-
-	    // Aplicamos TODAS las búsquedas (en modo AND) a la lista general de mensajes
-	    return estrategia.ejecutarBusqueda(listaMensajes); 
-	}
-
 
 
 }

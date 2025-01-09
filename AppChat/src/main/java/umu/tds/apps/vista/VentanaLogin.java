@@ -13,7 +13,7 @@ import java.awt.Font;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import java.awt.FlowLayout;
+
 import java.awt.Dimension;
 
 import javax.swing.ImageIcon;
@@ -25,8 +25,6 @@ import javax.swing.border.TitledBorder;
 import umu.tds.apps.controlador.AppChat;
 import umu.tds.apps.vista.customcomponents.VisualUtils;
 
-
-import javax.swing.ButtonGroup;
 
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -41,14 +39,12 @@ import javax.swing.border.CompoundBorder;
 
 import java.awt.Toolkit;
 import java.awt.SystemColor;
-import javax.swing.AbstractAction;
 
 import java.awt.Cursor;
 
 public class VentanaLogin {
 
 	private JFrame frmAppchat;
-	private final ButtonGroup buttonGroup = new ButtonGroup();
 	private JTextField textField;
 	private JPasswordField passwordField;
 	private static AppChat controlador;
@@ -106,7 +102,7 @@ public class VentanaLogin {
 	    
 		JPanel panelSur = new JPanel();
 		panelSur.setOpaque(false);
-		FlowLayout flowLayout = (FlowLayout) panelSur.getLayout();
+
 		frmAppchat.getContentPane().add(panelSur, BorderLayout.SOUTH);
 		
 		JButton btnRegistrar = new JButton("Registrar");

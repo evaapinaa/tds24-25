@@ -2,6 +2,7 @@ package umu.tds.apps.modelo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class Mensaje {
 
@@ -117,5 +118,21 @@ public class Mensaje {
         // Constructor "vacío" para la recuperación TDS
         // No lanza excepción si chat == null
     }
-
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        Mensaje other = (Mensaje) obj;
+        return codigo == other.codigo;
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(codigo);
+    }
+    
+    
 }

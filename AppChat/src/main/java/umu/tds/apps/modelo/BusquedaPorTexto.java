@@ -11,10 +11,11 @@ public class BusquedaPorTexto implements BusquedaMensaje {
 		this.textoBuscado = textoBuscado;	
 	}
 	
-    @Override
-    public List<Mensaje> buscar(List<Mensaje> mensajes, String criterio) {
-        return mensajes.stream()
-                .filter(m -> m.getTexto().toLowerCase().contains(criterio.toLowerCase()))
-                .collect(Collectors.toList());
-    }
+	public List<Mensaje> buscar(List<Mensaje> mensajes) {
+	    if (textoBuscado == null || textoBuscado.isEmpty()) return mensajes;
+	    return mensajes.stream()
+	                   .filter(m -> m.getTexto().toLowerCase().contains(textoBuscado.toLowerCase()))
+	                   .collect(Collectors.toList());
+	}
+
 }

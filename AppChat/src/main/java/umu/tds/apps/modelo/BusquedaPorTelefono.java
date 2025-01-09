@@ -12,10 +12,11 @@ public class BusquedaPorTelefono implements BusquedaMensaje {
 	}
 	
     @Override
-    public List<Mensaje> buscar(List<Mensaje> mensajes, String criterio) {
+    public List<Mensaje> buscar(List<Mensaje> mensajes) {
+    	if (telefonoBuscado == null || telefonoBuscado.isEmpty()) return mensajes;
         return mensajes.stream()
-                .filter(m -> m.getEmisor().getTelefono().contains(criterio) || 
-                             m.getReceptor().getTelefono().contains(criterio))
+                .filter(m -> m.getEmisor().getTelefono().contains(telefonoBuscado) || 
+                             m.getReceptor().getTelefono().contains(telefonoBuscado))
                 .collect(Collectors.toList());
     }
 }

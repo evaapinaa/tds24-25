@@ -3,6 +3,7 @@ package umu.tds.apps.vista;
 import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 
@@ -15,6 +16,8 @@ import umu.tds.apps.vista.customcomponents.VisualUtils;
 
 import java.awt.Adjustable;
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
+
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.BoxLayout;
@@ -67,6 +70,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.time.LocalTime;
+
 import javax.swing.DefaultComboBoxModel;
 
 public class VentanaPrincipal extends JFrame {
@@ -90,6 +95,13 @@ public class VentanaPrincipal extends JFrame {
 	private JTextField txtMensaje;
 
 	private Usuario receptorActual;
+	
+	private JScrollPane scrollPanelChatMensajes;
+	
+	
+	public JPanel getPanelCentro() {
+	    return panelCentro;
+	}
 
 	/**
 	 * Launch the application.
@@ -115,7 +127,8 @@ public class VentanaPrincipal extends JFrame {
 				.getImage(VentanaPrincipal.class.getResource("/umu/tds/apps/resources/icono.png")));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 800, 633);
-
+		
+		
 		contentPane = new JPanel();
 		contentPane.setBorder(new SoftBevelBorder(BevelBorder.RAISED, null, null, new Color(176, 196, 222), null));
 		setContentPane(contentPane);
@@ -200,10 +213,10 @@ public class VentanaPrincipal extends JFrame {
 						new EmptyBorder(5, 17, 5, 17)));
 		btnNewButton_1.setIcon(new ImageIcon(VentanaPrincipal.class.getResource("/umu/tds/apps/resources/lupa.png")));
 		btnNewButton_1.addActionListener(e -> {
-			// BUSCAR
-			VentanaBusqueda ventanaBusqueda = new VentanaBusqueda();
-			ventanaBusqueda.setVisible(true);
+		    VentanaBusqueda ventanaBusqueda = new VentanaBusqueda(this);
+		    ventanaBusqueda.setVisible(true);
 		});
+
 
 		Component rigidArea_1_1 = Box.createRigidArea(new Dimension(20, 20));
 		panelNorte.add(rigidArea_1_1);
@@ -311,8 +324,6 @@ public class VentanaPrincipal extends JFrame {
 		scrollPane.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		panelMensajes.add(scrollPane, BorderLayout.WEST);
 
-		
-		
 		panelCentro = new JPanel(new BorderLayout());
 		contentPane.add(panelCentro, BorderLayout.CENTER);
 
@@ -365,7 +376,7 @@ public class VentanaPrincipal extends JFrame {
 		panelBienvenida.add(lblBienvenida, gbcLblBienvenida);
 
 		// Configurar el tamaño dinámico del GIF
-		ImageIcon gifIcon = new ImageIcon(getClass().getResource("/umu/tds/apps/resources/revision-de-chat.gif"));
+		ImageIcon gifIcon = new ImageIcon(getClass().getResource("/umu/tds/apps/resources/directo.gif"));
 		panelBienvenida.addComponentListener(new java.awt.event.ComponentAdapter() {
 			@Override
 			public void componentResized(java.awt.event.ComponentEvent e) {
@@ -390,13 +401,13 @@ public class VentanaPrincipal extends JFrame {
 		panelChat.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 
 		// Scroll del panel de chat
-		JScrollPane scrollPane_1 = new JScrollPane();
-		scrollPane_1.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		scrollPane_1.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		scrollPane_1.setBorder(null);
+		scrollPanelChatMensajes = new JScrollPane();
+		scrollPanelChatMensajes.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		scrollPanelChatMensajes.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPanelChatMensajes.setBorder(null);
 
 		// Auto-scroll al final del chat
-		Adjustable vertical = scrollPane_1.getVerticalScrollBar();
+		Adjustable vertical = scrollPanelChatMensajes.getVerticalScrollBar();
 		final boolean[] autoScrollEnabled = { true };
 		vertical.addAdjustmentListener(new AdjustmentListener() {
 			@Override
@@ -419,13 +430,16 @@ public class VentanaPrincipal extends JFrame {
 				}
 			}
 		});
+		
 
-		panelChat.add(scrollPane_1, BorderLayout.CENTER);
+
+
+		panelChat.add(scrollPanelChatMensajes, BorderLayout.CENTER);
 
 		// Panel con fondo degradado donde ponemos las burbujas
 		panelChatContenido = new VisualUtils.JPanelGradient(new Color(0, 128, 128), new Color(172, 225, 175));
 		panelChatContenido.setLayout(new BoxLayout(panelChatContenido, BoxLayout.Y_AXIS));
-		scrollPane_1.setViewportView(panelChatContenido);
+		scrollPanelChatMensajes.setViewportView(panelChatContenido);
 
 		// Panel de envío en la parte Sur
 		JPanel panelEnvio = new JPanel();
@@ -468,7 +482,7 @@ public class VentanaPrincipal extends JFrame {
 		        boolean enviado = AppChat.getUnicaInstancia().enviarEmoji(AppChat.getUsuarioActual(), receptorActual, numEmoji);
 		        if (enviado) {
 		            // Insertar la burbuja de emoji en el chat
-		            pintarBubblesEmoji(panelChatContenido, numEmoji, true, "Yo");
+		            pintarBubblesEmoji(panelChatContenido, numEmoji, true);
 		            // Actualizar la lista de conversaciones recientes
 		            actualizarListaChats(list);
 		        } else {
@@ -534,7 +548,10 @@ public class VentanaPrincipal extends JFrame {
 					// Crear y persistir mensaje
 					AppChat.getUnicaInstancia().enviarMensaje(AppChat.getUsuarioActual(), receptor, textoMensaje);
 					// Actualizar el panel de chat
-					BubbleText burbuja = new BubbleText(panelChatContenido, textoMensaje, Color.GREEN, "Yo",
+					
+					// añadir hora al mensaje hora actual
+					textoMensaje = textoMensaje + "  " + String.format("%02d:%02d", LocalTime.now().getHour(), LocalTime.now().getMinute());
+					BubbleText burbuja = new BubbleText(panelChatContenido, textoMensaje, Color.GREEN, "",
 							BubbleText.SENT, 18);
 					panelChatContenido.add(burbuja);
 					panelChatContenido.revalidate();
@@ -542,7 +559,7 @@ public class VentanaPrincipal extends JFrame {
 
 					// Actualizar la lista de conversaciones recientes
 					actualizarListaChats(list);
-
+				
 					// Limpiar campo de texto
 					txtMensaje.setText("");
 				} else {
@@ -561,15 +578,8 @@ public class VentanaPrincipal extends JFrame {
 		gbc_btnEnviar.gridy = 1;
 		panelEnvio.add(btnEnviar, gbc_btnEnviar);
 
-		// Seleccionar mensaje de la lista de chats
-		list.addListSelectionListener(e -> {
-			if (!e.getValueIsAdjusting()) {
-				Chat chatSeleccionado = list.getSelectedValue();
-				if (chatSeleccionado == null)
-					return;
-				cargarChat(chatSeleccionado);
-			}
-		});
+
+
 
 		// Listener de Mouse para detectar clics en el botón '+'
 		list.addMouseListener(new MouseAdapter() {
@@ -628,8 +638,28 @@ public class VentanaPrincipal extends JFrame {
 			}
 		});
 		// al iniciar, cargamos tambien la lista de chats
+		//panelCentro.add(panelBienvenida, BorderLayout.CENTER);
 		actualizarListaChats(list);
+		refrescarChat();
+		
+		CardLayout cardLayout = new CardLayout();
+		panelCentro.setLayout(cardLayout);
 
+		panelCentro.add(panelBienvenida, "Bienvenida");
+		panelCentro.add(panelChat, "Chat");
+
+		// Mostrar panel de bienvenida al inicio
+		cardLayout.show(panelCentro, "Bienvenida");
+		
+		list.addListSelectionListener(e -> {
+		    if (!e.getValueIsAdjusting()) {
+		        Chat chatSeleccionado = list.getSelectedValue();
+		        if (chatSeleccionado != null) {
+		            cargarChat(chatSeleccionado);
+		            cardLayout.show(panelCentro, "Chat");
+		        }
+		    }
+		});
 	}
 
 	/**
@@ -736,8 +766,7 @@ public class VentanaPrincipal extends JFrame {
 	        // Cargar los mensajes existentes en el chat
 	        for (Mensaje mensaje : chatExistente.getMensajes()) {
 	            boolean esMio = mensaje.getEmisor().equals(AppChat.getUsuarioActual());
-	            String nombre = esMio ? "Yo" : contacto.getUsuario();
-	            pintarBubblesMensaje(panelChatContenido, mensaje, esMio, nombre);
+	            pintarBubblesMensaje(panelChatContenido, mensaje, esMio);
 	        }
 	    } else {
 	        // Si no hay chat o mensajes, mostrar mensaje predeterminado
@@ -747,8 +776,8 @@ public class VentanaPrincipal extends JFrame {
 	        noMessagesLabel.setFont(new Font("Arial", Font.ITALIC, 14));
 	        panelChatContenido.add(noMessagesLabel);
 	    }
-
-	    refrescarChat(); // Actualizar el panel del chat
+	    
+	    refrescarChat();
 	}
 
 
@@ -779,8 +808,7 @@ public class VentanaPrincipal extends JFrame {
 	        // Si hay mensajes, los mostramos en el chat
 	        for (Mensaje mensaje : mensajes) {
 	            boolean esMio = mensaje.getEmisor().equals(AppChat.getUsuarioActual());
-	            String nombre = esMio ? "Yo" : mensaje.getEmisor().getUsuario();
-	            pintarBubblesMensaje(panelChatContenido, mensaje, esMio, nombre);
+	            pintarBubblesMensaje(panelChatContenido, mensaje, esMio);         
 	        }
 	    } else {
 	        // Si no hay mensajes, mostramos un mensaje de "sin mensajes"
@@ -845,24 +873,24 @@ public class VentanaPrincipal extends JFrame {
 	}
 
 	
-	public void pintarBubblesEmoji(JPanel panel, int emoji, boolean esMio, String nombre) {
+	public void pintarBubblesEmoji(JPanel panel, int emoji, boolean esMio) {
 	    BubbleText burbuja = new BubbleText(panel, emoji, 
-	            esMio ? Color.GREEN : Color.LIGHT_GRAY, nombre,
+	            esMio ? Color.GREEN : Color.LIGHT_GRAY, "",
 	            esMio ? BubbleText.SENT : BubbleText.RECEIVED, 18);
 	    panel.add(burbuja);
 	}
 	
-	public void pintarBubblesMensaje(JPanel panel, Mensaje mensaje, boolean esMio, String nombre) {
+	public void pintarBubblesMensaje(JPanel panel, Mensaje mensaje, boolean esMio) {
 	    String texto = mensaje.getTexto();
 	    if (texto != null && texto.startsWith("EMOJI:")) {
 	        try {
 	            int emojiCode = Integer.parseInt(texto.substring(6));
 	            // Renderizar emoji
-	            pintarBubblesEmoji(panel, emojiCode, esMio, nombre);
+	            pintarBubblesEmoji(panel, emojiCode, esMio);
 	        } catch (NumberFormatException e) {
 	            // Si el código del emoji no es válido, tratarlo como texto normal
 	            BubbleText burbuja = new BubbleText(panel, "[Emoji inválido]", 
-	                    esMio ? Color.GREEN : Color.LIGHT_GRAY, nombre, 
+	                    esMio ? Color.GREEN : Color.LIGHT_GRAY, "", 
 	                    esMio ? BubbleText.SENT : BubbleText.RECEIVED, 18);
 	            panel.add(burbuja);
 	        }
@@ -870,14 +898,14 @@ public class VentanaPrincipal extends JFrame {
 	        // Renderizar texto normal
 	        BubbleText burbuja = new BubbleText(panel, texto + "  " +
 	                String.format("%02d:%02d", mensaje.getHora().getHour(), mensaje.getHora().getMinute()),
-	                esMio ? Color.GREEN : Color.LIGHT_GRAY, nombre, 
+	                esMio ? Color.GREEN : Color.LIGHT_GRAY, "", 
 	                esMio ? BubbleText.SENT : BubbleText.RECEIVED, 18);
 	        panel.add(burbuja);
 	    } else {
 	        // Texto es null
 	        BubbleText burbuja = new BubbleText(panel, "[Mensaje sin contenido] " +
 	                String.format("%02d:%02d", mensaje.getHora().getHour(), mensaje.getHora().getMinute()),
-	                esMio ? Color.GREEN : Color.LIGHT_GRAY, nombre, 
+	                esMio ? Color.GREEN : Color.LIGHT_GRAY, "", 
 	                esMio ? BubbleText.SENT : BubbleText.RECEIVED, 18);
 	        panel.add(burbuja);
 	    }
@@ -885,12 +913,18 @@ public class VentanaPrincipal extends JFrame {
 
 
 	public void refrescarChat() {
-		panelChatContenido.revalidate();
-		panelChatContenido.repaint();
-		panelCentro.removeAll();
-		panelCentro.add(panelChat, BorderLayout.CENTER);
-		panelCentro.revalidate();
-		panelCentro.repaint();
+	    SwingUtilities.invokeLater(() -> {
+	        panelChatContenido.revalidate();
+	        panelChatContenido.repaint();
+	    });
 	}
+
+
+	public void cargarMensajeEnChat(Usuario contacto) {
+		cargarChat(contacto);
+	}
+
+	
+
 
 }
