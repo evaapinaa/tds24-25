@@ -15,6 +15,7 @@ import javax.swing.ImageIcon;
 import umu.tds.apps.modelo.BusquedaPorContacto;
 import umu.tds.apps.modelo.BusquedaPorTelefono;
 import umu.tds.apps.modelo.BusquedaPorTexto;
+import umu.tds.apps.modelo.BusquedaMensaje;
 import umu.tds.apps.modelo.Chat;
 import umu.tds.apps.modelo.Contacto;
 import umu.tds.apps.modelo.ContactoIndividual;
@@ -36,8 +37,7 @@ public class AppChat {
     private IAdaptadorUsuarioDAO adaptadorUsuario;
     private IAdaptadorMensajeDAO adaptadorMensaje;
     private IAdaptadorChatDAO adaptadorChat;
-    private List<Mensaje> listaMensajes;
-    
+
     private static AppChat unicaInstancia = null;
 
     // constructor privado (singleton)
@@ -83,11 +83,7 @@ public class AppChat {
         for (Chat chat : listaChats) {
             todosLosMensajes.addAll(chat.getMensajes());
         }
-
-        System.out.println("Mensajes combinados de todos los chats:");
-        for (Mensaje mensaje : todosLosMensajes) {
-            System.out.println("Texto: " + mensaje.getTexto() + ", Fecha: " + mensaje.getFecha());
-        }
+        
 
         // Ordenar por fecha/hora descendente
         todosLosMensajes.sort((m1, m2) -> {
@@ -106,12 +102,6 @@ public class AppChat {
         usuarioActual = repositorioUsuarios.getUsuario(telefono);
         if (usuarioActual == null || !usuarioActual.isClaveValida(new String(contraseña))) {
             return false;
-        }
-        // Depuración
-        System.out.println("Chats del usuario tras iniciar sesión: " + usuarioActual.getListaChats().size());
-        for (Chat c : usuarioActual.getListaChats()) {
-            System.out.println("Chat con: " + c.getOtroUsuarioChat().getTelefono()
-                               + " Mensajes: " + c.getMensajes().size());
         }
         return true;
     }
@@ -226,24 +216,32 @@ public class AppChat {
         }
     }
 
-    // Filtrar Mensajes
+    // Filtrar Mensajes y poder combinar varios filtros
     public List<Mensaje> filtrarMensajes(String texto, String telefono, String contacto) {
-        // Creamos la "EstrategiaBusquedaMensaje"
-        EstrategiaBusquedaMensaje estrategia = new EstrategiaBusquedaMensaje();
+        EstrategiaBusquedaMensaje estrategiaBusqueda = new EstrategiaBusquedaMensaje();
 
-        if (texto != null && !texto.trim().isEmpty() && !texto.equals("Texto")) {
-            estrategia.addEstrategiaBusqueda(new BusquedaPorTexto(texto));
+        // Añadir estrategias sólo si los valores no están vacíos o nulos
+        if (texto != null && !texto.isEmpty()) {
+            estrategiaBusqueda.addEstrategiaBusqueda(new BusquedaPorTexto(texto));
         }
-        if (telefono != null && !telefono.trim().isEmpty() && !telefono.equals("Teléfono")) {
-            estrategia.addEstrategiaBusqueda(new BusquedaPorTelefono(telefono));
+        if (telefono != null && !telefono.isEmpty()) {
+            estrategiaBusqueda.addEstrategiaBusqueda(new BusquedaPorTelefono(telefono));
         }
-        if (contacto != null && !contacto.trim().isEmpty() && !contacto.equals("Contacto")) {
-            estrategia.addEstrategiaBusqueda(new BusquedaPorContacto(contacto));
+        if (contacto != null && !contacto.isEmpty()) {
+            estrategiaBusqueda.addEstrategiaBusqueda(new BusquedaPorContacto(usuarioActual, contacto));
         }
 
-        // Aplicas las estrategias a 'listaMensajes'
-        return estrategia.ejecutarBusqueda(listaMensajes);
+        // Obtener mensajes enviados y recibidos del usuario actual
+        List<Mensaje> mensajes = new ArrayList<>();
+        mensajes.addAll(usuarioActual.getListaMensajesEnviados());
+        mensajes.addAll(usuarioActual.getListaMensajesRecibidos());
+
+        // Ejecutar todas las estrategias y devolver los mensajes filtrados
+        return estrategiaBusqueda.ejecutarBusqueda(mensajes);
     }
+
+
+
 
     // Crear nuevo chat
     public void crearNuevoChat(Usuario uActual, Usuario otroUsuario) {
@@ -262,10 +260,6 @@ public class AppChat {
 
         adaptadorUsuario.modificarUsuario(uActual);
         adaptadorUsuario.modificarUsuario(otroUsuario);
-
-        System.out.println("Nuevo chat creado y registrado entre "
-            + uActual.getTelefono() + " y " + otroUsuario.getTelefono()
-            + " con ID: " + nuevoChat.getCodigo());
     }
 
     // Método para enviar mensaje
@@ -274,6 +268,7 @@ public class AppChat {
             System.err.println("Error: texto null");
             return false;
         }
+
         Chat chat = uActual.obtenerChatCon(uDestino);
         if (chat == null) {
             chat = new Chat(uActual, uDestino);
@@ -287,17 +282,22 @@ public class AppChat {
         Mensaje mensaje = new Mensaje(uActual, texto, uDestino, chat);
         adaptadorMensaje.registrarMensaje(mensaje);
 
-        chat.addMensaje(mensaje);
-        adaptadorChat.modificarChat(chat);
+        // Actualizar listas de mensajes utilizando los métodos de Usuario
+        uActual.añadirMensajeEnviado(mensaje);
+        uDestino.añadirMensajeRecibido(mensaje);
 
-        uActual.getListaMensajesEnviados().add(mensaje);
-        uDestino.getListaMensajesRecibidos().add(mensaje);
+        // Persistir cambios en la base de datos
         adaptadorUsuario.modificarUsuario(uActual);
         adaptadorUsuario.modificarUsuario(uDestino);
+
+        // Actualizar el chat y persistirlo
+        chat.addMensaje(mensaje);
+        adaptadorChat.modificarChat(chat);
 
         System.out.println("Mensaje enviado: " + texto);
         return true;
     }
+
     
     public boolean enviarEmoji(Usuario uActual, Usuario uDestino, int emoji) {
     	String texto = "EMOJI:" + emoji;
