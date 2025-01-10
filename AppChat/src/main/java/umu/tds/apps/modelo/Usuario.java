@@ -2,6 +2,7 @@ package umu.tds.apps.modelo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -165,7 +166,7 @@ public class Usuario {
 	}
 	
 	public List<Mensaje> getListaMensajesEnviados() {
-		return new LinkedList<Mensaje>(listaMensajesEnviados); // comprobar
+	    return Collections.unmodifiableList(listaMensajesEnviados);
 	}
 	
 	public void setListaMensajesEnviados(List<Mensaje> listaMensajesEnviados) {
@@ -173,9 +174,8 @@ public class Usuario {
 	}
 	
 	public List<Mensaje> getListaMensajesRecibidos() {
-		return new LinkedList<Mensaje>(listaMensajesRecibidos); // comprobar
+	    return Collections.unmodifiableList(listaMensajesRecibidos);
 	}
-	
 	public void setListaMensajesRecibidos(List<Mensaje> listaMensajesRecibidos) {
 		this.listaMensajesRecibidos = listaMensajesRecibidos;
 	}
@@ -243,6 +243,16 @@ public class Usuario {
 				.findFirst()
 				.orElse(null);
 	}
+	
+    // Método para añadir un mensaje enviado
+    public void añadirMensajeEnviado(Mensaje mensaje) {
+        this.listaMensajesEnviados.add(mensaje);
+    }
+
+    // Método para añadir un mensaje recibido
+    public void añadirMensajeRecibido(Mensaje mensaje) {
+        this.listaMensajesRecibidos.add(mensaje);
+    }
 
     // CONSTRUCTOR
 	
@@ -279,9 +289,22 @@ public class Usuario {
         return true;
     }
 
-	@Override
-	public int hashCode() {
-	    return telefono.hashCode();
+    @Override
+    public int hashCode() {
+        return telefono.hashCode();
+    }
+
+
+	public Contacto obtenerContactoCon(Usuario otroUsuario) {
+	    return listaContactos.stream()
+	            .filter(c -> {
+	                if (c instanceof ContactoIndividual) {
+	                    return ((ContactoIndividual) c).getUsuario().equals(otroUsuario);
+	                }
+	                return false;
+	            })
+	            .findFirst()
+	            .orElse(null);
 	}
 
 
