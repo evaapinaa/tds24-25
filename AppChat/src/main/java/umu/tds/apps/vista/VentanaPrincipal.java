@@ -985,6 +985,7 @@ public class VentanaPrincipal extends JFrame {
 	                    esMio ? BubbleText.SENT : BubbleText.RECEIVED, 18);
 	            panel.add(burbuja);
 	        }
+	        
 	    } else if (texto != null) {
 	        // Renderizar texto normal
 	        BubbleText burbuja = new BubbleText(panel, texto + "  " +
