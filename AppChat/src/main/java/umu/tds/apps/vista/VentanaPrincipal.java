@@ -98,6 +98,7 @@ public class VentanaPrincipal extends JFrame {
 	
 	private JScrollPane scrollPanelChatMensajes;
 	
+	private CardLayout cardLayout;
 	
 	public JPanel getPanelCentro() {
 	    return panelCentro;
@@ -642,7 +643,7 @@ public class VentanaPrincipal extends JFrame {
 		actualizarListaChats(list);
 		refrescarChat();
 		
-		CardLayout cardLayout = new CardLayout();
+		cardLayout = new CardLayout();
 		panelCentro.setLayout(cardLayout);
 
 		panelCentro.add(panelBienvenida, "Bienvenida");
@@ -778,6 +779,7 @@ public class VentanaPrincipal extends JFrame {
 	    }
 	    
 	    refrescarChat();
+	    cardLayout.show(panelCentro, "Chat");
 	}
 
 
