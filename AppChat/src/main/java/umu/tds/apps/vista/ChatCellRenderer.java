@@ -79,12 +79,15 @@ public class ChatCellRenderer extends JPanel implements ListCellRenderer<Chat> {
 
 		try {
 		    BufferedImage image;
-
+		    
 		    if (path.startsWith("http")) {
-		        // Si es una URL, carga la imagen desde la URL
+		        // Si es una URL, cargar la imagen desde la URL
 		        image = ImageIO.read(new URL(path));
+		    } else if (path.startsWith("/")) {
+		        // Si empieza por '/', se asume que es un recurso del classpath
+		        image = ImageIO.read(VentanaRegistro.class.getResource(path));
 		    } else {
-		        // Si no es una URL, carga la imagen desde un archivo local
+		        // Sino, se asume que es una ruta de archivo en el sistema
 		        image = ImageIO.read(new File(path));
 		    }
 
@@ -97,7 +100,6 @@ public class ChatCellRenderer extends JPanel implements ListCellRenderer<Chat> {
 		    System.err.println("Error al cargar la imagen: " + e.getMessage());
 		    e.printStackTrace();
 		}
-
 
 	// 4. Último mensaje (si es largo, no se muestra completo)
 	    java.util.List<Mensaje> mensajes = chat.getMensajes();
