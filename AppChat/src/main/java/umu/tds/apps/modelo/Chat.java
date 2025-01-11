@@ -59,8 +59,8 @@ public class Chat {
 	    mensajes.sort(Comparator.comparing(Mensaje::getFecha).thenComparing(Mensaje::getHora));
 	}
 
-	public boolean involucraUsuario(Usuario u) {
-	    return usuario.equals(u) || otroUsuarioChat.equals(u);
+	public boolean involucraUsuario(Usuario otroUsuario) {
+	    return usuario.equals(otroUsuario) || otroUsuarioChat.equals(otroUsuario);
 	}
 
 	

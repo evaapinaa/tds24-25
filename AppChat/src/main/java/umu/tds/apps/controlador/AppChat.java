@@ -20,11 +20,14 @@ import umu.tds.apps.modelo.Chat;
 import umu.tds.apps.modelo.Contacto;
 import umu.tds.apps.modelo.ContactoIndividual;
 import umu.tds.apps.modelo.EstrategiaBusquedaMensaje;
+import umu.tds.apps.modelo.Grupo;
 import umu.tds.apps.modelo.Mensaje;
 import umu.tds.apps.modelo.RepositorioUsuarios;
 import umu.tds.apps.modelo.Usuario;
 import umu.tds.apps.persistencia.AdaptadorChatTDS;
 import umu.tds.apps.persistencia.AdaptadorContactoIndividualTDS;
+import umu.tds.apps.persistencia.AdaptadorGrupoTDS;
+import umu.tds.apps.persistencia.AdaptadorUsuarioTDS;
 import umu.tds.apps.persistencia.FactoriaDAO;
 import umu.tds.apps.persistencia.IAdaptadorChatDAO;
 import umu.tds.apps.persistencia.IAdaptadorMensajeDAO;
@@ -215,6 +218,36 @@ public class AppChat {
             return false;
         }
     }
+    
+    //FUNCION NUEVA
+    public boolean crearGrupo(String nombreGrupo, List<ContactoIndividual> contactos, Optional<ImageIcon> imagenGrupo) {
+        if (nombreGrupo == null || nombreGrupo.trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre del grupo no puede estar vacío.");
+        }
+
+        boolean nombreDuplicado = getUsuarioActual().getGrupos().stream()
+                .anyMatch(grupo -> grupo.getNombre().equalsIgnoreCase(nombreGrupo));
+        if (nombreDuplicado) {
+            throw new IllegalArgumentException("Ya existe un grupo con este nombre.");
+        }
+
+        Grupo nuevoGrupo = new Grupo(nombreGrupo, contactos, getUsuarioActual(), imagenGrupo.orElse(null));
+        getUsuarioActual().añadirContacto(nuevoGrupo);
+
+        // Persistir el grupo y el usuario
+        AdaptadorGrupoTDS.getUnicaInstancia().registrarGrupo(nuevoGrupo);
+        AdaptadorUsuarioTDS.getUnicaInstancia().modificarUsuario(getUsuarioActual());
+
+        return true;
+    }
+
+
+
+
+    
+    
+    
+    
 
     // Filtrar Mensajes y poder combinar varios filtros
     public List<Mensaje> filtrarMensajes(String texto, String telefono, String contacto) {
@@ -263,32 +296,32 @@ public class AppChat {
     }
 
     // Método para enviar mensaje
-    public boolean enviarMensaje(Usuario uActual, Usuario uDestino, String texto) {
+    public boolean enviarMensaje(Usuario uActual, Usuario receptor, String texto) {
         if (texto == null) {
             System.err.println("Error: texto null");
             return false;
         }
 
-        Chat chat = uActual.obtenerChatCon(uDestino);
+        Chat chat = uActual.obtenerChatCon(receptor);
         if (chat == null) {
-            chat = new Chat(uActual, uDestino);
+            chat = new Chat(uActual, receptor);
             adaptadorChat.registrarChat(chat);
             uActual.añadirChat(chat);
-            uDestino.añadirChat(chat);
+            receptor.añadirChat(chat);
             adaptadorUsuario.modificarUsuario(uActual);
-            adaptadorUsuario.modificarUsuario(uDestino);
+            adaptadorUsuario.modificarUsuario(receptor);
         }
 
-        Mensaje mensaje = new Mensaje(uActual, texto, uDestino, chat);
+        Mensaje mensaje = new Mensaje(uActual, texto, receptor, chat);
         adaptadorMensaje.registrarMensaje(mensaje);
 
         // Actualizar listas de mensajes utilizando los métodos de Usuario
         uActual.añadirMensajeEnviado(mensaje);
-        uDestino.añadirMensajeRecibido(mensaje);
+        receptor.añadirMensajeRecibido(mensaje);
 
         // Persistir cambios en la base de datos
         adaptadorUsuario.modificarUsuario(uActual);
-        adaptadorUsuario.modificarUsuario(uDestino);
+        adaptadorUsuario.modificarUsuario(receptor);
 
         // Actualizar el chat y persistirlo
         chat.addMensaje(mensaje);
@@ -326,5 +359,31 @@ public class AppChat {
 	            .findFirst()
 	            .orElse(null);
 	}
+	
+	public boolean enviarMensajeAGrupo(Usuario uActual, Grupo grupo, String texto) {
+	    if (texto == null || grupo == null) {
+	        System.err.println("Error: texto o grupo es null");
+	        return false;
+	    }
+
+	    List<ContactoIndividual> miembros = grupo.getListaContactos();
+	    if (miembros.isEmpty()) {
+	        System.err.println("El grupo no tiene miembros.");
+	        return false;
+	    }
+
+	    boolean enviado = true;
+	    for (ContactoIndividual miembro : miembros) {
+	        Usuario receptor = miembro.getUsuario();
+	        if (receptor != null) {
+	            enviado &= enviarMensaje(uActual, receptor, texto);
+	        } else {
+	            System.err.println("No se pudo enviar mensaje a: " + miembro.getNombre());
+	            enviado = false;
+	        }
+	    }
+	    return enviado;
+	}
+
 
 }

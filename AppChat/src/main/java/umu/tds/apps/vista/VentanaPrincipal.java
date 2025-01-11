@@ -9,9 +9,14 @@ import javax.swing.border.EmptyBorder;
 
 import umu.tds.apps.controlador.AppChat;
 import umu.tds.apps.modelo.Chat;
+import umu.tds.apps.modelo.Contacto;
 import umu.tds.apps.modelo.ContactoIndividual;
+import umu.tds.apps.modelo.Grupo;
 import umu.tds.apps.modelo.Mensaje;
 import umu.tds.apps.modelo.Usuario;
+import umu.tds.apps.persistencia.AdaptadorChatTDS;
+import umu.tds.apps.persistencia.AdaptadorMensajeTDS;
+import umu.tds.apps.persistencia.AdaptadorUsuarioTDS;
 import umu.tds.apps.vista.customcomponents.VisualUtils;
 
 import java.awt.Adjustable;
@@ -98,6 +103,8 @@ public class VentanaPrincipal extends JFrame {
 	
 	private JScrollPane scrollPanelChatMensajes;
 	
+	private CardLayout cardLayout;
+	
 	
 	public JPanel getPanelCentro() {
 	    return panelCentro;
@@ -116,6 +123,61 @@ public class VentanaPrincipal extends JFrame {
 			}
 		});
 	}
+	
+	public boolean enviarMensajeAGrupo(Usuario emisor, Grupo grupo, String texto) {
+	    if (texto == null || texto.trim().isEmpty()) {
+	        System.err.println("El mensaje no puede estar vacío.");
+	        return false;
+	    }
+
+	    if (grupo == null || grupo.getListaContactos().isEmpty()) {
+	        System.err.println("El grupo no existe o no tiene contactos.");
+	        return false;
+	    }
+
+	    if (emisor == null) {
+	        System.err.println("El emisor no puede ser nulo.");
+	        return false;
+	    }
+
+	    boolean exito = true;
+
+	    for (ContactoIndividual contacto : grupo.getListaContactos()) {
+	        Usuario receptor = contacto.getUsuario();
+	        if (receptor != null) {
+	            // Obtener o crear el chat entre el emisor y el receptor
+	            Chat chat = emisor.obtenerChatCon(receptor);
+	            if (chat == null) {
+	                chat = new Chat(emisor, receptor);
+	                AdaptadorChatTDS.getUnicaInstancia().registrarChat(chat);
+	                emisor.añadirChat(chat);
+	                receptor.añadirChat(chat);
+	                AdaptadorUsuarioTDS.getUnicaInstancia().modificarUsuario(emisor);
+	                AdaptadorUsuarioTDS.getUnicaInstancia().modificarUsuario(receptor);
+	            }
+
+	            // Crear y registrar el mensaje
+	            Mensaje mensaje = new Mensaje(emisor, texto, receptor, chat);
+	            AdaptadorMensajeTDS.getUnicaInstancia().registrarMensaje(mensaje);
+
+	            // Añadir el mensaje a las listas del emisor y receptor
+	            emisor.añadirMensajeEnviado(mensaje);
+	            receptor.añadirMensajeRecibido(mensaje);
+
+	            // Persistir cambios
+	            AdaptadorUsuarioTDS.getUnicaInstancia().modificarUsuario(emisor);
+	            AdaptadorUsuarioTDS.getUnicaInstancia().modificarUsuario(receptor);
+	            chat.addMensaje(mensaje);
+	            AdaptadorChatTDS.getUnicaInstancia().modificarChat(chat);
+	        } else {
+	            System.err.println("No se pudo enviar el mensaje a un contacto del grupo.");
+	            exito = false;
+	        }
+	    }
+
+	    return exito;
+	}
+
 
 	/**
 	 * Create the frame.
@@ -166,34 +228,62 @@ public class VentanaPrincipal extends JFrame {
 						new EmptyBorder(5, 17, 5, 17)));
 		btnNewButton.setIcon(new ImageIcon(VentanaPrincipal.class.getResource("/umu/tds/apps/resources/enviar.png")));
 		btnNewButton.addActionListener(e -> {
-			String seleccion = (String) comboBoxContactos.getSelectedItem();
+		    String seleccion = (String) comboBoxContactos.getSelectedItem();
 
-			if ("Contacto".equals(seleccion)) {
-				// Abrir chat con un contacto de la lista
-				String nombreContacto = JOptionPane.showInputDialog("Introduce el nombre del contacto:");
-				if (nombreContacto != null && !nombreContacto.trim().isEmpty()) {
-					Usuario contacto = AppChat.getUnicaInstancia().obtenerUsuarioPorNombre(nombreContacto);
-					if (contacto != null) {
-						cargarChat(contacto);
-					} else {
-						JOptionPane.showMessageDialog(this, "Contacto no encontrado.", "Error",
-								JOptionPane.ERROR_MESSAGE);
-					}
-				}
-			} else if ("Teléfono".equals(seleccion)) {
-				// Abrir chat con un usuario por número de teléfono
-				String telefono = JOptionPane.showInputDialog("Introduce el número de teléfono:");
-				if (telefono != null && !telefono.trim().isEmpty()) {
-					Usuario usuario = AppChat.getUnicaInstancia().obtenerUsuarioPorTelefono(telefono);
-					if (usuario != null) {
-						cargarChat(usuario);
-					} else {
-						JOptionPane.showMessageDialog(this, "Usuario no encontrado.", "Error",
-								JOptionPane.ERROR_MESSAGE);
-					}
-				}
-			}
+		    if ("Contacto".equals(seleccion)) {
+		        // Abrir chat con un contacto o grupo de la lista
+		        String nombreContactoOGrupo = JOptionPane.showInputDialog("Introduce el nombre del contacto o grupo:");
+		        if (nombreContactoOGrupo != null && !nombreContactoOGrupo.trim().isEmpty()) {
+		            // Intentar obtener el grupo o contacto primero
+		            Usuario usuarioActual = AppChat.getUnicaInstancia().getUsuarioActual();
+		            Contacto contacto = usuarioActual.getListaContactos().stream()
+		                    .filter(c -> c.getNombre().equalsIgnoreCase(nombreContactoOGrupo))
+		                    .findFirst()
+		                    .orElse(null);
+
+		            if (contacto == null) {
+		                JOptionPane.showMessageDialog(this, "Contacto o grupo no encontrado.", "Error",
+		                        JOptionPane.ERROR_MESSAGE);
+		                return;
+		            }
+
+		            if (contacto instanceof Grupo) {
+		                // Es un grupo, enviar mensaje a todos los miembros
+		                Grupo grupo = (Grupo) contacto;
+		                String mensaje = JOptionPane.showInputDialog("Introduce el mensaje para enviar al grupo:");
+		                if (mensaje != null && !mensaje.trim().isEmpty()) {
+		                	boolean exito = AppChat.getUnicaInstancia().enviarMensajeAGrupo(usuarioActual, grupo, mensaje);
+		                    if (exito) {
+		                        JOptionPane.showMessageDialog(this, "Mensaje enviado al grupo correctamente.", "Éxito",
+		                                JOptionPane.INFORMATION_MESSAGE);
+		                    } else {
+		                        JOptionPane.showMessageDialog(this, "Error al enviar el mensaje al grupo.", "Error",
+		                                JOptionPane.ERROR_MESSAGE);
+		                    }
+		                }
+		            } else if (contacto instanceof ContactoIndividual) {
+		                // Es un contacto individual, abrir chat
+		                Usuario usuarioContacto = ((ContactoIndividual) contacto).getUsuario();
+		                cargarChat(usuarioContacto);
+		            }
+		        }
+		    } else if ("Teléfono".equals(seleccion)) {
+		        // Abrir chat con un usuario por número de teléfono
+		        String telefono = JOptionPane.showInputDialog("Introduce el número de teléfono:");
+		        if (telefono != null && !telefono.trim().isEmpty()) {
+		            Usuario usuario = AppChat.getUnicaInstancia().obtenerUsuarioPorTelefono(telefono);
+		            if (usuario != null) {
+		                cargarChat(usuario);
+		            } else {
+		                JOptionPane.showMessageDialog(this, "Usuario no encontrado.", "Error",
+		                        JOptionPane.ERROR_MESSAGE);
+		            }
+		        }
+		    }
 		});
+		
+		
+
 
 		Component rigidArea = Box.createRigidArea(new Dimension(20, 20));
 		panelNorte.add(rigidArea);
@@ -642,7 +732,7 @@ public class VentanaPrincipal extends JFrame {
 		actualizarListaChats(list);
 		refrescarChat();
 		
-		CardLayout cardLayout = new CardLayout();
+		cardLayout = new CardLayout();
 		panelCentro.setLayout(cardLayout);
 
 		panelCentro.add(panelBienvenida, "Bienvenida");
@@ -778,6 +868,7 @@ public class VentanaPrincipal extends JFrame {
 	    }
 	    
 	    refrescarChat();
+	    cardLayout.show(panelCentro, "Chat");
 	}
 
 
@@ -923,6 +1014,9 @@ public class VentanaPrincipal extends JFrame {
 	public void cargarMensajeEnChat(Usuario contacto) {
 		cargarChat(contacto);
 	}
+	
+	
+
 
 	
 

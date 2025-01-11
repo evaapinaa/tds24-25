@@ -6,12 +6,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import javax.swing.ImageIcon;
+
 import beans.Entidad;
 import beans.Propiedad;
 import tds.driver.FactoriaServicioPersistencia;
 import tds.driver.ServicioPersistencia;
 import umu.tds.apps.modelo.ContactoIndividual;
 import umu.tds.apps.modelo.Grupo;
+import umu.tds.apps.modelo.Usuario;
 
 public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
 
@@ -32,22 +35,28 @@ public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
 
     @Override
     public void registrarGrupo(Grupo grupo) {
-        if (grupo.getNombre() == null) {
-            throw new IllegalArgumentException("El nombre del grupo no puede ser nulo.");
+        if (grupo.getNombreGrupo() == null || grupo.getCreador() == null) {
+            throw new IllegalArgumentException("El nombre del grupo y el creador no pueden ser nulos.");
         }
 
-        // Crear la entidad
         Entidad eGrupo = new Entidad();
         eGrupo.setNombre("grupo");
         eGrupo.setPropiedades(new ArrayList<>(Arrays.asList(
-            new Propiedad("nombre", grupo.getNombre()),
-            new Propiedad("contactos", obtenerCodigosContactos(grupo.getListaContactos()))
+            new Propiedad("nombreGrupo", grupo.getNombreGrupo()),
+            new Propiedad("contactos", obtenerCodigosContactos(grupo.getListaContactos())),
+            new Propiedad("creador", String.valueOf(grupo.getCreador().getCodigo()))
         )));
 
         eGrupo = servPersistencia.registrarEntidad(eGrupo);
         grupo.setCodigo(eGrupo.getId());
-        System.out.println("Grupo registrado con ID: " + eGrupo.getId());
+        System.out.println("Grupo registrado correctamente: " + grupo.getNombreGrupo());
     }
+
+
+
+
+
+
 
     @Override
     public Grupo recuperarGrupo(int codigo) {
@@ -57,20 +66,31 @@ public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
 
         Entidad eGrupo = servPersistencia.recuperarEntidad(codigo);
         if (eGrupo == null) {
-            System.err.println("No se encontró el grupo con ID: " + codigo);
+            System.err.println("No se encontró el grupo con código: " + codigo);
             return null;
         }
 
-        String nombre = servPersistencia.recuperarPropiedadEntidad(eGrupo, "nombre");
+        String nombreGrupo = servPersistencia.recuperarPropiedadEntidad(eGrupo, "nombreGrupo");
         String contactosCodigos = servPersistencia.recuperarPropiedadEntidad(eGrupo, "contactos");
+        int creadorCodigo = Integer.parseInt(servPersistencia.recuperarPropiedadEntidad(eGrupo, "creador"));
 
-        Grupo grupo = new Grupo(nombre);
+        Usuario creador = AdaptadorUsuarioTDS.getUnicaInstancia().recuperarUsuario(creadorCodigo);
+        if (creador == null) {
+            throw new IllegalStateException("El creador del grupo no existe: " + creadorCodigo);
+        }
+
+        List<ContactoIndividual> contactos = obtenerContactosDesdeCodigos(contactosCodigos);
+
+        Grupo grupo = new Grupo(nombreGrupo, contactos, creador, null);
         grupo.setCodigo(codigo);
-        grupo.setListaContactos(obtenerContactosDesdeCodigos(contactosCodigos));
 
         PoolDAO.getUnicaInstancia().addObjeto(codigo, grupo);
         return grupo;
     }
+
+
+
+
 
     @Override
     public List<Grupo> recuperarTodosGrupos() {
@@ -104,10 +124,16 @@ public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
             int codContacto = Integer.parseInt(st.nextToken());
             ContactoIndividual ci = AdaptadorContactoIndividualTDS.getUnicaInstancia().recuperarContactoIndividual(codContacto);
             if (ci != null) {
-                contactos.add(ci);
+                // Verifica que el usuario esté correctamente configurado
+                if (ci.getUsuario() == null) {
+                    System.err.println("El contacto con código " + codContacto + " no tiene un usuario asociado.");
+                } else {
+                    contactos.add(ci);
+                }
             }
         }
         return contactos;
     }
+
 
 }

@@ -19,6 +19,7 @@ import tds.driver.ServicioPersistencia;
 import umu.tds.apps.modelo.Chat;
 import umu.tds.apps.modelo.Contacto;
 import umu.tds.apps.modelo.ContactoIndividual;
+import umu.tds.apps.modelo.Grupo;
 import umu.tds.apps.modelo.Mensaje;
 import umu.tds.apps.modelo.Usuario;
 
@@ -131,7 +132,7 @@ public class AdaptadorUsuarioTDS implements IAdaptadorUsuarioDAO {
             return null;
         }
 
-        // Propiedades
+        // Propiedades básicas
         String nombre = servPersistencia.recuperarPropiedadEntidad(eUsuario, "nombre");
         String telefono = servPersistencia.recuperarPropiedadEntidad(eUsuario, "telefono");
         String contraseña = servPersistencia.recuperarPropiedadEntidad(eUsuario, "contraseña");
@@ -154,11 +155,10 @@ public class AdaptadorUsuarioTDS implements IAdaptadorUsuarioDAO {
             Optional.ofNullable(saludo),
             imagenPerfil,
             null,
-            null // fechaRegistro NULL???
+            null // Fecha de registro se asigna después
         );
         usuario.setCodigo(codigo);
-        
-        
+
         // Recuperar la fecha de registro
         String fechaRegistroStr = servPersistencia.recuperarPropiedadEntidad(eUsuario, "fechaRegistro");
         if (fechaRegistroStr != null) {
@@ -218,13 +218,27 @@ public class AdaptadorUsuarioTDS implements IAdaptadorUsuarioDAO {
         StringTokenizer st = new StringTokenizer(codigos, " ");
         while (st.hasMoreTokens()) {
             int codContacto = Integer.parseInt(st.nextToken());
-            ContactoIndividual ci = AdaptadorContactoIndividualTDS.getUnicaInstancia().recuperarContactoIndividual(codContacto);
-            if (ci != null) {
-                contactos.add(ci);
+            Entidad eContacto = servPersistencia.recuperarEntidad(codContacto);
+
+            if (eContacto.getNombre().equals("contactoIndividual")) {
+                ContactoIndividual ci = AdaptadorContactoIndividualTDS.getUnicaInstancia().recuperarContactoIndividual(codContacto);
+                if (ci != null) {
+                    contactos.add(ci);
+                }
+            } else if (eContacto.getNombre().equals("grupo")) {
+                Grupo grupo = AdaptadorGrupoTDS.getUnicaInstancia().recuperarGrupo(codContacto);
+                if (grupo != null) {
+                    contactos.add(grupo);
+                }
+            } else {
+                System.err.println("La entidad con código " + codContacto + " no es un contacto válido.");
             }
         }
         return contactos;
     }
+
+
+
 
     private String obtenerCodigosMensajes(List<Mensaje> mensajes) {
         StringBuilder sb = new StringBuilder();

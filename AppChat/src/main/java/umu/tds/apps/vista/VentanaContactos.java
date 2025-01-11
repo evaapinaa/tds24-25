@@ -4,7 +4,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 import javax.swing.border.LineBorder;
 
 import umu.tds.apps.controlador.AppChat;
@@ -46,7 +49,7 @@ public class VentanaContactos extends JPanel {
         contactos.forEach(contacto -> modeloContactos.addElement(contacto.getNombre()));
         listaContactos = new JList<>(modeloContactos);
         listaContactos.setBackground(new Color(102, 205, 170));
-        listaContactos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        listaContactos.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
         // ScrollPane para la lista de contactos
         JScrollPane scrollPaneContactos = new JScrollPane(listaContactos);
@@ -123,6 +126,7 @@ public class VentanaContactos extends JPanel {
         gbcGrupos.weighty = 1.0;
         add(panelGrupos, gbcGrupos);
 
+
         // Acción para añadir un contacto
         btnAgregarContacto.addActionListener(new ActionListener() {
             @Override
@@ -173,36 +177,149 @@ public class VentanaContactos extends JPanel {
         btnAgregarGrupo.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String nuevoGrupo = JOptionPane.showInputDialog("Introduce el nombre del nuevo grupo:");
-                if (nuevoGrupo != null && !nuevoGrupo.trim().isEmpty()) {
-                    modeloGrupos.addElement(nuevoGrupo.trim());
+                JTextField nombreGrupoField = new JTextField();
+
+                JButton seleccionarImagenBtn = new JButton("Seleccionar Imagen");
+                JLabel imagenSeleccionadaLabel = new JLabel("No se ha seleccionado ninguna imagen");
+
+                final ImageIcon[] imagenIcono = {null};
+
+                seleccionarImagenBtn.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        JFileChooser fileChooser = new JFileChooser();
+                        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Imágenes", "jpg", "png", "jpeg"));
+                        int returnValue = fileChooser.showOpenDialog(null);
+                        if (returnValue == JFileChooser.APPROVE_OPTION) {
+                            String rutaImagen = fileChooser.getSelectedFile().getAbsolutePath();
+                            imagenIcono[0] = new ImageIcon(rutaImagen);
+                            imagenSeleccionadaLabel.setText("Imagen seleccionada: " + fileChooser.getSelectedFile().getName());
+                        }
+                    }
+                });
+
+                final String[] nombreGrupo = {null}; // Usamos un arreglo para almacenar el valor mutable
+
+                boolean nombreValido = false;
+
+                // Validar nombre no vacío y único
+                do {
+                    Object[] message = {
+                        "Nombre del grupo:", nombreGrupoField,
+                        "Imagen del grupo:", seleccionarImagenBtn,
+                        imagenSeleccionadaLabel
+                    };
+
+                    int option = JOptionPane.showConfirmDialog(null, message, "Crear Grupo", JOptionPane.OK_CANCEL_OPTION);
+
+                    if (option == JOptionPane.CANCEL_OPTION || option == JOptionPane.CLOSED_OPTION) {
+                        return; // Salir si el usuario cancela
+                    }
+
+                    nombreGrupo[0] = nombreGrupoField.getText().trim();
+
+                    if (nombreGrupo[0].isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "El nombre del grupo no puede estar vacío.", "Error", JOptionPane.ERROR_MESSAGE);
+                        continue;
+                    }
+
+                    boolean nombreDuplicado = AppChat.getUnicaInstancia().getUsuarioActual().getGrupos().stream()
+                            .anyMatch(grupo -> grupo.getNombreGrupo().equalsIgnoreCase(nombreGrupo[0]));
+
+                    if (nombreDuplicado) {
+                        JOptionPane.showMessageDialog(null, "Ya existe un grupo con este nombre. Introduzca un nombre único.", "Error", JOptionPane.ERROR_MESSAGE);
+                        continue;
+                    }
+
+                    nombreValido = true;
+                } while (!nombreValido);
+
+                // Obtener contactos seleccionados en la lista de "Añadir Grupo"
+                List<String> nombresSeleccionados = new ArrayList<>();
+                for (int i = 0; i < modeloGrupos.size(); i++) {
+                    nombresSeleccionados.add(modeloGrupos.getElementAt(i));
+                }
+
+                if (nombresSeleccionados.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Debe haber al menos un contacto en el grupo.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Crear una lista de contactos a partir de los nombres seleccionados
+                List<ContactoIndividual> contactosSeleccionados = new ArrayList<>();
+                Usuario usuarioActual = AppChat.getUnicaInstancia().getUsuarioActual();
+
+                for (String nombre : nombresSeleccionados) {
+                    ContactoIndividual contacto = (ContactoIndividual) usuarioActual.getListaContactos().stream()
+                            .filter(c -> c instanceof ContactoIndividual && c.getNombre().equals(nombre))
+                            .map(c -> (ContactoIndividual) c)
+                            .findFirst()
+                            .orElse(null);
+                    if (contacto != null) {
+                        contactosSeleccionados.add(contacto);
+                    }
+                }
+
+                // Validar si el grupo ya existe
+                umu.tds.apps.modelo.Grupo grupoExistente = usuarioActual.getListaContactos().stream()
+                        .filter(contacto -> contacto instanceof umu.tds.apps.modelo.Grupo)
+                        .map(contacto -> (umu.tds.apps.modelo.Grupo) contacto)
+                        .filter(grupo -> grupo.getNombreGrupo().equalsIgnoreCase(nombreGrupo[0]))
+                        .findFirst()
+                        .orElse(null);
+
+                if (grupoExistente != null) {
+                    // Agregar contactos nuevos al grupo existente
+                    for (ContactoIndividual contacto : contactosSeleccionados) {
+                        if (!grupoExistente.getListaContactos().contains(contacto)) {
+                            grupoExistente.agregarContacto(contacto);
+                        }
+                    }
+                    JOptionPane.showMessageDialog(null, "Se han añadido nuevos contactos al grupo existente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    // Crear un grupo nuevo
+                    try {
+                        AppChat.getUnicaInstancia().crearGrupo(nombreGrupo[0], contactosSeleccionados, Optional.ofNullable(imagenIcono[0]));
+                        modeloGrupos.addElement(nombreGrupo[0]); // Actualizar la lista de grupos
+                        JOptionPane.showMessageDialog(null, "Grupo creado con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                    } catch (IllegalArgumentException ex) {
+                        JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
                 }
             }
         });
+
+
 
         // Acción para mover un contacto al grupo
         btnMoverDerecha.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String contactoSeleccionado = listaContactos.getSelectedValue();
-                if (contactoSeleccionado != null) {
-                    modeloGrupos.addElement(contactoSeleccionado);
-                    modeloContactos.removeElement(contactoSeleccionado);
+                List<String> contactosSeleccionados = listaContactos.getSelectedValuesList();
+                for (String contacto : contactosSeleccionados) {
+                    if (!modeloGrupos.contains(contacto)) {
+                        modeloGrupos.addElement(contacto); // Agregar a la lista de "Añadir Grupo"
+                    }
                 }
             }
         });
+
 
         // Acción para mover un contacto del grupo de vuelta a los contactos
         btnMoverIzquierda.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String grupoSeleccionado = listaGrupos.getSelectedValue();
-                if (grupoSeleccionado != null) {
-                    modeloContactos.addElement(grupoSeleccionado);
-                    modeloGrupos.removeElement(grupoSeleccionado);
+                String contactoSeleccionado = listaGrupos.getSelectedValue();
+                if (contactoSeleccionado != null) {
+                    // Verificar si el contacto ya existe en la lista de contactos
+                    if (!modeloContactos.contains(contactoSeleccionado)) {
+                        modeloContactos.addElement(contactoSeleccionado);
+                    }
+                    modeloGrupos.removeElement(contactoSeleccionado);
                 }
             }
         });
+
     }
 
     // Método main para visualizar el panel de contactos en un JFrame independiente

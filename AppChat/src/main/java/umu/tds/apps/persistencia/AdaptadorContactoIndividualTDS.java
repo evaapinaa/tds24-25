@@ -80,14 +80,19 @@ public class AdaptadorContactoIndividualTDS implements IAdaptadorContactoIndivid
 
         Entidad eContacto = servPersistencia.recuperarEntidad(codigo);
 
+        // Verificar si la entidad es de tipo "grupo"
+        if ("grupo".equals(eContacto.getNombre())) {
+            System.err.println("La entidad con código " + codigo + " es un grupo, no un contacto individual.");
+            return null; // Ignorar los grupos en este método
+        }
+
         String nombre = servPersistencia.recuperarPropiedadEntidad(eContacto, "nombre");
         String telefono = servPersistencia.recuperarPropiedadEntidad(eContacto, "telefono");
         String usuarioIdStr = servPersistencia.recuperarPropiedadEntidad(eContacto, "usuario");
 
-        // Validar que usuarioIdStr no sea null o vacío
         if (usuarioIdStr == null || usuarioIdStr.trim().isEmpty()) {
             System.err.println("La propiedad 'usuario' es nula o inválida para el contacto con código: " + codigo);
-            return null; // Ignorar esta entidad
+            return null;
         }
 
         int usuarioId;
@@ -95,13 +100,13 @@ public class AdaptadorContactoIndividualTDS implements IAdaptadorContactoIndivid
             usuarioId = Integer.parseInt(usuarioIdStr);
         } catch (NumberFormatException e) {
             System.err.println("Error al convertir la propiedad 'usuario' a entero: " + usuarioIdStr);
-            return null; // Ignorar esta entidad
+            return null;
         }
 
         Usuario usuario = AdaptadorUsuarioTDS.getUnicaInstancia().recuperarUsuario(usuarioId);
         if (usuario == null) {
             System.err.println("El usuario asociado con el ID " + usuarioId + " no existe.");
-            return null; // Ignorar esta entidad
+            return null;
         }
 
         ContactoIndividual contacto = new ContactoIndividual(nombre, telefono, usuario);
@@ -110,6 +115,7 @@ public class AdaptadorContactoIndividualTDS implements IAdaptadorContactoIndivid
         PoolDAO.getUnicaInstancia().addObjeto(codigo, contacto);
         return contacto;
     }
+
 
 
     @Override
