@@ -105,7 +105,6 @@ public class VentanaPrincipal extends JFrame {
 	
 	private CardLayout cardLayout;
 	
-	
 	public JPanel getPanelCentro() {
 	    return panelCentro;
 	}
