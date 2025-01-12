@@ -1,3 +1,4 @@
+
 package umu.tds.apps.persistencia;
 
 import java.util.ArrayList;
@@ -87,6 +88,46 @@ public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
         PoolDAO.getUnicaInstancia().addObjeto(codigo, grupo);
         return grupo;
     }
+    
+    @Override
+    public void modificarGrupo(Grupo grupo) {
+        // 1) Recuperar la entidad del grupo
+        Entidad eGrupo = servPersistencia.recuperarEntidad(grupo.getCodigo());
+        if (eGrupo == null) {
+            System.err.println("No se encontró el grupo con código: " + grupo.getCodigo());
+            return;
+        }
+
+        // 2) Actualizar las propiedades (nombreGrupo, contactos, creador, imagenGrupo, etc.)
+        for (Propiedad prop : eGrupo.getPropiedades()) {
+            switch (prop.getNombre()) {
+                case "nombreGrupo":
+                    prop.setValor(grupo.getNombreGrupo());
+                    break;
+                case "contactos":
+                    prop.setValor(obtenerCodigosContactos(grupo.getListaContactos()));
+                    break;
+                case "creador":
+                    prop.setValor(String.valueOf(grupo.getCreador().getCodigo()));
+                    break;
+                case "imagenGrupo":
+                    String desc = (grupo.getImagenGrupo() != null)
+                        ? grupo.getImagenGrupo().getDescription()
+                        : "";
+                    prop.setValor(desc);
+                    break;
+                // case "historial":
+                //     prop.setValor(convertirHistorialAMensajes(grupo.getHistorialMensajes()));
+                //     break;
+                default:
+                    // Si tienes más propiedades, manéjalas aquí.
+                    break;
+            }
+            servPersistencia.modificarPropiedad(prop);
+        }
+        System.out.println("Grupo modificado en BD: " + grupo.getNombreGrupo());
+    }
+    
 
 
 

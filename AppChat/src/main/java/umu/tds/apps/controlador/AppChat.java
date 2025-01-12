@@ -338,6 +338,13 @@ public class AppChat {
     	return enviarMensaje(uActual, uDestino, texto);
 
     }
+    
+    public boolean enviarEmojiAGrupo(Usuario emisor, Grupo grupo, int emoji) {
+        String texto = "EMOJI:" + emoji;
+        System.out.println("Emoji enviado a grupo: " + emoji);
+        return enviarMensajeAGrupo(emisor, grupo, texto);
+    }
+
 
     public Usuario obtenerUsuarioPorTelefono(String telefono) {
         if (telefono == null) return null;

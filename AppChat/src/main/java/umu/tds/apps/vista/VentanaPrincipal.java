@@ -15,6 +15,7 @@ import umu.tds.apps.modelo.Grupo;
 import umu.tds.apps.modelo.Mensaje;
 import umu.tds.apps.modelo.Usuario;
 import umu.tds.apps.persistencia.AdaptadorChatTDS;
+import umu.tds.apps.persistencia.AdaptadorGrupoTDS;
 import umu.tds.apps.persistencia.AdaptadorMensajeTDS;
 import umu.tds.apps.persistencia.AdaptadorUsuarioTDS;
 import umu.tds.apps.vista.customcomponents.VisualUtils;
@@ -78,6 +79,7 @@ import java.net.URL;
 import java.time.LocalTime;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.GroupLayout.Group;
 
 public class VentanaPrincipal extends JFrame {
 
@@ -100,6 +102,8 @@ public class VentanaPrincipal extends JFrame {
 	private JTextField txtMensaje;
 
 	private Usuario receptorActual;
+	
+	private Grupo grupoActual;
 	
 	private JScrollPane scrollPanelChatMensajes;
 	
@@ -162,10 +166,14 @@ public class VentanaPrincipal extends JFrame {
 	            // Añadir el mensaje a las listas del emisor y receptor
 	            emisor.añadirMensajeEnviado(mensaje);
 	            receptor.añadirMensajeRecibido(mensaje);
+	            grupo.addMensajeEnviado(mensaje);
+
 
 	            // Persistir cambios
 	            AdaptadorUsuarioTDS.getUnicaInstancia().modificarUsuario(emisor);
 	            AdaptadorUsuarioTDS.getUnicaInstancia().modificarUsuario(receptor);
+	            AdaptadorGrupoTDS.getUnicaInstancia().modificarGrupo(grupo);
+
 	            chat.addMensaje(mensaje);
 	            AdaptadorChatTDS.getUnicaInstancia().modificarChat(chat);
 	        } else {
@@ -233,7 +241,7 @@ public class VentanaPrincipal extends JFrame {
 		        // Abrir chat con un contacto o grupo de la lista
 		        String nombreContactoOGrupo = JOptionPane.showInputDialog("Introduce el nombre del contacto o grupo:");
 		        if (nombreContactoOGrupo != null && !nombreContactoOGrupo.trim().isEmpty()) {
-		            // Intentar obtener el grupo o contacto primero
+		            // 1) Localizar el contacto en la listaContactos del usuario actual
 		            Usuario usuarioActual = AppChat.getUnicaInstancia().getUsuarioActual();
 		            Contacto contacto = usuarioActual.getListaContactos().stream()
 		                    .filter(c -> c.getNombre().equalsIgnoreCase(nombreContactoOGrupo))
@@ -241,32 +249,26 @@ public class VentanaPrincipal extends JFrame {
 		                    .orElse(null);
 
 		            if (contacto == null) {
-		                JOptionPane.showMessageDialog(this, "Contacto o grupo no encontrado.", "Error",
-		                        JOptionPane.ERROR_MESSAGE);
+		                JOptionPane.showMessageDialog(this, "Contacto o grupo no encontrado.",
+		                                              "Error", JOptionPane.ERROR_MESSAGE);
 		                return;
 		            }
 
+		            // 2) Según sea Grupo o ContactoIndividual, abrimos el chat adecuado
 		            if (contacto instanceof Grupo) {
-		                // Es un grupo, enviar mensaje a todos los miembros
+		                // ABRIR CHAT DE GRUPO
 		                Grupo grupo = (Grupo) contacto;
-		                String mensaje = JOptionPane.showInputDialog("Introduce el mensaje para enviar al grupo:");
-		                if (mensaje != null && !mensaje.trim().isEmpty()) {
-		                	boolean exito = AppChat.getUnicaInstancia().enviarMensajeAGrupo(usuarioActual, grupo, mensaje);
-		                    if (exito) {
-		                        JOptionPane.showMessageDialog(this, "Mensaje enviado al grupo correctamente.", "Éxito",
-		                                JOptionPane.INFORMATION_MESSAGE);
-		                    } else {
-		                        JOptionPane.showMessageDialog(this, "Error al enviar el mensaje al grupo.", "Error",
-		                                JOptionPane.ERROR_MESSAGE);
-		                    }
-		                }
+		                cargarChat(grupo); 
+		                // Se mostrará la misma ventana de chat que para un contacto individual,
+		                // pero ahora 'grupoActual' != null y 'receptorActual' == null
 		            } else if (contacto instanceof ContactoIndividual) {
-		                // Es un contacto individual, abrir chat
+		                // ABRIR CHAT INDIVIDUAL
 		                Usuario usuarioContacto = ((ContactoIndividual) contacto).getUsuario();
 		                cargarChat(usuarioContacto);
 		            }
 		        }
-		    } else if ("Teléfono".equals(seleccion)) {
+		    }
+		    else if ("Teléfono".equals(seleccion)) {
 		        // Abrir chat con un usuario por número de teléfono
 		        String telefono = JOptionPane.showInputDialog("Introduce el número de teléfono:");
 		        if (telefono != null && !telefono.trim().isEmpty()) {
@@ -274,12 +276,13 @@ public class VentanaPrincipal extends JFrame {
 		            if (usuario != null) {
 		                cargarChat(usuario);
 		            } else {
-		                JOptionPane.showMessageDialog(this, "Usuario no encontrado.", "Error",
-		                        JOptionPane.ERROR_MESSAGE);
+		                JOptionPane.showMessageDialog(this, "Usuario no encontrado.",
+		                                              "Error", JOptionPane.ERROR_MESSAGE);
 		            }
 		        }
 		    }
 		});
+
 		
 		
 
@@ -397,7 +400,7 @@ public class VentanaPrincipal extends JFrame {
 		JPanel panelMensajes = new JPanel(new BorderLayout());
 		contentPane.add(panelMensajes, BorderLayout.WEST);
 
-		JList<Chat> list = new JList<>();
+		JList<Object> list = new JList<>();
 		list.setSelectionBackground(new Color(102, 205, 170));
 		list.setBackground(new Color(205, 235, 234));
 		list.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -567,19 +570,47 @@ public class VentanaPrincipal extends JFrame {
 		JPanel panelEmojis = new EmojiPanel(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 		        int numEmoji = Integer.parseInt(e.getActionCommand());
-		        // Enviar el emoji utilizando el método enviarEmoji
-		        boolean enviado = AppChat.getUnicaInstancia().enviarEmoji(AppChat.getUsuarioActual(), receptorActual, numEmoji);
-		        if (enviado) {
-		            // Insertar la burbuja de emoji en el chat
-		            pintarBubblesEmoji(panelChatContenido, numEmoji, true);
-		            // Actualizar la lista de conversaciones recientes
-		            actualizarListaChats(list);
+
+		        // 1) Verifica si estamos en chat grupal o individual
+		        if (grupoActual != null) {
+		            // Chat de GRUPO
+		            // Creamos un texto "EMOJI:<numEmoji>" para reutilizar enviarMensajeAGrupo
+		            String textoEmoji = "EMOJI:" + numEmoji;
+		            boolean enviado = AppChat.getUnicaInstancia()
+		                                     .enviarMensajeAGrupo(AppChat.getUsuarioActual(), grupoActual, textoEmoji);
+		            if (enviado) {
+		                // Insertar la burbuja de emoji (local) en el panel
+		                pintarBubblesEmoji(panelChatContenido, numEmoji, true);
+		                // Actualizar la lista de conversaciones recientes (si procede)
+		                actualizarListaChats(list);
+		            } else {
+		                JOptionPane.showMessageDialog(VentanaPrincipal.this,
+		                        "No se pudo enviar el emoji al grupo.", "Error",
+		                        JOptionPane.ERROR_MESSAGE);
+		            }
+
+		        } else if (receptorActual != null) {
+		            // Chat INDIVIDUAL
+		            boolean enviado = AppChat.getUnicaInstancia()
+		                                     .enviarEmoji(AppChat.getUsuarioActual(), receptorActual, numEmoji);
+		            if (enviado) {
+		                pintarBubblesEmoji(panelChatContenido, numEmoji, true);
+		                actualizarListaChats(list);
+		            } else {
+		                JOptionPane.showMessageDialog(VentanaPrincipal.this,
+		                        "No se pudo enviar el emoji.", "Error",
+		                        JOptionPane.ERROR_MESSAGE);
+		            }
+
 		        } else {
-		            JOptionPane.showMessageDialog(VentanaPrincipal.this, "No se pudo enviar el emoji.", "Error",
-		                    JOptionPane.ERROR_MESSAGE);
+		            // No hay ni grupoActual ni receptorActual => no sabemos a quién enviar
+		            JOptionPane.showMessageDialog(VentanaPrincipal.this,
+		                    "No hay ningún chat seleccionado para enviar el emoji.",
+		                    "Advertencia", JOptionPane.WARNING_MESSAGE);
 		        }
 		    }
 		});
+
 		layeredPane.add(panelEmojis, JLayeredPane.POPUP_LAYER);
 
 		// Al pulsar el botón, mostramos/ocultamos panelEmojis
@@ -630,33 +661,59 @@ public class VentanaPrincipal extends JFrame {
 		btnEnviar.setFocusPainted(false);
 
 		btnEnviar.addActionListener(e -> {
-			String textoMensaje = txtMensaje.getText().trim();
-			if (!textoMensaje.isEmpty()) {
-				Usuario receptor = receptorActual; // Método para obtener el usuario del chat actual
-				if (receptor != null) {
-					// Crear y persistir mensaje
-					AppChat.getUnicaInstancia().enviarMensaje(AppChat.getUsuarioActual(), receptor, textoMensaje);
-					// Actualizar el panel de chat
-					
-					// añadir hora al mensaje hora actual
-					textoMensaje = textoMensaje + "  " + String.format("%02d:%02d", LocalTime.now().getHour(), LocalTime.now().getMinute());
-					BubbleText burbuja = new BubbleText(panelChatContenido, textoMensaje, Color.GREEN, "",
-							BubbleText.SENT, 18);
-					panelChatContenido.add(burbuja);
-					panelChatContenido.revalidate();
-					panelChatContenido.repaint();
+		    String textoMensaje = txtMensaje.getText().trim();
+		    if (!textoMensaje.isEmpty()) {
 
-					// Actualizar la lista de conversaciones recientes
-					actualizarListaChats(list);
-				
-					// Limpiar campo de texto
-					txtMensaje.setText("");
-				} else {
-					JOptionPane.showMessageDialog(this, "Error al identificar el receptor del mensaje.", "Error",
-							JOptionPane.ERROR_MESSAGE);
-				}
-			}
+		        // 1) Si es un chat de grupo
+		        if (grupoActual != null) {
+		            // Llamar a tu método "enviarMensajeAGrupo(...)"
+		            boolean exito = enviarMensajeAGrupo(AppChat.getUsuarioActual(), grupoActual, textoMensaje);
+		            if (exito) {
+		                // Pintar burbuja local (si quieres)
+		                String textoConHora = textoMensaje + "  " + 
+		                    String.format("%02d:%02d", LocalTime.now().getHour(), LocalTime.now().getMinute());
+		                BubbleText burbuja = new BubbleText(panelChatContenido, textoConHora,
+		                        Color.GREEN, "", BubbleText.SENT, 18);
+		                panelChatContenido.add(burbuja);
+
+		                refrescarChat();
+		                // También puedes actualizar la lista si lo deseas
+		                actualizarListaChats(list);
+		            } else {
+		                JOptionPane.showMessageDialog(this,
+		                        "No se pudo enviar el mensaje al grupo.", "Error",
+		                        JOptionPane.ERROR_MESSAGE);
+		            }
+
+		            txtMensaje.setText("");
+		            return;
+		        }
+
+		        // 2) Si no es un chat de grupo, usar la lógica actual
+		        Usuario receptor = receptorActual;
+		        if (receptor != null) {
+		            // Enviar a un usuario
+		            AppChat.getUnicaInstancia().enviarMensaje(AppChat.getUsuarioActual(), receptor, textoMensaje);
+
+		            // Pintar la burbuja local
+		            String textoConHora = textoMensaje + "  " +
+		                String.format("%02d:%02d", LocalTime.now().getHour(), LocalTime.now().getMinute());
+		            BubbleText burbuja = new BubbleText(panelChatContenido, textoConHora,
+		                    Color.GREEN, "", BubbleText.SENT, 18);
+		            panelChatContenido.add(burbuja);
+		            panelChatContenido.revalidate();
+		            panelChatContenido.repaint();
+
+		            actualizarListaChats(list);
+		            txtMensaje.setText("");
+		        } else {
+		            JOptionPane.showMessageDialog(this,
+		                    "Error al identificar el receptor del mensaje.", "Error",
+		                    JOptionPane.ERROR_MESSAGE);
+		        }
+		    }
 		});
+
 
 		// Enviar con ENTER
 		txtMensaje.addActionListener(e -> btnEnviar.doClick());
@@ -688,7 +745,7 @@ public class VentanaPrincipal extends JFrame {
 
 						if (addButtonArea.contains(relativeX, relativeY)) {
 							// El clic fue en el botón '+'
-							Chat chat = list.getModel().getElementAt(index);
+							Chat chat = (Chat) list.getModel().getElementAt(index);
 
 							// Obtener el otro usuario del chat
 							Usuario usuarioActual = AppChat.getUsuarioActual();
@@ -742,13 +799,22 @@ public class VentanaPrincipal extends JFrame {
 		
 		list.addListSelectionListener(e -> {
 		    if (!e.getValueIsAdjusting()) {
-		        Chat chatSeleccionado = list.getSelectedValue();
-		        if (chatSeleccionado != null) {
-		            cargarChat(chatSeleccionado);
+		        Object seleccionado = list.getSelectedValue(); // un Object
+		        if (seleccionado instanceof Chat) {
+		            // Abrir un Chat 
+		            Chat chat = (Chat) seleccionado;
+		            cargarChat(chat);
+		            cardLayout.show(panelCentro, "Chat");
+		        } else if (seleccionado instanceof Grupo) {
+		            // Abrir el chat de Grupo
+		            Grupo grupo = (Grupo) seleccionado;
+		            cargarChat(grupo);
 		            cardLayout.show(panelCentro, "Chat");
 		        }
 		    }
 		});
+
+;
 	}
 
 	/**
@@ -869,6 +935,39 @@ public class VentanaPrincipal extends JFrame {
 	    refrescarChat();
 	    cardLayout.show(panelCentro, "Chat");
 	}
+	
+	private void cargarChat(Grupo grupo) {
+	    // Guardamos el grupo con el que vamos a chatear
+	    this.grupoActual = grupo;
+	    // Anulamos el usuario actual, puesto que ahora es un chat grupal
+	    this.receptorActual = null;
+
+	    // Limpiar contenido del panel de chat
+	    panelChatContenido.removeAll();
+
+	    // 1) Consultar el historial de mensajes del grupo
+	    if (grupo.getListaMensajesEnviados() != null && !grupo.getListaMensajesEnviados().isEmpty()) {
+	        // Si hay mensajes, los mostramos en el chat
+	        for (Mensaje msg : grupo.getListaMensajesEnviados()) {
+	            boolean esMio = msg.getEmisor().equals(AppChat.getUsuarioActual());
+	            pintarBubblesMensaje(panelChatContenido, msg, esMio);
+	        }
+	    } else {
+	        // Si no hay historial, mostramos un mensaje predeterminado
+	        JLabel noMessagesLabel = new JLabel("No hay mensajes con este grupo.");
+	        noMessagesLabel.setHorizontalAlignment(SwingConstants.CENTER);
+	        noMessagesLabel.setForeground(Color.GRAY);
+	        noMessagesLabel.setFont(new Font("Arial", Font.ITALIC, 14));
+	        panelChatContenido.add(noMessagesLabel);
+	    }
+
+	    // Refrescar el panel y cambiar la vista
+	    refrescarChat();
+	    cardLayout.show(panelCentro, "Chat");
+	}
+
+	
+	
 
 
 	private void cargarChat(Chat chatSeleccionado) {
@@ -914,53 +1013,59 @@ public class VentanaPrincipal extends JFrame {
 	}
 
 
-	private void actualizarListaChats(JList<Chat> listaChats) {
-		List<Chat> chats = AppChat.getUsuarioActual().getListaChats();
+	private void actualizarListaChats(JList<Object> listaChats) {
+	    // 1) Obtener Chats
+	    List<Chat> chats = AppChat.getUsuarioActual().getListaChats();
 
-		chats.sort((c1, c2) -> {
-			List<Mensaje> m1 = c1.getMensajes();
-			List<Mensaje> m2 = c2.getMensajes();
-			if (m1.isEmpty() && m2.isEmpty())
-				return 0;
-			if (m1.isEmpty())
-				return 1; // chats sin mensajes al final
-			if (m2.isEmpty())
-				return -1;
+	    // Ordenar Chats (exactamente como hacías antes)
+	    chats.sort((c1, c2) -> {
+	        List<Mensaje> m1 = c1.getMensajes();
+	        List<Mensaje> m2 = c2.getMensajes();
+	        if (m1.isEmpty() && m2.isEmpty()) return 0;
+	        if (m1.isEmpty()) return 1;   // chats sin mensajes al final
+	        if (m2.isEmpty()) return -1;
 
-			// Tomar el último mensaje de cada chat
-			Mensaje ultimo1 = m1.get(m1.size() - 1);
-			Mensaje ultimo2 = m2.get(m2.size() - 1);
+	        // Tomar último mensaje
+	        Mensaje ultimo1 = m1.get(m1.size() - 1);
+	        Mensaje ultimo2 = m2.get(m2.size() - 1);
 
-			// Comparamos primero la fecha (desc), luego la hora (desc)
-			int fechaCompare = ultimo2.getFecha().compareTo(ultimo1.getFecha());
-			if (fechaCompare != 0) {
-				return fechaCompare;
-			} else {
-				return ultimo2.getHora().compareTo(ultimo1.getHora());
-			}
-		});
+	        // Fecha DESC
+	        int fechaCompare = ultimo2.getFecha().compareTo(ultimo1.getFecha());
+	        if (fechaCompare != 0) return fechaCompare;
 
-		// Crear un nuevo modelo con el orden resultante
-		listaChats.setModel(new AbstractListModel<Chat>() {
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
+	        // Hora DESC
+	        return ultimo2.getHora().compareTo(ultimo1.getHora());
+	    });
 
-			@Override
-			public int getSize() {
-				return chats.size();
-			}
+	    // 2) Obtener Grupos
+	    List<Grupo> grupos = AppChat.getUsuarioActual().getGrupos();
 
-			@Override
-			public Chat getElementAt(int index) {
-				return chats.get(index);
-			}
-		});
+	    // 3) Combinar en una lista de Object
+	    List<Object> items = new ArrayList<>();
+	    // Primero añadimos los chats
+	    items.addAll(chats);
+	    // Luego los grupos (para que aparezcan después en la lista)
+	    items.addAll(grupos);
 
-		// Repintar la lista
-		listaChats.repaint();
+	    // 4) Construir un AbstractListModel<Object> con la lista combinada
+	    AbstractListModel<Object> modelo = new AbstractListModel<>() {
+	        @Override
+	        public int getSize() {
+	            return items.size();
+	        }
+	        @Override
+	        public Object getElementAt(int index) {
+	            return items.get(index);
+	        }
+	    };
+
+	    // 5) Asignar el modelo a la lista
+	    listaChats.setModel(modelo);
+
+	    // 6) Repintar la lista
+	    listaChats.repaint();
 	}
+
 
 	
 	public void pintarBubblesEmoji(JPanel panel, int emoji, boolean esMio) {

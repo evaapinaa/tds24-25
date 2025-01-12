@@ -1,3 +1,4 @@
+
 package umu.tds.apps.persistencia;
 
 import java.util.List;
@@ -9,4 +10,5 @@ public interface IAdaptadorGrupoDAO {
 	public void registrarGrupo(Grupo grupo);
 	public Grupo recuperarGrupo(int codigo);
 	public List<Grupo> recuperarTodosGrupos();
+	public void modificarGrupo(Grupo grupo);
 }

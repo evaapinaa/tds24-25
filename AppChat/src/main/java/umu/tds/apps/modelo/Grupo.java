@@ -1,3 +1,4 @@
+
 package umu.tds.apps.modelo;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ public class Grupo extends Contacto {
     private List<ContactoIndividual> listaContactos; // Lista de contactos que pertenecen al grupo
     private Usuario creador;
     private ImageIcon imagenGrupo; // Imagen opcional del grupo
+    private List<Mensaje> listaMensajesEnviados;
 
     // Constructor para inicializar un grupo con todos los atributos
     public Grupo(String nombreGrupo, List<ContactoIndividual> listaContactos, Usuario creador, ImageIcon imagenGrupo) {
@@ -20,6 +22,7 @@ public class Grupo extends Contacto {
         this.listaContactos = new ArrayList<>(listaContactos); // Inicializa la lista con los contactos proporcionados
         this.creador = creador;
         this.imagenGrupo = imagenGrupo;
+        listaMensajesEnviados = new ArrayList<>();
     }
 
     // Constructor básico (por compatibilidad con código existente)
@@ -57,6 +60,14 @@ public class Grupo extends Contacto {
     public ImageIcon getImagenGrupo() {
         return imagenGrupo;
     }
+    
+	public List<Mensaje> getListaMensajesEnviados() {
+		return Collections.unmodifiableList(listaMensajesEnviados);
+	}
+	
+	public void addMensajeEnviado(Mensaje mensaje) {
+		listaMensajesEnviados.add(mensaje);
+	}
 
     public void setImagenGrupo(ImageIcon imagenGrupo) {
         this.imagenGrupo = imagenGrupo;
