@@ -1145,17 +1145,22 @@ public class VentanaPrincipal extends JFrame {
 	    items.addAll(grupos);
 
 	    // 5) Construir un AbstractListModel<Object> con la lista combinada
-	    AbstractListModel<Object> modelo = new AbstractListModel<>() {
+	    AbstractListModel<Object> modelo = new AbstractListModel<Object>() {
+	        /**
+	         *
+	         */
+	        private static final long serialVersionUID = 1L;
+	        
 	        @Override
 	        public int getSize() {
 	            return items.size();
 	        }
+	        
 	        @Override
 	        public Object getElementAt(int index) {
 	            return items.get(index);
 	        }
 	    };
-
 	    // 6) Asignar el modelo a la lista
 	    listaChats.setModel(modelo);
 

@@ -3,6 +3,7 @@ package umu.tds.apps.modelo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,14 +16,14 @@ import umu.tds.apps.persistencia.AdaptadorContactoIndividualTDS;
 import umu.tds.apps.persistencia.AdaptadorUsuarioTDS;
 
 public class Usuario {
-	
+
 	// ATRIBUTOS
-	
+
 	private String usuario;
 	private String contraseña;
 	private String telefono;
 	private String email;
-	private Optional<String> saludo;  // Saludo es opcional
+	private Optional<String> saludo; // Saludo es opcional
 	private ImageIcon imagenPerfil;
 	private LocalDate fechaNacimiento;
 	private List<Contacto> listaContactos;
@@ -32,92 +33,89 @@ public class Usuario {
 	private boolean premium;
 	private int codigo;
 	private LocalDate fechaRegistro;
-	
+
 	// GETTERS AND SETTERS
-	
+
 	public String getUsuario() {
 		return usuario;
 	}
-	
+
 	public void setUsuario(String usuario) {
 		this.usuario = usuario;
 	}
-	
+
 	public String getContraseña() {
 		return contraseña;
 	}
-	
+
 	public void setContraseña(String contaseña) {
 		this.contraseña = contaseña;
 	}
-	
+
 	public String getTelefono() {
 		return telefono;
 	}
-	
+
 	public void setTelefono(String telefono) {
 		this.telefono = telefono;
 	}
-	
+
 	public String getEmail() {
 		return email;
 	}
-	
+
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	
-	
+
 	public Optional<String> getSaludo() {
 		return saludo;
 	}
-	
+
 	public void setSaludo(Optional<String> saludo) {
 		this.saludo = saludo;
 	}
-	
+
 	public ImageIcon getImagenPerfil() {
 		return imagenPerfil;
 	}
-	
+
 	public void setImagenPerfil(ImageIcon imagenPerfil) {
 		this.imagenPerfil = imagenPerfil;
 	}
-	
-	
+
 	public LocalDate getFechaNacimiento() {
 		return fechaNacimiento;
 	}
-	
+
 	public LocalDate getFechaRegistro() {
-	    return fechaRegistro;
+		return fechaRegistro;
 	}
-	
+
 	public void setFechaRegistro(LocalDate fechaRegistro) {
 		this.fechaRegistro = fechaRegistro;
 	}
 
-	
 	public int getCodigo() {
 		return codigo;
 	}
-	
+
 	public void setCodigo(int codigo) {
-        this.codigo = codigo;
-    }
-	
+		this.codigo = codigo;
+	}
+
 	public boolean isPremium() {
 		return premium;
 	}
-	
+
 	public void setPremium(boolean premium) {
 		this.premium = premium;
 	}
-	
+
 	public List<Chat> getListaChats() {
 		return listaChats;
 	}
-	
+
 	public void setListaChats(List<Chat> listaChats) {
 		this.listaChats = listaChats;
 	}
@@ -126,190 +124,225 @@ public class Usuario {
 	public boolean isClaveValida(String contraseña) {
 		return this.contraseña.equals(contraseña);
 	}
-	
-	
-	// Método para obtener el número de mensajes enviados en el último mes (DESCUENTO)
+
+	// Método para obtener el número de mensajes enviados en el último mes
+	// (DESCUENTO)
 	public long getNumeroMensajesUltimoMes() {
-	    // Fecha actual
-	    LocalDate ahora = LocalDate.now();
-	    
-	    // Primer día y último día del mes actual
-	    LocalDate primerDiaDelMes = ahora.withDayOfMonth(1);
-	    LocalDate ultimoDiaDelMes = primerDiaDelMes.plusMonths(1).minusDays(1);
-	    
-	    // Contar los mensajes enviados por el usuario en el mes actual
-	    return listaMensajesEnviados.stream()
-	        .filter(mensaje -> {
-	            // Verificar si la fecha está dentro del mes actual
-	            LocalDate fechaEnvio = mensaje.getFecha();
-	            return !fechaEnvio.isBefore(primerDiaDelMes) && !fechaEnvio.isAfter(ultimoDiaDelMes);
-	        })
-	        .count();
+		// Fecha actual
+		LocalDate ahora = LocalDate.now();
+
+		// Primer día y último día del mes actual
+		LocalDate primerDiaDelMes = ahora.withDayOfMonth(1);
+		LocalDate ultimoDiaDelMes = primerDiaDelMes.plusMonths(1).minusDays(1);
+
+		// Contar los mensajes enviados por el usuario en el mes actual
+		return listaMensajesEnviados.stream().filter(mensaje -> {
+			// Verificar si la fecha está dentro del mes actual
+			LocalDate fechaEnvio = mensaje.getFecha();
+			return !fechaEnvio.isBefore(primerDiaDelMes) && !fechaEnvio.isAfter(ultimoDiaDelMes);
+		}).count();
 	}
-	
-	
+
 	public List<Grupo> getGrupos() {
-	    return listaContactos.stream()
-	            .filter(c -> c instanceof Grupo)
-	            .map(c -> (Grupo) c)
-	            .toList(); // Cambiar a `collect(Collectors.toList())` si usas una versión de Java anterior a 16.
+		return listaContactos.stream().filter(c -> c instanceof Grupo).map(c -> (Grupo) c).toList(); // Cambiar a
+																										// `collect(Collectors.toList())`
+																										// si usas una
+																										// versión de
+																										// Java anterior
+																										// a 16.
 	}
 
-
-	
 	public void setFechaNacimiento(LocalDate fechaNacimiento) {
 		this.fechaNacimiento = fechaNacimiento;
 	}
-	
+
 	public List<Contacto> getListaContactos() {
 		return new LinkedList<Contacto>(listaContactos); // comprobar
 	}
-	
+
 	public void setListaContactos(List<Contacto> listaContactos) {
 		this.listaContactos = listaContactos;
 	}
-	
+
 	public List<Mensaje> getListaMensajesEnviados() {
-	    return Collections.unmodifiableList(listaMensajesEnviados);
+		return Collections.unmodifiableList(listaMensajesEnviados);
 	}
-	
+
 	public void setListaMensajesEnviados(List<Mensaje> listaMensajesEnviados) {
 		this.listaMensajesEnviados = listaMensajesEnviados;
 	}
-	
+
 	public List<Mensaje> getListaMensajesRecibidos() {
-	    return Collections.unmodifiableList(listaMensajesRecibidos);
+		return Collections.unmodifiableList(listaMensajesRecibidos);
 	}
+
 	public void setListaMensajesRecibidos(List<Mensaje> listaMensajesRecibidos) {
 		this.listaMensajesRecibidos = listaMensajesRecibidos;
 	}
-	
-	// Cambio
-    public boolean añadirContacto(Contacto contacto) {
-        if (!listaContactos.contains(contacto)) {
-            listaContactos.add(contacto);
-            
-            // Guardar los cambios del usuario en persistencia
-            AdaptadorUsuarioTDS.getUnicaInstancia().modificarUsuario(this);
-            
-            return true;
-        }
-        return false;
-    }
-	
-	public void añadirChat(Chat chat) {
-	    if (!listaChats.contains(chat)) {
-	        listaChats.add(chat);
-	    }
-	}
-	
-	public Chat obtenerChatCon(Usuario otroUsuario) {
-	    return listaChats.stream()
-	        .filter(ch -> ch.involucraUsuario(otroUsuario))
-	        .findFirst()
-	        .orElse(null);
-	}
-	
 
-	
-	public List<Mensaje> obtenerMensajesCon(Usuario otroUsuario) {
-	    List<Mensaje> mensajes = new LinkedList<>();
-	    for (Mensaje mensaje : listaMensajesEnviados) {
-	        if (mensaje.getReceptor().equals(otroUsuario)) {
-	            mensajes.add(mensaje);
-	        }
-	    }
-	    for (Mensaje mensaje : listaMensajesRecibidos) {
-	        if (mensaje.getEmisor().equals(otroUsuario)) {
-	            mensajes.add(mensaje);
-	        }
-	    }
-	    mensajes.sort((m1, m2) -> {
-	        if (m1.getFecha().equals(m2.getFecha())) {
-	            return m1.getHora().compareTo(m2.getHora());
-	        }
-	        return m1.getFecha().compareTo(m2.getFecha());
-	    });
-	    return mensajes;
+	// Cambio
+	public boolean añadirContacto(Contacto contacto) {
+		if (!listaContactos.contains(contacto)) {
+			listaContactos.add(contacto);
+
+			// Guardar los cambios del usuario en persistencia
+			AdaptadorUsuarioTDS.getUnicaInstancia().modificarUsuario(this);
+
+			return true;
+		}
+		return false;
 	}
-	
+
+	public void añadirChat(Chat chat) {
+		if (!listaChats.contains(chat)) {
+			listaChats.add(chat);
+		}
+	}
+
+	public Chat obtenerChatCon(Usuario otroUsuario) {
+		return listaChats.stream().filter(ch -> ch.involucraUsuario(otroUsuario)).findFirst().orElse(null);
+	}
+
+	public List<Mensaje> obtenerMensajesCon(Usuario otroUsuario) {
+		List<Mensaje> mensajes = new LinkedList<>();
+
+		// Añadir mensajes enviados al otro usuario
+		for (Mensaje mensaje : listaMensajesEnviados) {
+			if (mensaje.getReceptor().equals(otroUsuario)) {
+				mensajes.add(mensaje);
+			}
+		}
+
+		// Añadir mensajes recibidos del otro usuario
+		for (Mensaje mensaje : listaMensajesRecibidos) {
+			if (mensaje.getEmisor().equals(otroUsuario)) {
+				mensajes.add(mensaje);
+			}
+		}
+
+		// Ordenar por fecha y hora
+		mensajes.sort((m1, m2) -> {
+			int cmp = m1.getFecha().compareTo(m2.getFecha());
+			if (cmp == 0) {
+				return m1.getHora().compareTo(m2.getHora());
+			}
+			return cmp;
+		});
+
+		return mensajes;
+	}
+
+
 	public void activarPremium() {
-	    this.premium = true;
+		this.premium = true;
 	}
 
 	public void desactivarPremium() {
-	    this.premium = false;
+		this.premium = false;
 	}
 
 	public Chat getChatMensajes(Usuario otroUsuario) {
-		return listaChats.stream()
-				.filter(chat -> chat.getOtroUsuarioChat().equals(otroUsuario))
-				.findFirst()
+		return listaChats.stream().filter(chat -> chat.getOtroUsuarioChat().equals(otroUsuario)).findFirst()
 				.orElse(null);
 	}
-	
-    // Método para añadir un mensaje enviado
-    public void añadirMensajeEnviado(Mensaje mensaje) {
-        this.listaMensajesEnviados.add(mensaje);
-    }
 
-    // Método para añadir un mensaje recibido
-    public void añadirMensajeRecibido(Mensaje mensaje) {
-        this.listaMensajesRecibidos.add(mensaje);
-    }
-
-    // CONSTRUCTOR
-	
-	public Usuario(String usuario, String contraseña, String telefono, String email, Optional<String> saludo, ImageIcon imagenPerfil, LocalDate fechaNacimiento,
-			LocalDate fechaRegistro) {
-	    this.usuario = usuario;
-	    this.contraseña = contraseña;
-	    this.telefono = telefono;
-	    this.email = email;
-	    this.saludo = saludo;
-	    this.imagenPerfil = imagenPerfil;
-	    this.fechaNacimiento = fechaNacimiento;
-	    this.fechaRegistro = LocalDate.now();
-	    this.listaContactos = new LinkedList<>();
-	    this.listaMensajesEnviados = new LinkedList<>();
-	    this.listaMensajesRecibidos = new LinkedList<>();
-	    this.listaChats = new LinkedList<>();
+	// Método para añadir un mensaje enviado
+	public void añadirMensajeEnviado(Mensaje mensaje) {
+		this.listaMensajesEnviados.add(mensaje);
 	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Usuario other = (Usuario) obj;
-        if (telefono == null) {
-            if (other.telefono != null)
-                return false;
-        } else if (!telefono.equals(other.telefono))
-            return false;
-        return true;
-    }
+	// Método para añadir un mensaje recibido
+	public void añadirMensajeRecibido(Mensaje mensaje) {
+		this.listaMensajesRecibidos.add(mensaje);
+	}
 
-    @Override
-    public int hashCode() {
-        return telefono.hashCode();
-    }
+	public List<Mensaje> filtrarMensajes(String texto, String telefono, String contacto) {
+		EstrategiaBusquedaMensaje estrategiaBusqueda = new EstrategiaBusquedaMensaje();
 
+		// Añadir estrategias sólo si los valores no están vacíos o nulos
+		if (texto != null && !texto.isEmpty()) {
+			estrategiaBusqueda.addEstrategiaBusqueda(new BusquedaPorTexto(texto));
+		}
+		if (telefono != null && !telefono.isEmpty()) {
+			estrategiaBusqueda.addEstrategiaBusqueda(new BusquedaPorTelefono(telefono));
+		}
+		if (contacto != null && !contacto.isEmpty()) {
+			estrategiaBusqueda.addEstrategiaBusqueda(new BusquedaPorContacto(this, contacto));
+		}
+
+		// Obtener mensajes enviados y recibidos del usuario actual
+		List<Mensaje> mensajes = new ArrayList<>();
+		mensajes.addAll(this.getListaMensajesEnviados());
+		mensajes.addAll(this.getListaMensajesRecibidos());
+
+		// Ejecutar todas las estrategias y devolver los mensajes filtrados
+		return estrategiaBusqueda.ejecutarBusqueda(mensajes);
+	}
+	
+	public Chat crearChatCon(Usuario otroUsuario) {
+	    // Verificar si ya existe un chat con este usuario
+	    Chat chatExistente = obtenerChatCon(otroUsuario);
+	    if (chatExistente != null) {
+	        return chatExistente; // Devuelve el chat existente sin crear uno nuevo
+	    }
+	    
+	    // Crear nuevo chat
+	    Chat nuevoChat = new Chat(this, otroUsuario);
+	    
+	    // Añadir el chat a ambos usuarios
+	    this.añadirChat(nuevoChat);
+	    otroUsuario.añadirChat(nuevoChat);
+	    
+	    return nuevoChat;
+	}
+	
+	// CONSTRUCTOR
+
+	public Usuario(String usuario, String contraseña, String telefono, String email, Optional<String> saludo,
+			ImageIcon imagenPerfil, LocalDate fechaNacimiento, LocalDate fechaRegistro) {
+		this.usuario = usuario;
+		this.contraseña = contraseña;
+		this.telefono = telefono;
+		this.email = email;
+		this.saludo = saludo;
+		this.imagenPerfil = imagenPerfil;
+		this.fechaNacimiento = fechaNacimiento;
+		this.fechaRegistro = LocalDate.now();
+		this.listaContactos = new LinkedList<>();
+		this.listaMensajesEnviados = new LinkedList<>();
+		this.listaMensajesRecibidos = new LinkedList<>();
+		this.listaChats = new LinkedList<>();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Usuario other = (Usuario) obj;
+		if (telefono == null) {
+			if (other.telefono != null)
+				return false;
+		} else if (!telefono.equals(other.telefono))
+			return false;
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		return telefono.hashCode();
+	}
 
 	public Contacto obtenerContactoCon(Usuario otroUsuario) {
-	    return listaContactos.stream()
-	            .filter(c -> {
-	                if (c instanceof ContactoIndividual) {
-	                    return ((ContactoIndividual) c).getUsuario().equals(otroUsuario);
-	                }
-	                return false;
-	            })
-	            .findFirst()
-	            .orElse(null);
+		return listaContactos.stream().filter(c -> {
+			if (c instanceof ContactoIndividual) {
+				return ((ContactoIndividual) c).getUsuario().equals(otroUsuario);
+			}
+			return false;
+		}).findFirst().orElse(null);
 	}
-
 
 }
