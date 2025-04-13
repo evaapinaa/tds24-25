@@ -81,6 +81,10 @@ public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
         propiedades.add(new Propiedad("creador", String.valueOf(grupo.getCreador().getCodigo())));
         propiedades.add(new Propiedad("mensajesEnviados", obtenerCodigosMensajes(grupo.getListaMensajesEnviados())));
         
+        // Añadir la propiedad imagenGrupo
+        String rutaImagen = (grupo.getImagenGrupo() != null) ? grupo.getImagenGrupo().getDescription() : "";
+        propiedades.add(new Propiedad("imagenGrupo", rutaImagen));
+        
         // Establecer las propiedades en la entidad
         eGrupo.setPropiedades(propiedades);
 
@@ -111,6 +115,9 @@ public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
         String contactosCodigos = servPersistencia.recuperarPropiedadEntidad(eGrupo, "contactos");
         int creadorCodigo = Integer.parseInt(servPersistencia.recuperarPropiedadEntidad(eGrupo, "creador"));
         
+        // Recuperar la ruta de la imagen del grupo
+        String rutaImagen = servPersistencia.recuperarPropiedadEntidad(eGrupo, "imagenGrupo");
+        
         // Recuperar los códigos de los mensajes enviados
         String mensajesEnviadosCodigos = servPersistencia.recuperarPropiedadEntidad(eGrupo, "mensajesEnviados");
 
@@ -121,7 +128,23 @@ public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
 
         List<ContactoIndividual> contactos = obtenerContactosDesdeCodigos(contactosCodigos);
 
-        Grupo grupo = new Grupo(nombreGrupo, contactos, creador, null);
+        // Crear el ImageIcon para la imagen del grupo
+        ImageIcon imagenGrupo = null;
+        if (rutaImagen != null && !rutaImagen.trim().isEmpty()) {
+            try {
+                imagenGrupo = new ImageIcon(rutaImagen);
+                // Si la imagen no se carga correctamente (getIconWidth devuelve -1)
+                if (imagenGrupo.getIconWidth() <= 0) {
+                    System.err.println("No se pudo cargar la imagen del grupo desde: " + rutaImagen);
+                    imagenGrupo = null;
+                }
+            } catch (Exception e) {
+                System.err.println("Error al cargar la imagen del grupo: " + e.getMessage());
+                imagenGrupo = null;
+            }
+        }
+
+        Grupo grupo = new Grupo(nombreGrupo, contactos, creador, imagenGrupo);
         grupo.setCodigo(codigo);
 
         // Agregar el grupo al PoolDAO antes de recuperar los mensajes para evitar recursividad infinita
