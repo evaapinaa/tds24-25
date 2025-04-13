@@ -132,22 +132,21 @@ public class Usuario {
 	public long getNumeroMensajesUltimoMes() {
 	    // Fecha actual
 	    LocalDate ahora = LocalDate.now();
-
+	    
 	    // Primer día y último día del mes actual
 	    LocalDate primerDiaDelMes = ahora.withDayOfMonth(1);
 	    LocalDate ultimoDiaDelMes = primerDiaDelMes.plusMonths(1).minusDays(1);
-
+	    
 	    // Contar los mensajes enviados por el usuario en el mes actual
 	    return listaMensajesEnviados.stream()
 	        .filter(mensaje -> {
-	            // Convertir LocalDateTime a LocalDate
-	            LocalDate fechaEnvio = mensaje.getFecha();
-
 	            // Verificar si la fecha está dentro del mes actual
+	            LocalDate fechaEnvio = mensaje.getFecha();
 	            return !fechaEnvio.isBefore(primerDiaDelMes) && !fechaEnvio.isAfter(ultimoDiaDelMes);
 	        })
 	        .count();
 	}
+	
 	
 	public List<Grupo> getGrupos() {
 	    return listaContactos.stream()

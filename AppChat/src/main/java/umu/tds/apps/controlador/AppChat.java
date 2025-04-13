@@ -1,5 +1,7 @@
 package umu.tds.apps.controlador;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -12,6 +14,16 @@ import java.util.Optional;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+
 import umu.tds.apps.modelo.BusquedaPorContacto;
 import umu.tds.apps.modelo.BusquedaPorTelefono;
 import umu.tds.apps.modelo.BusquedaPorTexto;
@@ -19,7 +31,10 @@ import umu.tds.apps.modelo.BusquedaMensaje;
 import umu.tds.apps.modelo.Chat;
 import umu.tds.apps.modelo.Contacto;
 import umu.tds.apps.modelo.ContactoIndividual;
+import umu.tds.apps.modelo.DescuentoFecha;
+import umu.tds.apps.modelo.DescuentoMensaje;
 import umu.tds.apps.modelo.EstrategiaBusquedaMensaje;
+import umu.tds.apps.modelo.EstrategiaDescuento;
 import umu.tds.apps.modelo.Grupo;
 import umu.tds.apps.modelo.Mensaje;
 import umu.tds.apps.modelo.RepositorioUsuarios;
@@ -42,6 +57,8 @@ public class AppChat {
     private IAdaptadorChatDAO adaptadorChat;
 
     private static AppChat unicaInstancia = null;
+    
+    public static final double PRECIO_PREMIUM = 50.0; // Precio base de la suscripción premium
 
     // constructor privado (singleton)
     private AppChat() {
@@ -152,6 +169,44 @@ public class AppChat {
 		}
         usuarioActual.setSaludo(Optional.of(saludo));
         adaptadorUsuario.modificarUsuario(usuarioActual);
+    }
+    
+    
+    public double calcularPrecioPremium() {
+        if (usuarioActual == null) {
+            throw new IllegalStateException("No hay un usuario autenticado.");
+        }
+        
+        // Precio base
+        double precio = PRECIO_PREMIUM;
+        
+        // Aplicar estrategia de descuento según la fecha de registro
+        EstrategiaDescuento estrategia = new EstrategiaDescuento();
+        estrategia.setEstrategiaDescuento(new DescuentoFecha(usuarioActual.getFechaRegistro()));
+        precio = estrategia.calcularPrecioFinal(precio);
+        
+        // Obtener el número de mensajes enviados en el último mes
+        long mensajesEnviados = usuarioActual.getNumeroMensajesUltimoMes();
+        
+        // Aplicar estrategia de descuento según el número de mensajes
+        estrategia.setEstrategiaDescuento(new DescuentoMensaje((int) mensajesEnviados));
+        precio = estrategia.calcularPrecioFinal(precio);
+        
+        return precio;
+    }
+
+    public boolean activarPremium() {
+        if (usuarioActual == null) {
+            throw new IllegalStateException("No hay un usuario autenticado.");
+        }
+        
+        // Aquí iría la lógica de pago real, en este caso solo activamos el Premium
+        usuarioActual.activarPremium();
+        
+        // Persistir los cambios
+        adaptadorUsuario.modificarUsuario(usuarioActual);
+        
+        return true;
     }
 
     public static Usuario getUsuarioActual() {
@@ -390,6 +445,247 @@ public class AppChat {
 	        }
 	    }
 	    return enviado;
+	}
+
+
+	/**
+	 * Genera un PDF con la información de los contactos y grupos del usuario
+	 * @param rutaArchivo La ruta donde se guardará el archivo PDF
+	 * @return true si el PDF se generó correctamente, false en caso contrario
+	 */
+	/**
+	 * Genera un PDF con la información de los contactos y grupos del usuario, incluyendo mensajes enviados
+	 * @param rutaArchivo La ruta donde se guardará el archivo PDF
+	 * @return true si el PDF se generó correctamente, false en caso contrario
+	 */
+	public boolean generarPDFContactos(String rutaArchivo) {
+	    // Verificar que el usuario sea premium
+	    if (!usuarioActual.isPremium()) {
+	        System.err.println("Esta función solo está disponible para usuarios Premium");
+	        return false;
+	    }
+	    
+	    Document documento = new Document();
+	    
+	    try {
+	        PdfWriter.getInstance(documento, new FileOutputStream(rutaArchivo));
+	        documento.open();
+	        
+	        // Fuentes para el documento
+	        Font fontTitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16);
+	        Font fontSubtitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12);
+	        Font fontNormal = FontFactory.getFont(FontFactory.HELVETICA, 10);
+	        
+	        // Título principal
+	        documento.add(new Paragraph("Contactos y Grupos de " + usuarioActual.getUsuario(), fontTitle));
+	        documento.add(new Paragraph(" ")); // Espacio
+	        
+	        // Información del usuario
+	        documento.add(new Paragraph("Información del Usuario:", fontSubtitle));
+	        documento.add(new Paragraph("Nombre: " + usuarioActual.getUsuario(), fontNormal));
+	        documento.add(new Paragraph("Teléfono: " + usuarioActual.getTelefono(), fontNormal));
+	        documento.add(new Paragraph("Email: " + usuarioActual.getEmail(), fontNormal));
+	        documento.add(new Paragraph(" ")); // Espacio
+	        
+	        // Tabla de contactos individuales
+	        documento.add(new Paragraph("Contactos Individuales:", fontSubtitle));
+	        documento.add(new Paragraph(" ")); // Espacio
+	        
+	        // Crear tabla para contactos individuales
+	        PdfPTable tablaContactos = new PdfPTable(2); // 2 columnas
+	        tablaContactos.setWidthPercentage(100);
+	        tablaContactos.setWidths(new float[]{2, 1}); // Proporción de ancho de columnas
+	        
+	        // Encabezados de la tabla
+	        PdfPCell celdaNombre = new PdfPCell(new Phrase("Nombre", fontSubtitle));
+	        PdfPCell celdaTelefono = new PdfPCell(new Phrase("Teléfono", fontSubtitle));
+	        tablaContactos.addCell(celdaNombre);
+	        tablaContactos.addCell(celdaTelefono);
+	        
+	        // Añadir contactos individuales a la tabla
+	        for (Contacto contacto : usuarioActual.getListaContactos()) {
+	            if (contacto instanceof ContactoIndividual) {
+	                ContactoIndividual ci = (ContactoIndividual) contacto;
+	                tablaContactos.addCell(new Phrase(ci.getNombre(), fontNormal));
+	                tablaContactos.addCell(new Phrase(ci.getTelefono(), fontNormal));
+	            }
+	        }
+	        
+	        documento.add(tablaContactos);
+	        documento.add(new Paragraph(" ")); // Espacio
+	        
+	        // Sección de grupos
+	        documento.add(new Paragraph("Grupos:", fontSubtitle));
+	        documento.add(new Paragraph(" ")); // Espacio
+	        
+	        // Procesar cada grupo
+	        for (Contacto contacto : usuarioActual.getListaContactos()) {
+	            if (contacto instanceof Grupo) {
+	                Grupo grupo = (Grupo) contacto;
+	                documento.add(new Paragraph("Grupo: " + grupo.getNombre(), fontSubtitle));
+	                
+	                // Tabla de miembros del grupo
+	                PdfPTable tablaMiembros = new PdfPTable(2); // 2 columnas
+	                tablaMiembros.setWidthPercentage(100);
+	                tablaMiembros.setWidths(new float[]{2, 1}); // Proporción de ancho de columnas
+	                
+	                // Encabezados de la tabla
+	                PdfPCell celdaMiembro = new PdfPCell(new Phrase("Miembro", fontSubtitle));
+	                PdfPCell celdaTelefonoMiembro = new PdfPCell(new Phrase("Teléfono", fontSubtitle));
+	                tablaMiembros.addCell(celdaMiembro);
+	                tablaMiembros.addCell(celdaTelefonoMiembro);
+	                
+	                // Añadir miembros del grupo a la tabla
+	                for (ContactoIndividual miembro : grupo.getListaContactos()) {
+	                    tablaMiembros.addCell(new Phrase(miembro.getNombre(), fontNormal));
+	                    tablaMiembros.addCell(new Phrase(miembro.getTelefono(), fontNormal));
+	                }
+	                
+	                documento.add(tablaMiembros);
+	                documento.add(new Paragraph(" ")); // Espacio
+	                
+	                List<Mensaje> mensajesGrupo = grupo.getListaMensajesEnviados();
+	                if (mensajesGrupo != null && !mensajesGrupo.isEmpty()) {
+	                    documento.add(new Paragraph("Mensajes enviados al grupo:", fontSubtitle));
+	                    documento.add(new Paragraph(" ")); // Espacio
+	                    
+	                    // Tabla de mensajes enviados al grupo
+	                    PdfPTable tablaMensajes = new PdfPTable(3); // 3 columnas: Emisor, Mensaje, Fecha/Hora
+	                    tablaMensajes.setWidthPercentage(100);
+	                    tablaMensajes.setWidths(new float[]{1.5f, 3, 1.5f}); // Proporción de ancho de columnas
+	                    
+	                    // Encabezados de la tabla
+	                    tablaMensajes.addCell(new Phrase("Emisor", fontSubtitle));
+	                    tablaMensajes.addCell(new Phrase("Mensaje", fontSubtitle));
+	                    tablaMensajes.addCell(new Phrase("Fecha y Hora", fontSubtitle));
+	                    
+	                    // Añadir mensajes a la tabla
+	                    for (Mensaje mensaje : mensajesGrupo) {
+	                        String nombreEmisor = mensaje.getEmisor().equals(usuarioActual) ? 
+	                                "Yo" : mensaje.getEmisor().getUsuario();
+	                        
+	                        String textoMensaje = mensaje.getTexto();
+	                        if (textoMensaje.startsWith("EMOJI:")) {
+	                            textoMensaje = "[Emoji]"; // Representación simple para emojis
+	                        }
+	                        
+	                        String fechaHora = mensaje.getFecha().toString() + " " + 
+	                                String.format("%02d:%02d", mensaje.getHora().getHour(), mensaje.getHora().getMinute());
+	                        
+	                        tablaMensajes.addCell(new Phrase(nombreEmisor, fontNormal));
+	                        tablaMensajes.addCell(new Phrase(textoMensaje, fontNormal));
+	                        tablaMensajes.addCell(new Phrase(fechaHora, fontNormal));
+	                    }
+	                    
+	                    documento.add(tablaMensajes);
+	                } else {
+	                    documento.add(new Paragraph("No hay mensajes enviados a este grupo.", fontNormal));
+	                }
+	                
+	                documento.add(new Paragraph(" ")); // Espacio
+	            }
+	        }
+	        
+	        documento.close();
+	        return true;
+	        
+	    } catch (DocumentException | IOException e) {
+	        e.printStackTrace();
+	        if (documento.isOpen()) {
+	            documento.close();
+	        }
+	        return false;
+	    }
+	}
+
+	/**
+	 * Genera un PDF con los mensajes intercambiados entre el usuario actual y otro usuario
+	 * @param otroUsuario El otro usuario con el que se han intercambiado mensajes
+	 * @param rutaArchivo La ruta donde se guardará el archivo PDF
+	 * @return true si el PDF se generó correctamente, false en caso contrario
+	 */
+	public boolean generarPDFMensajesUsuario(Usuario otroUsuario, String rutaArchivo) {
+	    // Verificar que el usuario sea premium
+	    if (!usuarioActual.isPremium()) {
+	        System.err.println("Esta función solo está disponible para usuarios Premium");
+	        return false;
+	    }
+	    
+	    if (otroUsuario == null) {
+	        System.err.println("El usuario de destino no puede ser nulo");
+	        return false;
+	    }
+	    
+	    Document documento = new Document();
+	    
+	    try {
+	        PdfWriter.getInstance(documento, new FileOutputStream(rutaArchivo));
+	        documento.open();
+	        
+	        // Fuentes para el documento
+	        Font fontTitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16);
+	        Font fontSubtitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12);
+	        Font fontNormal = FontFactory.getFont(FontFactory.HELVETICA, 10);
+	        
+	        // Título principal
+	        documento.add(new Paragraph("Mensajes con " + otroUsuario.getUsuario(), fontTitle));
+	        documento.add(new Paragraph(" ")); // Espacio
+	        
+	        // Información de los usuarios
+	        documento.add(new Paragraph("Usuario actual: " + usuarioActual.getUsuario() + " (" + usuarioActual.getTelefono() + ")", fontNormal));
+	        documento.add(new Paragraph("Usuario conversación: " + otroUsuario.getUsuario() + " (" + otroUsuario.getTelefono() + ")", fontNormal));
+	        documento.add(new Paragraph(" ")); // Espacio
+	        
+	        // Obtener los mensajes intercambiados
+	        List<Mensaje> mensajes = usuarioActual.obtenerMensajesCon(otroUsuario);
+	        
+	        // Tabla de mensajes
+	        documento.add(new Paragraph("Mensajes intercambiados:", fontSubtitle));
+	        documento.add(new Paragraph(" ")); // Espacio
+	        
+	        if (mensajes.isEmpty()) {
+	            documento.add(new Paragraph("No hay mensajes intercambiados con este usuario.", fontNormal));
+	        } else {
+	            PdfPTable tablaMensajes = new PdfPTable(4); // 4 columnas: Emisor, Receptor, Mensaje, Fecha/Hora
+	            tablaMensajes.setWidthPercentage(100);
+	            tablaMensajes.setWidths(new float[]{1.5f, 1.5f, 4, 2}); // Proporción de ancho de columnas
+	            
+	            // Encabezados de la tabla
+	            tablaMensajes.addCell(new Phrase("Emisor", fontSubtitle));
+	            tablaMensajes.addCell(new Phrase("Receptor", fontSubtitle));
+	            tablaMensajes.addCell(new Phrase("Mensaje", fontSubtitle));
+	            tablaMensajes.addCell(new Phrase("Fecha y Hora", fontSubtitle));
+	            
+	            // Añadir mensajes a la tabla
+	            for (Mensaje mensaje : mensajes) {
+	                String nombreEmisor = mensaje.getEmisor().equals(usuarioActual) ? "Yo" : otroUsuario.getUsuario();
+	                String nombreReceptor = mensaje.getReceptor().equals(usuarioActual) ? "Yo" : otroUsuario.getUsuario();
+	                String textoMensaje = mensaje.getTexto();
+	                if (textoMensaje.startsWith("EMOJI:")) {
+	                    textoMensaje = "[Emoji]"; // Representación simple para emojis
+	                }
+	                String fechaHora = mensaje.getFecha().toString() + " " + 
+	                        String.format("%02d:%02d", mensaje.getHora().getHour(), mensaje.getHora().getMinute());
+	                
+	                tablaMensajes.addCell(new Phrase(nombreEmisor, fontNormal));
+	                tablaMensajes.addCell(new Phrase(nombreReceptor, fontNormal));
+	                tablaMensajes.addCell(new Phrase(textoMensaje, fontNormal));
+	                tablaMensajes.addCell(new Phrase(fechaHora, fontNormal));
+	            }
+	            
+	            documento.add(tablaMensajes);
+	        }
+	        
+	        documento.close();
+	        return true;
+	        
+	    } catch (DocumentException | IOException e) {
+	        e.printStackTrace();
+	        if (documento.isOpen()) {
+	            documento.close();
+	        }
+	        return false;
+	    }
 	}
 
 

@@ -1,7 +1,7 @@
+// Clase para manejar la estrategia de descuento
 package umu.tds.apps.modelo;
 
 public class EstrategiaDescuento {
-	
     private Descuento estrategiaDescuento;
 
     public void setEstrategiaDescuento(Descuento estrategiaDescuento) {
@@ -14,5 +14,4 @@ public class EstrategiaDescuento {
         }
         return estrategiaDescuento.calcularDescuento(precioOriginal);
     }
-
 }

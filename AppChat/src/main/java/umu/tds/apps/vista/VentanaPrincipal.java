@@ -33,6 +33,7 @@ import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.awt.event.ActionEvent;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
@@ -375,11 +376,7 @@ public class VentanaPrincipal extends JFrame {
 		btnNewButton_3.setFont(new Font("Arial", Font.PLAIN, 11));
 		btnNewButton_3
 				.setIcon(new ImageIcon(VentanaPrincipal.class.getResource("/umu/tds/apps/resources/garantia.png")));
-		btnNewButton_3.addActionListener(e -> {
-			// Abre la ventana de premium
-			VentanaPremium ventanaPremium = new VentanaPremium();
-			ventanaPremium.setVisible(true);
-		});
+		
 		panelNorte.add(btnNewButton_3);
 
 		// Usuario actual en la esquina derecha
@@ -827,9 +824,85 @@ public class VentanaPrincipal extends JFrame {
 		        }
 		    }
 		});
+		
+		
+		
+		Component rigidArea_2 = Box.createRigidArea(new Dimension(10, 20));  // 10px de ancho
+		panelNorte.add(rigidArea_2);
+		
+		// En VentanaPrincipal.java
+		JButton btnGenerarPDF = new JButton("Generar PDF");
+		btnGenerarPDF.setForeground(new Color(255, 255, 255));
+		btnGenerarPDF.setBackground(new Color(0, 128, 128));
+		btnGenerarPDF.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		btnGenerarPDF.setEnabled(AppChat.getUsuarioActual().isPremium()); // Solo disponible para usuarios Premium
+		
+		// En la clase VentanaPrincipal, encuentra el botón premium
+		btnNewButton_3.addActionListener(e -> {
+		    // Abre la ventana de premium
+		    VentanaPremium ventanaPremium = new VentanaPremium();
+		    ventanaPremium.setModal(true); // Hacer la ventana modal
+		    ventanaPremium.setLocationRelativeTo(this); // Centrar en la ventana principal
+		    ventanaPremium.setVisible(true);
+		    
+		    // Actualizar la UI si el usuario se volvió premium
+		    if (AppChat.getUsuarioActual().isPremium()) {
+		        // Refrescar la UI
+		        btnGenerarPDF.setEnabled(true);
+		        btnNewButton_3.setText(" Premium ✓ ");
+		        btnNewButton_3.setBackground(new Color(0, 128, 0)); // Verde para indicar activo
+		    }
+		});
+
+		btnGenerarPDF.addActionListener(e -> {
+		    if (!AppChat.getUsuarioActual().isPremium()) {
+		        JOptionPane.showMessageDialog(this, 
+		            "Esta función solo está disponible para usuarios Premium", 
+		            "Acceso denegado", JOptionPane.WARNING_MESSAGE);
+		        return;
+		    }
+		    
+		    // Mostrar un diálogo para seleccionar dónde guardar el archivo
+		    JFileChooser fileChooser = new JFileChooser();
+		    fileChooser.setDialogTitle("Guardar PDF");
+		    fileChooser.setFileFilter(new FileNameExtensionFilter("Archivos PDF (*.pdf)", "pdf"));
+		    
+		    int seleccion = fileChooser.showSaveDialog(this);
+		    if (seleccion == JFileChooser.APPROVE_OPTION) {
+		        String rutaArchivo = fileChooser.getSelectedFile().getAbsolutePath();
+		        if (!rutaArchivo.toLowerCase().endsWith(".pdf")) {
+		            rutaArchivo += ".pdf";
+		        }
+		        
+		        boolean exito = false;
+		        
+		        if (receptorActual != null) {
+		            // Generar PDF de mensajes con el contacto seleccionado
+		            exito = AppChat.getUnicaInstancia().generarPDFMensajesUsuario(receptorActual, rutaArchivo);
+		        } else {
+		            // Generar PDF de todos los contactos
+		            exito = AppChat.getUnicaInstancia().generarPDFContactos(rutaArchivo);
+		        }
+		        
+		        if (exito) {
+		            JOptionPane.showMessageDialog(this, 
+		                "PDF generado correctamente en: " + rutaArchivo, 
+		                "Éxito", JOptionPane.INFORMATION_MESSAGE);
+		        } else {
+		            JOptionPane.showMessageDialog(this, 
+		                "Error al generar el PDF", 
+		                "Error", JOptionPane.ERROR_MESSAGE);
+		        }
+		    }
+		});
+
+		// Añadir el botón a la interfaz en el lugar adecuado
+		panelNorte.add(btnGenerarPDF);
 
 ;
 	}
+	
+	
 
 	/**
 	 * Ejemplo de método para cargar imagen de perfil circular en un JLabel.
@@ -1036,7 +1109,7 @@ public class VentanaPrincipal extends JFrame {
 	    // 1) Obtener Chats
 	    List<Chat> chats = AppChat.getUsuarioActual().getListaChats();
 
-	    // Ordenar Chats (exactamente como hacías antes)
+	    // Ordenar Chats
 	    chats.sort((c1, c2) -> {
 	        List<Mensaje> m1 = c1.getMensajes();
 	        List<Mensaje> m2 = c2.getMensajes();
@@ -1058,15 +1131,20 @@ public class VentanaPrincipal extends JFrame {
 
 	    // 2) Obtener Grupos
 	    List<Grupo> grupos = AppChat.getUsuarioActual().getGrupos();
+	    
+	    // 3) Filtrar grupos para mostrar solo los que tienen mensajes
+	    grupos = grupos.stream()
+	            .filter(grupo -> grupo.getListaMensajesEnviados() != null && !grupo.getListaMensajesEnviados().isEmpty())
+	            .collect(Collectors.toList());
 
-	    // 3) Combinar en una lista de Object
+	    // 4) Combinar en una lista de Object
 	    List<Object> items = new ArrayList<>();
 	    // Primero añadimos los chats
 	    items.addAll(chats);
 	    // Luego los grupos (para que aparezcan después en la lista)
 	    items.addAll(grupos);
 
-	    // 4) Construir un AbstractListModel<Object> con la lista combinada
+	    // 5) Construir un AbstractListModel<Object> con la lista combinada
 	    AbstractListModel<Object> modelo = new AbstractListModel<>() {
 	        @Override
 	        public int getSize() {
@@ -1078,10 +1156,10 @@ public class VentanaPrincipal extends JFrame {
 	        }
 	    };
 
-	    // 5) Asignar el modelo a la lista
+	    // 6) Asignar el modelo a la lista
 	    listaChats.setModel(modelo);
 
-	    // 6) Repintar la lista
+	    // 7) Repintar la lista
 	    listaChats.repaint();
 	}
 
@@ -1138,6 +1216,10 @@ public class VentanaPrincipal extends JFrame {
 	public void cargarMensajeEnChat(Usuario contacto) {
 		cargarChat(contacto);
 	}
+	
+	
+	
+	
 	
 	
 
