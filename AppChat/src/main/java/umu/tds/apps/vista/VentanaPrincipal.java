@@ -143,12 +143,15 @@ public class VentanaPrincipal extends JFrame {
 	        return false;
 	    }
 
-	    boolean exito = true;
-
-	    for (ContactoIndividual contacto : grupo.getListaContactos()) {
-	        Usuario receptor = contacto.getUsuario();
+	    boolean enviado = true;
+	    
+	    // Crear un mensaje representativo para el grupo (usando el primer miembro como referencia)
+	    Mensaje mensajeGrupo = null;
+	    
+	    for (ContactoIndividual miembro : grupo.getListaContactos()) {
+	        Usuario receptor = miembro.getUsuario();
 	        if (receptor != null) {
-	            // Obtener o crear el chat entre el emisor y el receptor
+	            // Obtener o crear el chat con este receptor
 	            Chat chat = emisor.obtenerChatCon(receptor);
 	            if (chat == null) {
 	                chat = new Chat(emisor, receptor);
@@ -159,30 +162,41 @@ public class VentanaPrincipal extends JFrame {
 	                AdaptadorUsuarioTDS.getUnicaInstancia().modificarUsuario(receptor);
 	            }
 
-	            // Crear y registrar el mensaje
+	            // Crear mensaje individual para este receptor
 	            Mensaje mensaje = new Mensaje(emisor, texto, receptor, chat);
 	            AdaptadorMensajeTDS.getUnicaInstancia().registrarMensaje(mensaje);
 
-	            // Añadir el mensaje a las listas del emisor y receptor
+	            // Actualizar listas de emisor y receptor
 	            emisor.añadirMensajeEnviado(mensaje);
 	            receptor.añadirMensajeRecibido(mensaje);
-	            grupo.addMensajeEnviado(mensaje);
-
 
 	            // Persistir cambios
 	            AdaptadorUsuarioTDS.getUnicaInstancia().modificarUsuario(emisor);
 	            AdaptadorUsuarioTDS.getUnicaInstancia().modificarUsuario(receptor);
-	            AdaptadorGrupoTDS.getUnicaInstancia().modificarGrupo(grupo);
 
+	            // Actualizar chat individual
 	            chat.addMensaje(mensaje);
 	            AdaptadorChatTDS.getUnicaInstancia().modificarChat(chat);
+	            
+	            // Guardar el primer mensaje como representativo para el grupo
+	            if (mensajeGrupo == null) {
+	                mensajeGrupo = mensaje;
+	            }
+	            
+	            enviado &= true;
 	        } else {
-	            System.err.println("No se pudo enviar el mensaje a un contacto del grupo.");
-	            exito = false;
+	            System.err.println("No se pudo enviar mensaje a: " + miembro.getNombre());
+	            enviado = false;
 	        }
 	    }
-
-	    return exito;
+	    
+	    // Añadir solo una vez el mensaje al grupo
+	    if (mensajeGrupo != null) {
+	        grupo.addMensajeEnviado(mensajeGrupo);
+	        AdaptadorGrupoTDS.getUnicaInstancia().modificarGrupo(grupo);
+	    }
+	    
+	    return enviado;
 	}
 
 
@@ -912,7 +926,10 @@ public class VentanaPrincipal extends JFrame {
 
 	private void cargarChat(Usuario contacto) {
 	    receptorActual = contacto;
+	    grupoActual = null; // Esta línea es crucial - asegúrate de que grupoActual sea null
+	    
 	    panelChatContenido.removeAll(); // Limpiar contenido del chat
+
 
 	    // Verificar si ya existe un chat entre el usuario actual y el contacto
 	    Chat chatExistente = AppChat.getUsuarioActual().obtenerChatCon(contacto);
@@ -975,6 +992,8 @@ public class VentanaPrincipal extends JFrame {
 	    Usuario usuario1 = chatSeleccionado.getUsuario();
 	    Usuario usuario2 = chatSeleccionado.getOtroUsuarioChat();
 	    Usuario receptor;
+	    
+	    grupoActual = null; 
 
 	    // Determinar el receptor según el usuario actual
 	    if (usuario1.equals(usuarioActual)) {

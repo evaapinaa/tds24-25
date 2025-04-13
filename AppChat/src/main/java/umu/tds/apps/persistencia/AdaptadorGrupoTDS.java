@@ -10,6 +10,7 @@ import java.util.StringTokenizer;
 import javax.swing.ImageIcon;
 
 import beans.Entidad;
+import umu.tds.apps.modelo.Mensaje;
 import beans.Propiedad;
 import tds.driver.FactoriaServicioPersistencia;
 import tds.driver.ServicioPersistencia;
@@ -32,6 +33,34 @@ public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
         }
         return unicaInstancia;
     }
+    
+ // Método auxiliar para obtener mensajes desde códigos
+    private List<Mensaje> obtenerMensajesDesdeCodigos(String codigos) {
+        List<Mensaje> mensajes = new LinkedList<>();
+        if (codigos == null || codigos.trim().isEmpty()) return mensajes;
+
+        StringTokenizer st = new StringTokenizer(codigos, " ");
+        while (st.hasMoreTokens()) {
+            try {
+                int codMensaje = Integer.parseInt(st.nextToken());
+                Mensaje m = AdaptadorMensajeTDS.getUnicaInstancia().recuperarMensaje(codMensaje);
+                if (m != null) {
+                    mensajes.add(m);
+                }
+            } catch (NumberFormatException e) {
+                System.err.println("Error al convertir código de mensaje: " + e.getMessage());
+            }
+        }
+        return mensajes;
+    }
+    
+    private String obtenerCodigosMensajes(List<Mensaje> list) {
+        StringBuilder sb = new StringBuilder();
+        for (Mensaje m : list) {
+            sb.append(m.getCodigo()).append(" ");
+        }
+        return sb.toString().trim();
+    }
 
 
     @Override
@@ -42,11 +71,18 @@ public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
 
         Entidad eGrupo = new Entidad();
         eGrupo.setNombre("grupo");
-        eGrupo.setPropiedades(new ArrayList<>(Arrays.asList(
-            new Propiedad("nombreGrupo", grupo.getNombreGrupo()),
-            new Propiedad("contactos", obtenerCodigosContactos(grupo.getListaContactos())),
-            new Propiedad("creador", String.valueOf(grupo.getCreador().getCodigo()))
-        )));
+        
+        // Crear una lista vacía
+        List<Propiedad> propiedades = new ArrayList<>();
+        
+        // Añadir las propiedades una por una
+        propiedades.add(new Propiedad("nombreGrupo", grupo.getNombreGrupo()));
+        propiedades.add(new Propiedad("contactos", obtenerCodigosContactos(grupo.getListaContactos())));
+        propiedades.add(new Propiedad("creador", String.valueOf(grupo.getCreador().getCodigo())));
+        propiedades.add(new Propiedad("mensajesEnviados", obtenerCodigosMensajes(grupo.getListaMensajesEnviados())));
+        
+        // Establecer las propiedades en la entidad
+        eGrupo.setPropiedades(propiedades);
 
         eGrupo = servPersistencia.registrarEntidad(eGrupo);
         grupo.setCodigo(eGrupo.getId());
@@ -74,6 +110,9 @@ public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
         String nombreGrupo = servPersistencia.recuperarPropiedadEntidad(eGrupo, "nombreGrupo");
         String contactosCodigos = servPersistencia.recuperarPropiedadEntidad(eGrupo, "contactos");
         int creadorCodigo = Integer.parseInt(servPersistencia.recuperarPropiedadEntidad(eGrupo, "creador"));
+        
+        // Recuperar los códigos de los mensajes enviados
+        String mensajesEnviadosCodigos = servPersistencia.recuperarPropiedadEntidad(eGrupo, "mensajesEnviados");
 
         Usuario creador = AdaptadorUsuarioTDS.getUnicaInstancia().recuperarUsuario(creadorCodigo);
         if (creador == null) {
@@ -85,7 +124,17 @@ public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
         Grupo grupo = new Grupo(nombreGrupo, contactos, creador, null);
         grupo.setCodigo(codigo);
 
+        // Agregar el grupo al PoolDAO antes de recuperar los mensajes para evitar recursividad infinita
         PoolDAO.getUnicaInstancia().addObjeto(codigo, grupo);
+        
+        // Recuperar y establecer los mensajes enviados
+        if (mensajesEnviadosCodigos != null && !mensajesEnviadosCodigos.isEmpty()) {
+            List<Mensaje> mensajesEnviados = obtenerMensajesDesdeCodigos(mensajesEnviadosCodigos);
+            for (Mensaje mensaje : mensajesEnviados) {
+                grupo.addMensajeEnviado(mensaje);
+            }
+        }
+        
         return grupo;
     }
     
@@ -98,33 +147,59 @@ public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
             return;
         }
 
-        // 2) Actualizar las propiedades (nombreGrupo, contactos, creador, imagenGrupo, etc.)
+        // 2) Verificar si ya existe la propiedad mensajesEnviados
+        boolean tienePropiedadMensajes = false;
         for (Propiedad prop : eGrupo.getPropiedades()) {
-            switch (prop.getNombre()) {
-                case "nombreGrupo":
-                    prop.setValor(grupo.getNombreGrupo());
-                    break;
-                case "contactos":
-                    prop.setValor(obtenerCodigosContactos(grupo.getListaContactos()));
-                    break;
-                case "creador":
-                    prop.setValor(String.valueOf(grupo.getCreador().getCodigo()));
-                    break;
-                case "imagenGrupo":
-                    String desc = (grupo.getImagenGrupo() != null)
-                        ? grupo.getImagenGrupo().getDescription()
-                        : "";
-                    prop.setValor(desc);
-                    break;
-                // case "historial":
-                //     prop.setValor(convertirHistorialAMensajes(grupo.getHistorialMensajes()));
-                //     break;
-                default:
-                    // Si tienes más propiedades, manéjalas aquí.
-                    break;
+            if (prop.getNombre().equals("mensajesEnviados")) {
+                tienePropiedadMensajes = true;
+                break;
             }
-            servPersistencia.modificarPropiedad(prop);
         }
+
+        // 3) Si no existe la propiedad, crear una lista nueva con todas las propiedades
+        if (!tienePropiedadMensajes) {
+            // Crear una nueva lista con todas las propiedades existentes
+            List<Propiedad> propiedadesNuevas = new ArrayList<>(eGrupo.getPropiedades());
+            
+            // Añadir la nueva propiedad
+            propiedadesNuevas.add(new Propiedad("mensajesEnviados", 
+                                             obtenerCodigosMensajes(grupo.getListaMensajesEnviados())));
+            
+            // Establecer las propiedades actualizadas
+            eGrupo.setPropiedades(propiedadesNuevas);
+            
+            // Actualizar la entidad en el servicio de persistencia
+            servPersistencia.modificarEntidad(eGrupo);
+        } else {
+            // 4) Si ya existe, actualizar las propiedades individualmente
+            for (Propiedad prop : eGrupo.getPropiedades()) {
+                switch (prop.getNombre()) {
+                    case "nombreGrupo":
+                        prop.setValor(grupo.getNombreGrupo());
+                        break;
+                    case "contactos":
+                        prop.setValor(obtenerCodigosContactos(grupo.getListaContactos()));
+                        break;
+                    case "creador":
+                        prop.setValor(String.valueOf(grupo.getCreador().getCodigo()));
+                        break;
+                    case "mensajesEnviados":
+                        prop.setValor(obtenerCodigosMensajes(grupo.getListaMensajesEnviados()));
+                        break;
+                    case "imagenGrupo":
+                        String desc = (grupo.getImagenGrupo() != null)
+                            ? grupo.getImagenGrupo().getDescription()
+                            : "";
+                        prop.setValor(desc);
+                        break;
+                    default:
+                        // Si tienes más propiedades, manéjalas aquí.
+                        break;
+                }
+                servPersistencia.modificarPropiedad(prop);
+            }
+        }
+        
         System.out.println("Grupo modificado en BD: " + grupo.getNombreGrupo());
     }
     

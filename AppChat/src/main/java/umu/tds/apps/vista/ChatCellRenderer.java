@@ -8,6 +8,8 @@ import java.net.URL;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import java.util.List;
+
 
 import tds.BubbleText;
 import umu.tds.apps.controlador.AppChat;
@@ -184,24 +186,75 @@ public class ChatCellRenderer extends JPanel implements ListCellRenderer<Object>
         addButton.setVisible(false);  // No tiene sentido el botón '+' en un Grupo
 
         // Imagen del grupo
-        // Si tu clase Grupo tiene un método getImagenGrupo() (ImageIcon) o un path
-        // A continuación asumo que tienes "grupo.getImagenGrupo()" que devuelve un ImageIcon
-        // Si devuelves un path, tendrías que replicar la misma lógica de setProfileImage(path).
         ImageIcon iconGrupo = grupo.getImagenGrupo(); 
         if (iconGrupo != null) {
             // Si quieres que sea circular:
-            //   1) Cargarla como buffered
-            //   2) VisualUtils.createCircularIcon(...)
-            // De momento, la muestro tal cual:
-            imageLabel.setIcon(iconGrupo);
+            try {
+                Image img = iconGrupo.getImage();
+                BufferedImage buffImg;
+                if (img instanceof BufferedImage) {
+                    buffImg = (BufferedImage) img;
+                } else {
+                    // Crear BufferedImage desde Image
+                    buffImg = new BufferedImage(
+                        img.getWidth(null), 
+                        img.getHeight(null), 
+                        BufferedImage.TYPE_INT_ARGB);
+                    Graphics2D g2d = buffImg.createGraphics();
+                    g2d.drawImage(img, 0, 0, null);
+                    g2d.dispose();
+                }
+                imageLabel.setIcon(VisualUtils.createCircularIcon(buffImg, 50));
+            } catch (Exception e) {
+                // Si hay error, mostrar el icono tal cual
+                imageLabel.setIcon(iconGrupo);
+            }
         } else {
-            // Sin imagen => dejar un icono por defecto o poner nulo
-            imageLabel.setIcon(null);
+            // Sin imagen => usar icono por defecto
+            imageLabel.setIcon(new ImageIcon(ChatCellRenderer.class.getResource("/umu/tds/apps/resources/personas.png")));
         }
 
-        // Preview: no tienes historial en 'Grupo'
-        previewLabel.setText("Sin historial"); 
-        previewLabel.setIcon(null);
+        // Obtener el último mensaje del grupo para mostrar en la previsualización
+        List<Mensaje> mensajes = grupo.getListaMensajesEnviados();
+        if (mensajes != null && !mensajes.isEmpty()) {
+            // Encontrar el mensaje más reciente
+            Mensaje ultimoMensaje = mensajes.get(mensajes.size() - 1);
+            String texto = ultimoMensaje.getTexto();
+            String horaStr = String.format("%02d:%02d",
+                    ultimoMensaje.getHora().getHour(), 
+                    ultimoMensaje.getHora().getMinute());
+
+            // Mostrar el último mensaje (texto o emoji)
+            if (texto != null && texto.startsWith("EMOJI:")) {
+                try {
+                    int emojiCode = Integer.parseInt(texto.substring(6));
+                    ImageIcon emojiIcon = BubbleText.getEmoji(emojiCode);
+                    if (emojiIcon != null) {
+                        previewLabel.setIcon(emojiIcon);
+                        previewLabel.setText(" " + horaStr);
+                    } else {
+                        previewLabel.setText("[Emoji] " + horaStr);
+                        previewLabel.setIcon(null);
+                    }
+                } catch (NumberFormatException e) {
+                    previewLabel.setText(texto + "  " + horaStr);
+                    previewLabel.setIcon(null);
+                }
+            } else if (texto != null) {
+                // Acortar si es muy largo
+                if (texto.length() > 20) {
+                    texto = texto.substring(0, 20) + "...";
+                }
+                previewLabel.setText(texto + "  " + horaStr);
+                previewLabel.setIcon(null);
+            } else {
+                previewLabel.setText("[Mensaje sin contenido] " + horaStr);
+                previewLabel.setIcon(null);
+            }
+        } else {
+            previewLabel.setText("Sin historial"); 
+            previewLabel.setIcon(null);
+        }
 
         // Colores de selección
         applySelectionColors(list, isSelected);
