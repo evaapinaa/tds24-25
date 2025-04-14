@@ -9,7 +9,12 @@ import javax.swing.border.EtchedBorder;
 
 public class EmojiPanel extends JPanel {
 	
-    public EmojiPanel(ActionListener emojiClickListener) {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public EmojiPanel(ActionListener emojiClickListener) {
         setLayout(new GridLayout(5,3,0,0)); // Grid para organizar los emojis
         setBackground(new Color(0, 128, 128));
         setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));

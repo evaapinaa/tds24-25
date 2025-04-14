@@ -26,21 +26,15 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
 import umu.tds.apps.controlador.AppChat;
-import umu.tds.apps.modelo.Chat;
 import umu.tds.apps.modelo.Mensaje;
 import umu.tds.apps.modelo.Usuario;
-import umu.tds.apps.vista.customcomponents.VisualUtils;
 
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.LineBorder;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.BevelBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.Toolkit;
 import javax.swing.UIManager;

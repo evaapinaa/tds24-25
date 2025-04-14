@@ -1,11 +1,9 @@
 package umu.tds.apps.persistencia;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import beans.Entidad;
 import beans.Propiedad;

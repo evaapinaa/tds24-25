@@ -3,7 +3,6 @@ package umu.tds.apps.persistencia;
 import java.util.List;
 
 import umu.tds.apps.modelo.Chat;
-import umu.tds.apps.modelo.Usuario;
 
 public interface IAdaptadorChatDAO {
 

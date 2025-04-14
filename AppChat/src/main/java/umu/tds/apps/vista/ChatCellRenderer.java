@@ -109,7 +109,6 @@ public class ChatCellRenderer extends JPanel implements ListCellRenderer<Object>
     /**
      * Renderiza un Chat (usuario-usuario) con foto, nombre y último mensaje.
      */
-    @SuppressWarnings("deprecation")
     private void renderChat(JList<?> list, Chat chat, int index, boolean isSelected) {
         // 1. Usuario actual y "otro usuario"
         Usuario usuarioActual = AppChat.getUsuarioActual();

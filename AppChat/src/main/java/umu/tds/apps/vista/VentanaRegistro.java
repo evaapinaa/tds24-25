@@ -398,7 +398,8 @@ public class VentanaRegistro extends JFrame {
 
 	        if (urlImagen != null && !urlImagen.isEmpty()) {
 	            try {
-	                BufferedImage imagen = ImageIO.read(new URL(urlImagen));
+	                @SuppressWarnings("deprecation")
+					BufferedImage imagen = ImageIO.read(new URL(urlImagen));
 	                ImageIcon icono = new ImageIcon(imagen.getScaledInstance(100, 100, Image.SCALE_SMOOTH));
 	                icono = VisualUtils.createCircularIcon(imagen, 100);
 	                // Limpiar el prefijo "file:" en caso de que lo tenga (por ejemplo, si se hubiese copiado una URL local)

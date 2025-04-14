@@ -2,17 +2,14 @@
 package umu.tds.apps.modelo;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import javax.swing.ImageIcon;
 
-import umu.tds.apps.persistencia.AdaptadorContactoIndividualTDS;
 import umu.tds.apps.persistencia.AdaptadorUsuarioTDS;
 
 public class Usuario {

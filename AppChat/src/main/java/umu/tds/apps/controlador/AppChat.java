@@ -3,12 +3,8 @@ package umu.tds.apps.controlador;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import javax.swing.Icon;
@@ -24,22 +20,17 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
-import umu.tds.apps.modelo.BusquedaPorContacto;
-import umu.tds.apps.modelo.BusquedaPorTelefono;
-import umu.tds.apps.modelo.BusquedaPorTexto;
-import umu.tds.apps.modelo.BusquedaMensaje;
+
 import umu.tds.apps.modelo.Chat;
 import umu.tds.apps.modelo.Contacto;
 import umu.tds.apps.modelo.ContactoIndividual;
 import umu.tds.apps.modelo.DescuentoFecha;
 import umu.tds.apps.modelo.DescuentoMensaje;
-import umu.tds.apps.modelo.EstrategiaBusquedaMensaje;
 import umu.tds.apps.modelo.EstrategiaDescuento;
 import umu.tds.apps.modelo.Grupo;
 import umu.tds.apps.modelo.Mensaje;
 import umu.tds.apps.modelo.RepositorioUsuarios;
 import umu.tds.apps.modelo.Usuario;
-import umu.tds.apps.persistencia.AdaptadorChatTDS;
 import umu.tds.apps.persistencia.AdaptadorContactoIndividualTDS;
 import umu.tds.apps.persistencia.AdaptadorGrupoTDS;
 import umu.tds.apps.persistencia.AdaptadorUsuarioTDS;
