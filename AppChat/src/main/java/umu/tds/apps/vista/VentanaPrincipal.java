@@ -836,6 +836,11 @@ public class VentanaPrincipal extends JFrame {
 		btnGenerarPDF.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnGenerarPDF.setEnabled(AppChat.getUsuarioActual().isPremium()); // Solo disponible para usuarios Premium
 		
+		if (AppChat.getUsuarioActual().isPremium()) {
+		    btnNewButton_3.setText(" Premium ");
+		    btnNewButton_3.setBackground(new Color(0, 128, 0)); // Verde para indicar activo
+		}
+		
 		// En la clase VentanaPrincipal, encuentra el botón premium
 		btnNewButton_3.addActionListener(e -> {
 		    // Abre la ventana de premium
@@ -848,7 +853,7 @@ public class VentanaPrincipal extends JFrame {
 		    if (AppChat.getUsuarioActual().isPremium()) {
 		        // Refrescar la UI
 		        btnGenerarPDF.setEnabled(true);
-		        btnNewButton_3.setText(" Premium ✓ ");
+		        btnNewButton_3.setText(" Premium ");
 		        btnNewButton_3.setBackground(new Color(0, 128, 0)); // Verde para indicar activo
 		    }
 		});

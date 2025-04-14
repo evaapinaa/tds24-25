@@ -26,264 +26,271 @@ import umu.tds.apps.modelo.Usuario;
 
 public class AdaptadorUsuarioTDS implements IAdaptadorUsuarioDAO {
 
-    private static ServicioPersistencia servPersistencia;
-    private static AdaptadorUsuarioTDS unicaInstancia = null;
+	private static ServicioPersistencia servPersistencia;
+	private static AdaptadorUsuarioTDS unicaInstancia = null;
 
-    private AdaptadorUsuarioTDS() {
-        servPersistencia = FactoriaServicioPersistencia.getInstance().getServicioPersistencia();
-    }
+	private AdaptadorUsuarioTDS() {
+		servPersistencia = FactoriaServicioPersistencia.getInstance().getServicioPersistencia();
+	}
 
-    public static AdaptadorUsuarioTDS getUnicaInstancia() {
-        if (unicaInstancia == null) {
-            unicaInstancia = new AdaptadorUsuarioTDS();
-        }
-        return unicaInstancia;
-    }
+	public static AdaptadorUsuarioTDS getUnicaInstancia() {
+		if (unicaInstancia == null) {
+			unicaInstancia = new AdaptadorUsuarioTDS();
+		}
+		return unicaInstancia;
+	}
 
-    @Override
-    public void registrarUsuario(Usuario usuario) {
-        Entidad eUsuario = null;
-        try {
-            eUsuario = servPersistencia.recuperarEntidad(usuario.getCodigo());
-        } catch (NullPointerException e) {}
-        if (eUsuario != null) return; // ya existe
+	@Override
+	public void registrarUsuario(Usuario usuario) {
+		Entidad eUsuario = null;
+		try {
+			eUsuario = servPersistencia.recuperarEntidad(usuario.getCodigo());
+		} catch (NullPointerException e) {
+		}
+		if (eUsuario != null)
+			return; // ya existe
 
-        eUsuario = new Entidad();
-        eUsuario.setNombre("usuario");
-        eUsuario.setPropiedades(new ArrayList<>(Arrays.asList(
-            new Propiedad("nombre", usuario.getUsuario()),
-            new Propiedad("telefono", usuario.getTelefono()),
-            new Propiedad("email", usuario.getEmail()),
-            new Propiedad("contraseña", usuario.getContraseña()),
-            new Propiedad("saludo", usuario.getSaludo().orElse("")),
-            
-            new Propiedad("fechaRegistro", usuario.getFechaRegistro().toString()),   //GUARDAMOS LA FECHA DE REGISTRO EN LA BD
+		eUsuario = new Entidad();
+		eUsuario.setNombre("usuario");
+		eUsuario.setPropiedades(new ArrayList<>(Arrays.asList(new Propiedad("nombre", usuario.getUsuario()),
+				new Propiedad("telefono", usuario.getTelefono()), new Propiedad("email", usuario.getEmail()),
+				new Propiedad("contraseña", usuario.getContraseña()),
+				new Propiedad("saludo", usuario.getSaludo().orElse("")),
 
+				new Propiedad("fechaRegistro", usuario.getFechaRegistro().toString()), // GUARDAMOS LA FECHA DE REGISTRO
+																						// EN LA BD
 
-            new Propiedad("contactos", obtenerCodigosContactos(usuario.getListaContactos())),
-            new Propiedad("imagenPerfil", (usuario.getImagenPerfil() != null)
-                                            ? usuario.getImagenPerfil().getDescription()
-                                            : ""),
-            new Propiedad("mensajesEnviados", obtenerCodigosMensajes(usuario.getListaMensajesEnviados())),
-            new Propiedad("mensajesRecibidos", obtenerCodigosMensajes(usuario.getListaMensajesRecibidos())),
-            new Propiedad("chats", obtenerCodigosChats(usuario.getListaChats()))
-        )));
+				new Propiedad("contactos", obtenerCodigosContactos(usuario.getListaContactos())),
+				new Propiedad("imagenPerfil",
+						(usuario.getImagenPerfil() != null) ? usuario.getImagenPerfil().getDescription() : ""),
+				new Propiedad("mensajesEnviados", obtenerCodigosMensajes(usuario.getListaMensajesEnviados())),
+				new Propiedad("mensajesRecibidos", obtenerCodigosMensajes(usuario.getListaMensajesRecibidos())),
+				new Propiedad("chats", obtenerCodigosChats(usuario.getListaChats())),
+				new Propiedad("premium", String.valueOf(usuario.isPremium()))
 
-        eUsuario = servPersistencia.registrarEntidad(eUsuario);
-        usuario.setCodigo(eUsuario.getId());
-        System.out.println("Usuario registrado con ID: " + eUsuario.getId());
-    }
+		)));
 
-    @Override
-    public void modificarUsuario(Usuario usuario) {
-        Entidad eUsuario = servPersistencia.recuperarEntidad(usuario.getCodigo());
-        if (eUsuario == null) {
-            System.err.println("No se encontró el usuario con ID: " + usuario.getCodigo());
-            return;
-        }
-        for (Propiedad prop : eUsuario.getPropiedades()) {
-            switch (prop.getNombre()) {
-                case "nombre":
-                    prop.setValor(usuario.getUsuario());
-                    break;
-                case "telefono":
-                    prop.setValor(usuario.getTelefono());
-                    break;
-                case "email":
-                    prop.setValor(usuario.getEmail());
-                    break;
-                case "contraseña":
-                    prop.setValor(usuario.getContraseña());
-                    break;
-                case "saludo":
-                    prop.setValor(usuario.getSaludo().orElse(""));
-                    break;
-                case "imagenPerfil":
-                    prop.setValor((usuario.getImagenPerfil() != null)
-                                  ? usuario.getImagenPerfil().getDescription()
-                                  : "");
-                    break;
-                case "contactos":
-                    prop.setValor(obtenerCodigosContactos(usuario.getListaContactos()));
-                    break;
-                case "mensajesEnviados":
-                    prop.setValor(obtenerCodigosMensajes(usuario.getListaMensajesEnviados()));
-                    break;
-                case "mensajesRecibidos":
-                    prop.setValor(obtenerCodigosMensajes(usuario.getListaMensajesRecibidos()));
-                    break;
-                case "chats":
-                    prop.setValor(obtenerCodigosChats(usuario.getListaChats()));
-                    break;
-            }
-            servPersistencia.modificarPropiedad(prop);
-        }
-        System.out.println("Usuario " + usuario.getTelefono() + " modificado en BD.");
-    }
+		eUsuario = servPersistencia.registrarEntidad(eUsuario);
+		usuario.setCodigo(eUsuario.getId());
+		System.out.println("Usuario registrado con ID: " + eUsuario.getId());
+	}
 
-    @Override
-    public Usuario recuperarUsuario(int codigo) {
-        if (PoolDAO.getUnicaInstancia().contiene(codigo)) {
-            return (Usuario) PoolDAO.getUnicaInstancia().getObjeto(codigo);
-        }
+	@Override
+	public void modificarUsuario(Usuario usuario) {
+		Entidad eUsuario = servPersistencia.recuperarEntidad(usuario.getCodigo());
+		if (eUsuario == null) {
+			System.err.println("No se encontró el usuario con ID: " + usuario.getCodigo());
+			return;
+		}
 
-        Entidad eUsuario = servPersistencia.recuperarEntidad(codigo);
-        if (eUsuario == null) {
-            System.err.println("No se encontró el usuario con ID: " + codigo);
-            return null;
-        }
+		for (Propiedad prop : eUsuario.getPropiedades()) {
+			switch (prop.getNombre()) {
+			case "nombre":
+				prop.setValor(usuario.getUsuario());
+				break;
+			case "telefono":
+				prop.setValor(usuario.getTelefono());
+				break;
+			case "email":
+				prop.setValor(usuario.getEmail());
+				break;
+			case "contraseña":
+				prop.setValor(usuario.getContraseña());
+				break;
+			case "saludo":
+				prop.setValor(usuario.getSaludo().orElse(""));
+				break;
+			case "imagenPerfil":
+				prop.setValor((usuario.getImagenPerfil() != null) ? usuario.getImagenPerfil().getDescription() : "");
+				break;
+			case "contactos":
+				prop.setValor(obtenerCodigosContactos(usuario.getListaContactos()));
+				break;
+			case "mensajesEnviados":
+				prop.setValor(obtenerCodigosMensajes(usuario.getListaMensajesEnviados()));
+				break;
+			case "mensajesRecibidos":
+				prop.setValor(obtenerCodigosMensajes(usuario.getListaMensajesRecibidos()));
+				break;
+			case "chats":
+				prop.setValor(obtenerCodigosChats(usuario.getListaChats()));
+				break;
+			case "premium":
+				prop.setValor(String.valueOf(usuario.isPremium()));
+				break;
+			}
+			servPersistencia.modificarPropiedad(prop);
+		}
+		System.out.println("Usuario " + usuario.getTelefono() + " modificado en BD.");
+	}
 
-        // Propiedades básicas
-        String nombre = servPersistencia.recuperarPropiedadEntidad(eUsuario, "nombre");
-        String telefono = servPersistencia.recuperarPropiedadEntidad(eUsuario, "telefono");
-        String contraseña = servPersistencia.recuperarPropiedadEntidad(eUsuario, "contraseña");
-        String email = servPersistencia.recuperarPropiedadEntidad(eUsuario, "email");
-        String saludo = servPersistencia.recuperarPropiedadEntidad(eUsuario, "saludo");
-        String rutaImagenPerfil = servPersistencia.recuperarPropiedadEntidad(eUsuario, "imagenPerfil");
+	@Override
+	public Usuario recuperarUsuario(int codigo) {
+		if (PoolDAO.getUnicaInstancia().contiene(codigo)) {
+			return (Usuario) PoolDAO.getUnicaInstancia().getObjeto(codigo);
+		}
 
-        // Crea el usuario base
-        ImageIcon imagenPerfil = null;
-        if (rutaImagenPerfil != null && !rutaImagenPerfil.isEmpty()) {
-            imagenPerfil = new ImageIcon();
-            imagenPerfil.setDescription(rutaImagenPerfil);
-        }
+		Entidad eUsuario = servPersistencia.recuperarEntidad(codigo);
+		if (eUsuario == null) {
+			System.err.println("No se encontró el usuario con ID: " + codigo);
+			return null;
+		}
 
-        Usuario usuario = new Usuario(
-            nombre,
-            contraseña,
-            telefono,
-            email,
-            Optional.ofNullable(saludo),
-            imagenPerfil,
-            null,
-            null // Fecha de registro se asigna después
-        );
-        usuario.setCodigo(codigo);
+		// Propiedades básicas
+		String nombre = servPersistencia.recuperarPropiedadEntidad(eUsuario, "nombre");
+		String telefono = servPersistencia.recuperarPropiedadEntidad(eUsuario, "telefono");
+		String contraseña = servPersistencia.recuperarPropiedadEntidad(eUsuario, "contraseña");
+		String email = servPersistencia.recuperarPropiedadEntidad(eUsuario, "email");
+		String saludo = servPersistencia.recuperarPropiedadEntidad(eUsuario, "saludo");
+		String rutaImagenPerfil = servPersistencia.recuperarPropiedadEntidad(eUsuario, "imagenPerfil");
+		String premiumStr = servPersistencia.recuperarPropiedadEntidad(eUsuario, "premium");
 
-        // Recuperar la fecha de registro
-        String fechaRegistroStr = servPersistencia.recuperarPropiedadEntidad(eUsuario, "fechaRegistro");
-        if (fechaRegistroStr != null) {
-            usuario.setFechaRegistro(LocalDate.parse(fechaRegistroStr));
-        }
+		// Crea el usuario base
+		ImageIcon imagenPerfil = null;
+		if (rutaImagenPerfil != null && !rutaImagenPerfil.isEmpty()) {
+			imagenPerfil = new ImageIcon();
+			imagenPerfil.setDescription(rutaImagenPerfil);
+		}
 
-        // Añadir a PoolDAO antes de cargar sus referencias
-        PoolDAO.getUnicaInstancia().addObjeto(codigo, usuario);
+		Usuario usuario = new Usuario(nombre, contraseña, telefono, email, Optional.ofNullable(saludo), imagenPerfil,
+				null, null // Fecha de registro se asigna después
+		);
+		usuario.setCodigo(codigo);
 
-        // Cargar listas
-        String contactos = servPersistencia.recuperarPropiedadEntidad(eUsuario, "contactos");
-        usuario.setListaContactos(obtenerContactosDesdeCodigos(contactos));
+		// Recuperar la fecha de registro
+		String fechaRegistroStr = servPersistencia.recuperarPropiedadEntidad(eUsuario, "fechaRegistro");
+		if (fechaRegistroStr != null) {
+			usuario.setFechaRegistro(LocalDate.parse(fechaRegistroStr));
+		}
 
-        String mensajesEnviados = servPersistencia.recuperarPropiedadEntidad(eUsuario, "mensajesEnviados");
-        usuario.setListaMensajesEnviados(obtenerMensajesDesdeCodigos(mensajesEnviados));
+		// Añadir a PoolDAO antes de cargar sus referencias
+		PoolDAO.getUnicaInstancia().addObjeto(codigo, usuario);
 
-        String mensajesRecibidos = servPersistencia.recuperarPropiedadEntidad(eUsuario, "mensajesRecibidos");
-        usuario.setListaMensajesRecibidos(obtenerMensajesDesdeCodigos(mensajesRecibidos));
+		// Cargar listas
+		String contactos = servPersistencia.recuperarPropiedadEntidad(eUsuario, "contactos");
+		usuario.setListaContactos(obtenerContactosDesdeCodigos(contactos));
 
-        String chats = servPersistencia.recuperarPropiedadEntidad(eUsuario, "chats");
-        usuario.setListaChats(obtenerChatsDesdeCodigos(chats));
+		String mensajesEnviados = servPersistencia.recuperarPropiedadEntidad(eUsuario, "mensajesEnviados");
+		usuario.setListaMensajesEnviados(obtenerMensajesDesdeCodigos(mensajesEnviados));
 
-        System.out.println("Usuario recuperado: " + telefono
-                           + ", Chats: " + usuario.getListaChats().size());
-        return usuario;
-    }
+		String mensajesRecibidos = servPersistencia.recuperarPropiedadEntidad(eUsuario, "mensajesRecibidos");
+		usuario.setListaMensajesRecibidos(obtenerMensajesDesdeCodigos(mensajesRecibidos));
 
-    @Override
-    public List<Usuario> recuperarTodosUsuarios() {
-        List<Entidad> eUsuarios = servPersistencia.recuperarEntidades("usuario");
-        List<Usuario> usuarios = new LinkedList<>();
-        for (Entidad eUsuario : eUsuarios) {
-            Usuario u = recuperarUsuario(eUsuario.getId());
-            if (u != null) {
-                usuarios.add(u);
-            }
-        }
-        return usuarios;
-    }
+		String chats = servPersistencia.recuperarPropiedadEntidad(eUsuario, "chats");
+		usuario.setListaChats(obtenerChatsDesdeCodigos(chats));
 
-    // --------------------------------------------------------------------------------
-    // Métodos auxiliares
-    // --------------------------------------------------------------------------------
+		System.out.println("Usuario recuperado: " + telefono + ", Chats: " + usuario.getListaChats().size());
 
-    private String obtenerCodigosContactos(List<Contacto> listaContactos) {
-        StringBuilder sb = new StringBuilder();
-        for (Contacto c : listaContactos) {
-            sb.append(c.getCodigo()).append(" ");
-        }
-        return sb.toString().trim();
-    }
+		boolean premium = false;
+		if (premiumStr != null) {
+			try {
+				premium = Boolean.parseBoolean(premiumStr);
+			} catch (NumberFormatException e) {
+				System.err.println("Error al convertir la propiedad 'premium' a booleano: " + premiumStr);
+			}
+		}
+		usuario.setPremium(premium);
+		return usuario;
+	}
 
-    private List<Contacto> obtenerContactosDesdeCodigos(String codigos) {
-        List<Contacto> contactos = new LinkedList<>();
-        if (codigos == null || codigos.trim().isEmpty()) return contactos;
+	@Override
+	public List<Usuario> recuperarTodosUsuarios() {
+		List<Entidad> eUsuarios = servPersistencia.recuperarEntidades("usuario");
+		List<Usuario> usuarios = new LinkedList<>();
+		for (Entidad eUsuario : eUsuarios) {
+			Usuario u = recuperarUsuario(eUsuario.getId());
+			if (u != null) {
+				usuarios.add(u);
+			}
+		}
+		return usuarios;
+	}
 
-        StringTokenizer st = new StringTokenizer(codigos, " ");
-        while (st.hasMoreTokens()) {
-            int codContacto = Integer.parseInt(st.nextToken());
-            Entidad eContacto = servPersistencia.recuperarEntidad(codContacto);
+	// --------------------------------------------------------------------------------
+	// Métodos auxiliares
+	// --------------------------------------------------------------------------------
 
-            if (eContacto.getNombre().equals("contactoIndividual")) {
-                ContactoIndividual ci = AdaptadorContactoIndividualTDS.getUnicaInstancia().recuperarContactoIndividual(codContacto);
-                if (ci != null) {
-                    contactos.add(ci);
-                }
-            } else if (eContacto.getNombre().equals("grupo")) {
-                Grupo grupo = AdaptadorGrupoTDS.getUnicaInstancia().recuperarGrupo(codContacto);
-                if (grupo != null) {
-                    contactos.add(grupo);
-                }
-            } else {
-                System.err.println("La entidad con código " + codContacto + " no es un contacto válido.");
-            }
-        }
-        return contactos;
-    }
+	private String obtenerCodigosContactos(List<Contacto> listaContactos) {
+		StringBuilder sb = new StringBuilder();
+		for (Contacto c : listaContactos) {
+			sb.append(c.getCodigo()).append(" ");
+		}
+		return sb.toString().trim();
+	}
 
+	private List<Contacto> obtenerContactosDesdeCodigos(String codigos) {
+		List<Contacto> contactos = new LinkedList<>();
+		if (codigos == null || codigos.trim().isEmpty())
+			return contactos;
 
+		StringTokenizer st = new StringTokenizer(codigos, " ");
+		while (st.hasMoreTokens()) {
+			int codContacto = Integer.parseInt(st.nextToken());
+			Entidad eContacto = servPersistencia.recuperarEntidad(codContacto);
 
+			if (eContacto.getNombre().equals("contactoIndividual")) {
+				ContactoIndividual ci = AdaptadorContactoIndividualTDS.getUnicaInstancia()
+						.recuperarContactoIndividual(codContacto);
+				if (ci != null) {
+					contactos.add(ci);
+				}
+			} else if (eContacto.getNombre().equals("grupo")) {
+				Grupo grupo = AdaptadorGrupoTDS.getUnicaInstancia().recuperarGrupo(codContacto);
+				if (grupo != null) {
+					contactos.add(grupo);
+				}
+			} else {
+				System.err.println("La entidad con código " + codContacto + " no es un contacto válido.");
+			}
+		}
+		return contactos;
+	}
 
-    private String obtenerCodigosMensajes(List<Mensaje> mensajes) {
-        StringBuilder sb = new StringBuilder();
-        for (Mensaje m : mensajes) {
-            sb.append(m.getCodigo()).append(" ");
-        }
-        return sb.toString().trim();
-    }
+	private String obtenerCodigosMensajes(List<Mensaje> mensajes) {
+		StringBuilder sb = new StringBuilder();
+		for (Mensaje m : mensajes) {
+			sb.append(m.getCodigo()).append(" ");
+		}
+		return sb.toString().trim();
+	}
 
-    private List<Mensaje> obtenerMensajesDesdeCodigos(String codigos) {
-        List<Mensaje> mensajes = new LinkedList<>();
-        if (codigos == null || codigos.trim().isEmpty()) return mensajes;
+	private List<Mensaje> obtenerMensajesDesdeCodigos(String codigos) {
+		List<Mensaje> mensajes = new LinkedList<>();
+		if (codigos == null || codigos.trim().isEmpty())
+			return mensajes;
 
-        StringTokenizer st = new StringTokenizer(codigos, " ");
-        while (st.hasMoreTokens()) {
-            int codMensaje = Integer.parseInt(st.nextToken());
-            Mensaje m = AdaptadorMensajeTDS.getUnicaInstancia().recuperarMensaje(codMensaje);
-            if (m != null) {
-                mensajes.add(m);
-            }
-        }
-        return mensajes;
-    }
+		StringTokenizer st = new StringTokenizer(codigos, " ");
+		while (st.hasMoreTokens()) {
+			int codMensaje = Integer.parseInt(st.nextToken());
+			Mensaje m = AdaptadorMensajeTDS.getUnicaInstancia().recuperarMensaje(codMensaje);
+			if (m != null) {
+				mensajes.add(m);
+			}
+		}
+		return mensajes;
+	}
 
-    private String obtenerCodigosChats(List<Chat> chats) {
-        StringBuilder sb = new StringBuilder();
-        for (Chat c : chats) {
-            sb.append(c.getCodigo()).append(" ");
-        }
-        return sb.toString().trim();
-    }
+	private String obtenerCodigosChats(List<Chat> chats) {
+		StringBuilder sb = new StringBuilder();
+		for (Chat c : chats) {
+			sb.append(c.getCodigo()).append(" ");
+		}
+		return sb.toString().trim();
+	}
 
-    private List<Chat> obtenerChatsDesdeCodigos(String codigos) {
-        List<Chat> listaChats = new LinkedList<>();
-        if (codigos == null || codigos.trim().isEmpty()) return listaChats;
+	private List<Chat> obtenerChatsDesdeCodigos(String codigos) {
+		List<Chat> listaChats = new LinkedList<>();
+		if (codigos == null || codigos.trim().isEmpty())
+			return listaChats;
 
-        StringTokenizer st = new StringTokenizer(codigos, " ");
-        while (st.hasMoreTokens()) {
-            int codChat = Integer.parseInt(st.nextToken());
-            Chat c = AdaptadorChatTDS.getUnicaInstancia().recuperarChat(codChat);
-            if (c != null) {
-                listaChats.add(c);
-            }
-        }
-        return listaChats;
-    }
+		StringTokenizer st = new StringTokenizer(codigos, " ");
+		while (st.hasMoreTokens()) {
+			int codChat = Integer.parseInt(st.nextToken());
+			Chat c = AdaptadorChatTDS.getUnicaInstancia().recuperarChat(codChat);
+			if (c != null) {
+				listaChats.add(c);
+			}
+		}
+		return listaChats;
+	}
 }

@@ -185,17 +185,22 @@ public class AppChat {
 	}
 
 	public boolean activarPremium() {
-		if (usuarioActual == null) {
-			throw new IllegalStateException("No hay un usuario autenticado.");
-		}
+	    if (usuarioActual == null) {
+	        throw new IllegalStateException("No hay un usuario autenticado.");
+	    }
+	    
+	    // Verificar si ya es Premium
+	    if (usuarioActual.isPremium()) {
+	        return true; // Ya es Premium, no es necesario hacer nada
+	    }
 
-		// Aquí iría la lógica de pago real, en este caso solo activamos el Premium
-		usuarioActual.activarPremium();
-
-		// Persistir los cambios
-		adaptadorUsuario.modificarUsuario(usuarioActual);
-
-		return true;
+	    // Activar Premium
+	    usuarioActual.activarPremium();
+	    
+	    // Persistir los cambios
+	    adaptadorUsuario.modificarUsuario(usuarioActual);
+	    
+	    return true;
 	}
 
 	public static Usuario getUsuarioActual() {
