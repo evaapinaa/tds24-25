@@ -415,12 +415,35 @@ public class VentanaPrincipal extends JFrame {
 		panelNorte.add(lblNewLabel_1);
 
 		lblNewLabel_1.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				seleccionarFotoPerfil(lblNewLabel_1);
-			}
-		});
+		    @Override
+		    public void mouseClicked(MouseEvent e) {
+		        // Crear un diálogo de opciones
+		        String[] opciones = {"Cambiar Foto de Perfil", "Ver Perfil", "Cancelar"};
+		        int seleccion = JOptionPane.showOptionDialog(
+		            VentanaPrincipal.this,  // padre
+		            "Selecciona una opción", 
+		            "Opciones de Perfil", 
+		            JOptionPane.DEFAULT_OPTION,
+		            JOptionPane.QUESTION_MESSAGE,
+		            null,  // sin icono personalizado
+		            opciones, 
+		            opciones[2]  // opción por defecto
+		        );
 
+		        // Manejar la selección
+		        switch (seleccion) {
+		            case 0:  // Cambiar Foto de Perfil
+		                seleccionarFotoPerfil(lblNewLabel_1);
+		                break;
+		            case 1:  // Ver Perfil
+		                VentanaPerfil.mostrarPerfil(VentanaPrincipal.this);
+		                break;
+		            case 2:  // Cancelar
+		                // No hacer nada
+		                break;
+		        }
+		    }
+		});
 		// Para la lista de chats recientes
 		JPanel panelMensajes = new JPanel(new BorderLayout());
 		contentPane.add(panelMensajes, BorderLayout.WEST);
@@ -828,7 +851,6 @@ public class VentanaPrincipal extends JFrame {
 		        }
 		    }
 		});
-		
 		
 		
 		Component rigidArea_2 = Box.createRigidArea(new Dimension(10, 20));  // 10px de ancho

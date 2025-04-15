@@ -56,17 +56,15 @@ public class AdaptadorUsuarioTDS implements IAdaptadorUsuarioDAO {
 				new Propiedad("telefono", usuario.getTelefono()), new Propiedad("email", usuario.getEmail()),
 				new Propiedad("contraseña", usuario.getContraseña()),
 				new Propiedad("saludo", usuario.getSaludo().orElse("")),
-
-				new Propiedad("fechaRegistro", usuario.getFechaRegistro().toString()), // GUARDAMOS LA FECHA DE REGISTRO
-																						// EN LA BD
-
+				new Propiedad("fechaRegistro", usuario.getFechaRegistro().toString()),
 				new Propiedad("contactos", obtenerCodigosContactos(usuario.getListaContactos())),
 				new Propiedad("imagenPerfil",
 						(usuario.getImagenPerfil() != null) ? usuario.getImagenPerfil().getDescription() : ""),
 				new Propiedad("mensajesEnviados", obtenerCodigosMensajes(usuario.getListaMensajesEnviados())),
 				new Propiedad("mensajesRecibidos", obtenerCodigosMensajes(usuario.getListaMensajesRecibidos())),
 				new Propiedad("chats", obtenerCodigosChats(usuario.getListaChats())),
-				new Propiedad("premium", String.valueOf(usuario.isPremium()))
+				new Propiedad("premium", String.valueOf(usuario.isPremium())),
+				new Propiedad("fechaNacimiento", usuario.getFechaNacimiento().toString())
 
 		)));
 
@@ -118,6 +116,9 @@ public class AdaptadorUsuarioTDS implements IAdaptadorUsuarioDAO {
 			case "premium":
 				prop.setValor(String.valueOf(usuario.isPremium()));
 				break;
+			case "fechaNacimiento":
+				prop.setValor(usuario.getFechaNacimiento().toString());
+				break;
 			}
 			servPersistencia.modificarPropiedad(prop);
 		}
@@ -144,6 +145,7 @@ public class AdaptadorUsuarioTDS implements IAdaptadorUsuarioDAO {
 		String saludo = servPersistencia.recuperarPropiedadEntidad(eUsuario, "saludo");
 		String rutaImagenPerfil = servPersistencia.recuperarPropiedadEntidad(eUsuario, "imagenPerfil");
 		String premiumStr = servPersistencia.recuperarPropiedadEntidad(eUsuario, "premium");
+		String fechaNacimientoStr = servPersistencia.recuperarPropiedadEntidad(eUsuario, "fechaNacimiento");
 
 		// Crea el usuario base
 		ImageIcon imagenPerfil = null;
@@ -190,6 +192,17 @@ public class AdaptadorUsuarioTDS implements IAdaptadorUsuarioDAO {
 			}
 		}
 		usuario.setPremium(premium);
+		
+	    LocalDate fechaNacimiento = null;
+	    if (fechaNacimientoStr != null && !fechaNacimientoStr.isEmpty()) {
+	        try {
+	            fechaNacimiento = LocalDate.parse(fechaNacimientoStr);
+	        } catch (Exception e) {
+	            System.err.println("Error al parsear fecha de nacimiento: " + fechaNacimientoStr);
+	        }
+	    }
+	    usuario.setFechaNacimiento(fechaNacimiento);
+	    
 		return usuario;
 	}
 
