@@ -44,7 +44,12 @@ public class ChatCellRenderer extends JPanel implements ListCellRenderer<Object>
         imageLabel = new JLabel();
         nameLabel = new JLabel();
         previewLabel = new JLabel();
+        
+        // boton de agregar
         addButton = new JButton("+");
+        addButton.setToolTipText("Añadir a contactos");
+        addButton.setFont(new Font("Arial", Font.BOLD, 16));
+        addButton.setForeground(new Color(0, 128, 128));
         addButtonBounds = new Rectangle();
 
         JPanel topPanel = new JPanel(new BorderLayout(5, 5));
@@ -55,6 +60,12 @@ public class ChatCellRenderer extends JPanel implements ListCellRenderer<Object>
 
         add(topPanel, BorderLayout.NORTH);
         add(previewLabel, BorderLayout.CENTER);
+        
+        
+    }
+    
+    public JButton getAddButton() {
+        return addButton;
     }
 
     @Override
@@ -94,14 +105,23 @@ public class ChatCellRenderer extends JPanel implements ListCellRenderer<Object>
             }
         }
 
-        // Ajustar tamaño de addButton y su área
-        addButton.setSize(addButton.getPreferredSize());
-        addButtonBounds.setBounds(
-            addButton.getLocation().x, 
-            addButton.getLocation().y,
-            addButton.getWidth(),
-            addButton.getHeight()
-        );
+        // Verificar si debemos mostrar el botón de añadir (solo para Chats)
+        if (value instanceof Chat) {
+            Chat chat = (Chat) value;
+            Usuario usuarioActual = AppChat.getUsuarioActual();
+            Usuario usuarioOtro = chat.getUsuario().equals(usuarioActual) ? 
+                                  chat.getOtroUsuarioChat() : chat.getUsuario();
+            
+            // Verificar si ya está en contactos
+            ContactoIndividual contactoExistente = AppChat.getUnicaInstancia()
+                    .obtenerContactoPorTelefono(usuarioOtro.getTelefono());
+            
+            // Mostrar u ocultar el botón según corresponda
+            addButton.setVisible(contactoExistente == null);
+        } else {
+            // No es un Chat, no necesitamos botón
+            addButton.setVisible(false);
+        }
 
         return this;
     }
@@ -132,7 +152,7 @@ public class ChatCellRenderer extends JPanel implements ListCellRenderer<Object>
         setProfileImage(path);
 
         // 4. Último mensaje
-        java.util.List<Mensaje> mensajes = chat.getMensajes();
+        List<Mensaje> mensajes = chat.getMensajes();
         if (!mensajes.isEmpty()) {
             Mensaje ultimo = mensajes.get(mensajes.size() - 1);
             String texto = ultimo.getTexto();

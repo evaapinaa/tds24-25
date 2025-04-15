@@ -5,6 +5,9 @@ import tds.BubbleText;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
 import javax.swing.border.EtchedBorder;
 
 public class EmojiPanel extends JPanel {
@@ -29,8 +32,8 @@ public class EmojiPanel extends JPanel {
             
             final int emojiIndex = i; // Variable final para capturar el índice del emoji
             
-            emoji.addMouseListener(new java.awt.event.MouseAdapter() {
-                public void mouseClicked(java.awt.event.MouseEvent evt) {
+            emoji.addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent evt) {
                     // Llama al ActionListener proporcionado con el índice del emoji seleccionado
                     emojiClickListener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, String.valueOf(emojiIndex)));
                     setVisible(false); // Ocultar el panel después de seleccionar

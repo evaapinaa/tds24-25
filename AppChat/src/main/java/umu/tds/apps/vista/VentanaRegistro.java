@@ -43,7 +43,6 @@ import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import java.awt.Toolkit;
-import javax.swing.border.BevelBorder;
 import java.awt.Cursor;
 import java.net.URL;
 import java.time.LocalDate;
@@ -98,8 +97,9 @@ public class VentanaRegistro extends JFrame {
 		setTitle("AppChat");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 561, 421);
+		setLocationRelativeTo(null);
 		contentPane = new VisualUtils.JPanelGradient(new Color(60, 179, 113), new Color(135, 206, 235));
-		contentPane.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		contentPane.setBorder(null);
 
 		setContentPane(contentPane);
 

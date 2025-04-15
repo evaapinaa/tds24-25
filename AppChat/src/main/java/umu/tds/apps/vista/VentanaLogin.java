@@ -93,7 +93,9 @@ public class VentanaLogin {
 		frmAppchat = new JFrame();
 		frmAppchat.setIconImage(Toolkit.getDefaultToolkit().getImage(VentanaLogin.class.getResource("/umu/tds/apps/resources/icono.png")));
 		frmAppchat.setTitle("AppChat");
-		frmAppchat.setBounds(300, 300, 450, 261);
+		frmAppchat.setBounds(100, 100, 565, 376);
+		// en medio de la pantalla
+		frmAppchat.setLocationRelativeTo(null);
 		frmAppchat.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		JPanel gradientPanel = new VisualUtils.JPanelGradient(new Color(60, 179, 113), new Color(135, 206, 235));

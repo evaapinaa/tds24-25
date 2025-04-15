@@ -30,9 +30,10 @@ import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.awt.event.ActionEvent;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
@@ -72,6 +73,8 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -79,7 +82,6 @@ import java.net.URL;
 import java.time.LocalTime;
 
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.GroupLayout.Group;
 
 public class VentanaPrincipal extends JFrame {
 
@@ -108,6 +110,9 @@ public class VentanaPrincipal extends JFrame {
 	private JScrollPane scrollPanelChatMensajes;
 	
 	private CardLayout cardLayout;
+	
+	// lista de chats
+	private JList<Object> list;
 	
 	public JPanel getPanelCentro() {
 	    return panelCentro;
@@ -210,7 +215,7 @@ public class VentanaPrincipal extends JFrame {
 				.getImage(VentanaPrincipal.class.getResource("/umu/tds/apps/resources/icono.png")));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 800, 633);
-		
+		setLocationRelativeTo(null);
 		
 		contentPane = new JPanel();
 		contentPane.setBorder(new SoftBevelBorder(BevelBorder.RAISED, null, null, new Color(176, 196, 222), null));
@@ -256,7 +261,7 @@ public class VentanaPrincipal extends JFrame {
 		        String nombreContactoOGrupo = JOptionPane.showInputDialog("Introduce el nombre del contacto o grupo:");
 		        if (nombreContactoOGrupo != null && !nombreContactoOGrupo.trim().isEmpty()) {
 		            // 1) Localizar el contacto en la listaContactos del usuario actual
-		            Usuario usuarioActual = AppChat.getUnicaInstancia().getUsuarioActual();
+		            Usuario usuarioActual = AppChat.getUsuarioActual();
 		            Contacto contacto = usuarioActual.getListaContactos().stream()
 		                    .filter(c -> c.getNombre().equalsIgnoreCase(nombreContactoOGrupo))
 		                    .findFirst()
@@ -344,19 +349,29 @@ public class VentanaPrincipal extends JFrame {
 		btnNewButton_2
 				.setIcon(new ImageIcon(VentanaPrincipal.class.getResource("/umu/tds/apps/resources/personas.png")));
 		btnNewButton_2.addActionListener(e -> {
-			// Crear el marco que contendrá la ventana de contactos
-			JFrame frameContactos = new JFrame("Ventana de Contactos");
-			frameContactos.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-			frameContactos.setSize(600, 400);
+		    // Crear el marco que contendrá la ventana de contactos
+		    JFrame frameContactos = new JFrame("Ventana de Contactos");
+		    frameContactos.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		    frameContactos.setSize(600, 400);
+		    frameContactos.setLocationRelativeTo(null);
 
-			// Lista de contactos inicial o vacía
-			List<String> contactosIniciales = new ArrayList<>();
-			contactosIniciales.add("Contacto 1"); // EJEMPLO
+		    // Lista de contactos inicial o vacía
+		    List<String> contactosIniciales = new ArrayList<>();
+		    contactosIniciales.add("Contacto 1"); // EJEMPLO
 
-			// Crear el panel VentanaContactos y añadir al frame
-			VentanaContactos ventanaContactos = new VentanaContactos();
-			frameContactos.getContentPane().add(ventanaContactos);
-			frameContactos.setVisible(true);
+		    // Crear el panel VentanaContactos y añadir al frame
+		    VentanaContactos ventanaContactos = new VentanaContactos();
+		    frameContactos.getContentPane().add(ventanaContactos);
+		    
+		    // Añadir listener para actualizar la lista cuando se cierra la ventana
+		    frameContactos.addWindowListener(new WindowAdapter() {
+		        @Override
+		        public void windowClosed(WindowEvent e) {
+		            actualizarListaChats(list);
+		        }
+		    });
+		    
+		    frameContactos.setVisible(true);
 		});
 		panelNorte.add(btnNewButton_2);
 
@@ -410,7 +425,7 @@ public class VentanaPrincipal extends JFrame {
 		JPanel panelMensajes = new JPanel(new BorderLayout());
 		contentPane.add(panelMensajes, BorderLayout.WEST);
 
-		JList<Object> list = new JList<>();
+		list = new JList<>();
 		list.setSelectionBackground(new Color(102, 205, 170));
 		list.setBackground(new Color(205, 235, 234));
 		list.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -479,9 +494,9 @@ public class VentanaPrincipal extends JFrame {
 
 		// Configurar el tamaño dinámico del GIF
 		ImageIcon gifIcon = new ImageIcon(getClass().getResource("/umu/tds/apps/resources/directo.gif"));
-		panelBienvenida.addComponentListener(new java.awt.event.ComponentAdapter() {
+		panelBienvenida.addComponentListener(new ComponentAdapter() {
 			@Override
-			public void componentResized(java.awt.event.ComponentEvent e) {
+			public void componentResized(ComponentEvent e) {
 				// Obtener el tamaño del panel
 				Dimension size = panelBienvenida.getSize();
 				int scaledWidth = (int) (size.width * 0.4); // GIF será el 40% del ancho del panel
@@ -735,63 +750,53 @@ public class VentanaPrincipal extends JFrame {
 		panelEnvio.add(btnEnviar, gbc_btnEnviar);
 
 
-
-
-		// Listener de Mouse para detectar clics en el botón '+'
 		list.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				int index = list.locationToIndex(e.getPoint());
-				if (index >= 0) {
-					Rectangle cellBounds = list.getCellBounds(index, index);
-					if (cellBounds != null && cellBounds.contains(e.getPoint())) {
-						int relativeX = e.getX() - cellBounds.x;
-						int relativeY = e.getY() - cellBounds.y;
-
-						// Definir el área del botón '+' (últimos 30 píxeles de la celda)
-						int cellWidth = list.getWidth();
-						int cellHeight = cellBounds.height;
-						Rectangle addButtonArea = new Rectangle(cellWidth - 30, 0, 30, cellHeight);
-
-						if (addButtonArea.contains(relativeX, relativeY)) {
-							// El clic fue en el botón '+'
-							Chat chat = (Chat) list.getModel().getElementAt(index);
-
-							// Obtener el otro usuario del chat
-							Usuario usuarioActual = AppChat.getUsuarioActual();
-							Usuario usuarioOtro = (chat.getUsuario().equals(usuarioActual)) ? chat.getOtroUsuarioChat()
-									: chat.getUsuario();
-
-							// Verificar si ya está en contactos
-							ContactoIndividual contactoExistente = AppChat.getUnicaInstancia()
-									.obtenerContactoPorTelefono(usuarioOtro.getTelefono());
-							if (contactoExistente != null) {
-								JOptionPane.showMessageDialog(VentanaPrincipal.this,
-										"Este usuario ya está en tus contactos.", "Información",
-										JOptionPane.INFORMATION_MESSAGE);
-								return;
-							}
-
-							// Solicitar el nombre para el contacto
-							String nombreContacto = JOptionPane.showInputDialog(VentanaPrincipal.this,
-									"Introduce el nombre del contacto:", "Agregar Contacto", JOptionPane.PLAIN_MESSAGE);
-							if (nombreContacto != null && !nombreContacto.trim().isEmpty()) {
-								boolean agregado = AppChat.getUnicaInstancia().añadirContacto(nombreContacto,
-										usuarioOtro.getTelefono());
-								if (agregado) {
-									actualizarListaChats(list);
-									JOptionPane.showMessageDialog(VentanaPrincipal.this,
-											"Contacto agregado exitosamente.", "Éxito",
-											JOptionPane.INFORMATION_MESSAGE);
-								} else {
-									JOptionPane.showMessageDialog(VentanaPrincipal.this,
-											"No se pudo agregar el contacto.", "Error", JOptionPane.ERROR_MESSAGE);
-								}
-							}
-						}
-					}
-				}
-			}
+		    @Override
+		    public void mouseClicked(MouseEvent e) {
+		        int index = list.locationToIndex(e.getPoint());
+		        if (index >= 0) {
+		            Object selectedItem = list.getModel().getElementAt(index);
+		            if (selectedItem instanceof Chat) {
+		                Chat chat = (Chat) selectedItem;
+		                
+		                // Obtener el otro usuario
+		                Usuario usuarioActual = AppChat.getUsuarioActual();
+		                Usuario usuarioOtro = chat.getUsuario().equals(usuarioActual) ? 
+		                                      chat.getOtroUsuarioChat() : chat.getUsuario();
+		                
+		                // IMPORTANTE: Verificar si ya existe como contacto
+		                ContactoIndividual contactoExistente = AppChat.getUnicaInstancia()
+		                        .obtenerContactoPorTelefono(usuarioOtro.getTelefono());
+		                
+		                // Solo proceder si NO es un contacto existente
+		                if (contactoExistente == null) {
+		                    Rectangle cellBounds = list.getCellBounds(index, index);
+		                    if (cellBounds != null && cellBounds.contains(e.getPoint())) {
+		                        int relativeX = e.getX() - cellBounds.x;
+		                        
+		                        // Usar coordenadas fijas para el área del botón
+		                        int buttonX = cellBounds.width - 40;
+		                        int buttonWidth = 30;
+		                        
+		                        if (relativeX >= buttonX && relativeX <= buttonX + buttonWidth) {
+		                            // Solicitar nombre para el contacto
+		                            String nombreContacto = JOptionPane.showInputDialog(
+		                                          "Introduce el nombre del contacto:");
+		                            
+		                            if (nombreContacto != null && !nombreContacto.trim().isEmpty()) {
+		                                boolean agregado = AppChat.getUnicaInstancia().añadirContacto(
+		                                    nombreContacto, usuarioOtro.getTelefono());
+		                                
+		                                if (agregado) {
+		                                    actualizarListaChats(list);
+		                                }
+		                            }
+		                        }
+		                    }
+		                }
+		            }
+		        }
+		    }
 		});
 		// al iniciar, cargamos tambien la lista de chats
 		//panelCentro.add(panelBienvenida, BorderLayout.CENTER);
@@ -1108,8 +1113,13 @@ public class VentanaPrincipal extends JFrame {
 	    refrescarChat();
 	}
 
-
 	private void actualizarListaChats(JList<Object> listaChats) {
+		
+	    if (listaChats == null) {
+	        System.out.println("La lista de chats es nula, no se puede actualizar");
+	        return;
+	    }
+	    
 	    // 1) Obtener Chats
 	    List<Chat> chats = AppChat.getUsuarioActual().getListaChats();
 
@@ -1133,26 +1143,18 @@ public class VentanaPrincipal extends JFrame {
 	        return ultimo2.getHora().compareTo(ultimo1.getHora());
 	    });
 
-	    // 2) Obtener Grupos
+	    // 2) Obtener todos los Grupos (sin filtrar por mensajes)
 	    List<Grupo> grupos = AppChat.getUsuarioActual().getGrupos();
 	    
-	    // 3) Filtrar grupos para mostrar solo los que tienen mensajes
-	    grupos = grupos.stream()
-	            .filter(grupo -> grupo.getListaMensajesEnviados() != null && !grupo.getListaMensajesEnviados().isEmpty())
-	            .collect(Collectors.toList());
-
-	    // 4) Combinar en una lista de Object
+	    // 3) Combinar en una lista de Object
 	    List<Object> items = new ArrayList<>();
 	    // Primero añadimos los chats
 	    items.addAll(chats);
-	    // Luego los grupos (para que aparezcan después en la lista)
+	    // Luego todos los grupos (sin filtrar)
 	    items.addAll(grupos);
 
-	    // 5) Construir un AbstractListModel<Object> con la lista combinada
+	    // 4) Construir un AbstractListModel<Object> con la lista combinada
 	    AbstractListModel<Object> modelo = new AbstractListModel<Object>() {
-	        /**
-	         *
-	         */
 	        private static final long serialVersionUID = 1L;
 	        
 	        @Override
@@ -1165,13 +1167,13 @@ public class VentanaPrincipal extends JFrame {
 	            return items.get(index);
 	        }
 	    };
-	    // 6) Asignar el modelo a la lista
+	    
+	    // 5) Asignar el modelo a la lista
 	    listaChats.setModel(modelo);
 
-	    // 7) Repintar la lista
+	    // 6) Repintar la lista
 	    listaChats.repaint();
 	}
-
 
 	
 	public void pintarBubblesEmoji(JPanel panel, int emoji, boolean esMio) {

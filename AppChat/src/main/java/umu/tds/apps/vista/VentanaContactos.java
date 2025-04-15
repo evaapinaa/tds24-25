@@ -14,6 +14,7 @@ import javax.swing.border.LineBorder;
 import umu.tds.apps.controlador.AppChat;
 import umu.tds.apps.modelo.Contacto;
 import umu.tds.apps.modelo.ContactoIndividual;
+import umu.tds.apps.modelo.Grupo;
 import umu.tds.apps.modelo.RepositorioUsuarios;
 import umu.tds.apps.modelo.Usuario;
 import umu.tds.apps.persistencia.AdaptadorContactoIndividualTDS;
@@ -22,7 +23,11 @@ import umu.tds.apps.persistencia.AdaptadorUsuarioTDS;
 import javax.swing.border.EmptyBorder;
 
 public class VentanaContactos extends JPanel {
-    private JList<String> listaContactos;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private JList<String> listaContactos;
     private JList<String> listaGrupos;
     private DefaultListModel<String> modeloContactos;
     private DefaultListModel<String> modeloGrupos;
@@ -224,7 +229,7 @@ public class VentanaContactos extends JPanel {
                         continue;
                     }
 
-                    boolean nombreDuplicado = AppChat.getUnicaInstancia().getUsuarioActual().getGrupos().stream()
+                    boolean nombreDuplicado = AppChat.getUsuarioActual().getGrupos().stream()
                             .anyMatch(grupo -> grupo.getNombreGrupo().equalsIgnoreCase(nombreGrupo[0]));
 
                     if (nombreDuplicado) {
@@ -248,7 +253,7 @@ public class VentanaContactos extends JPanel {
 
                 // Crear una lista de contactos a partir de los nombres seleccionados
                 List<ContactoIndividual> contactosSeleccionados = new ArrayList<>();
-                Usuario usuarioActual = AppChat.getUnicaInstancia().getUsuarioActual();
+                Usuario usuarioActual = AppChat.getUsuarioActual();
 
                 for (String nombre : nombresSeleccionados) {
                     ContactoIndividual contacto = (ContactoIndividual) usuarioActual.getListaContactos().stream()
@@ -262,9 +267,9 @@ public class VentanaContactos extends JPanel {
                 }
 
                 // Validar si el grupo ya existe
-                umu.tds.apps.modelo.Grupo grupoExistente = usuarioActual.getListaContactos().stream()
-                        .filter(contacto -> contacto instanceof umu.tds.apps.modelo.Grupo)
-                        .map(contacto -> (umu.tds.apps.modelo.Grupo) contacto)
+                Grupo grupoExistente = usuarioActual.getListaContactos().stream()
+                        .filter(contacto -> contacto instanceof Grupo)
+                        .map(contacto -> (Grupo) contacto)
                         .filter(grupo -> grupo.getNombreGrupo().equalsIgnoreCase(nombreGrupo[0]))
                         .findFirst()
                         .orElse(null);
