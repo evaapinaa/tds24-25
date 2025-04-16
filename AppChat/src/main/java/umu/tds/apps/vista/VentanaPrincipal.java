@@ -615,46 +615,47 @@ public class VentanaPrincipal extends JFrame {
 
 		// Panel flotante de Emojis
 		JLayeredPane layeredPane = getLayeredPane();
+		// En el método que maneja el clic en un emoji (en la clase VentanaPrincipal)
 		JPanel panelEmojis = new EmojiPanel(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 		        int numEmoji = Integer.parseInt(e.getActionCommand());
 
-		        // 1) Verifica si estamos en chat grupal o individual
 		        if (grupoActual != null) {
 		            // Chat de GRUPO
-		            // Creamos un texto "EMOJI:<numEmoji>" para reutilizar enviarMensajeAGrupo
-		            String textoEmoji = "EMOJI:" + numEmoji;
 		            boolean enviado = AppChat.getUnicaInstancia()
-		                                     .enviarMensajeAGrupo(AppChat.getUsuarioActual(), grupoActual, textoEmoji);
+		                                .enviarEmojiAGrupo(AppChat.getUsuarioActual(), grupoActual, numEmoji);
 		            if (enviado) {
-		                // Insertar la burbuja de emoji (local) en el panel
+		                // Simplemente mostrar el emoji localmente
 		                pintarBubblesEmoji(panelChatContenido, numEmoji, true);
-		                // Actualizar la lista de conversaciones recientes (si procede)
+		                panelChatContenido.revalidate();
+		                panelChatContenido.repaint();
+		                
+		                // Actualizar la lista de chats
 		                actualizarListaChats(list);
 		            } else {
 		                JOptionPane.showMessageDialog(VentanaPrincipal.this,
-		                        "No se pudo enviar el emoji al grupo.", "Error",
-		                        JOptionPane.ERROR_MESSAGE);
+		                    "No se pudo enviar el emoji al grupo.", "Error",
+		                    JOptionPane.ERROR_MESSAGE);
 		            }
-
 		        } else if (receptorActual != null) {
-		            // Chat INDIVIDUAL
+		            // Chat INDIVIDUAL (código existente)
 		            boolean enviado = AppChat.getUnicaInstancia()
-		                                     .enviarEmoji(AppChat.getUsuarioActual(), receptorActual, numEmoji);
+		                                .enviarEmoji(AppChat.getUsuarioActual(), receptorActual, numEmoji);
 		            if (enviado) {
 		                pintarBubblesEmoji(panelChatContenido, numEmoji, true);
+		                panelChatContenido.revalidate();
+		                panelChatContenido.repaint();
 		                actualizarListaChats(list);
 		            } else {
 		                JOptionPane.showMessageDialog(VentanaPrincipal.this,
-		                        "No se pudo enviar el emoji.", "Error",
-		                        JOptionPane.ERROR_MESSAGE);
+		                    "No se pudo enviar el emoji.", "Error",
+		                    JOptionPane.ERROR_MESSAGE);
 		            }
-
 		        } else {
-		            // No hay ni grupoActual ni receptorActual => no sabemos a quién enviar
+		            // Sin receptor actual
 		            JOptionPane.showMessageDialog(VentanaPrincipal.this,
-		                    "No hay ningún chat seleccionado para enviar el emoji.",
-		                    "Advertencia", JOptionPane.WARNING_MESSAGE);
+		                "No hay ningún chat seleccionado para enviar el emoji.",
+		                "Advertencia", JOptionPane.WARNING_MESSAGE);
 		        }
 		    }
 		});
@@ -1058,23 +1059,39 @@ public class VentanaPrincipal extends JFrame {
 	}
 	
 	private void cargarChat(Grupo grupo) {
-	    // Guardamos el grupo con el que vamos a chatear
+	    // Guardamos el grupo actual y limpiamos el receptor
 	    this.grupoActual = grupo;
-	    // Anulamos el usuario actual, puesto que ahora es un chat grupal
 	    this.receptorActual = null;
 
-	    // Limpiar contenido del panel de chat
+	    // Limpiar el panel de chat
 	    panelChatContenido.removeAll();
 
-	    // 1) Consultar el historial de mensajes del grupo
-	    if (grupo.getListaMensajesEnviados() != null && !grupo.getListaMensajesEnviados().isEmpty()) {
-	        // Si hay mensajes, los mostramos en el chat
-	        for (Mensaje msg : grupo.getListaMensajesEnviados()) {
-	            boolean esMio = msg.getEmisor().equals(AppChat.getUsuarioActual());
-	            pintarBubblesMensaje(panelChatContenido, msg, esMio);
+	    // Obtener mensajes del grupo
+	    List<Mensaje> mensajes = grupo.getListaMensajesEnviados();
+	    
+	    System.out.println("Cargando " + (mensajes != null ? mensajes.size() : 0) + " mensajes para el grupo " + grupo.getNombre());
+	    
+	    if (mensajes != null && !mensajes.isEmpty()) {
+	        for (Mensaje mensaje : mensajes) {
+	            boolean esMio = mensaje.getEmisor().equals(AppChat.getUsuarioActual());
+	            String texto = mensaje.getTexto();
+	            
+	            System.out.println("Procesando mensaje: " + texto + " (esMio=" + esMio + ")");
+	            
+	            if (texto != null && texto.startsWith("EMOJI:")) {
+	                try {
+	                    int emojiCode = Integer.parseInt(texto.substring(6));
+	                    System.out.println("Renderizando emoji: " + emojiCode);
+	                    pintarBubblesEmoji(panelChatContenido, emojiCode, esMio);
+	                } catch (NumberFormatException e) {
+	                    System.err.println("Error al parsear código de emoji: " + e.getMessage());
+	                    pintarBubblesMensaje(panelChatContenido, mensaje, esMio);
+	                }
+	            } else {
+	                pintarBubblesMensaje(panelChatContenido, mensaje, esMio);
+	            }
 	        }
 	    } else {
-	        // Si no hay historial, mostramos un mensaje predeterminado
 	        JLabel noMessagesLabel = new JLabel("No hay mensajes con este grupo.");
 	        noMessagesLabel.setHorizontalAlignment(SwingConstants.CENTER);
 	        noMessagesLabel.setForeground(Color.GRAY);
@@ -1082,13 +1099,10 @@ public class VentanaPrincipal extends JFrame {
 	        panelChatContenido.add(noMessagesLabel);
 	    }
 
-	    // Refrescar el panel y cambiar la vista
+	    // Actualizar la interfaz
 	    refrescarChat();
 	    cardLayout.show(panelCentro, "Chat");
 	}
-
-	
-	
 
 
 	private void cargarChat(Chat chatSeleccionado) {
@@ -1246,10 +1260,103 @@ public class VentanaPrincipal extends JFrame {
 	}
 
 
-	public void cargarMensajeEnChat(Usuario contacto) {
-		cargarChat(contacto);
+	public void cargarMensajeEnChat(Usuario contacto, Mensaje mensajeBuscado) {
+	    // Cargamos el chat normalmente
+	    receptorActual = contacto;
+	    grupoActual = null;
+	    
+	    panelChatContenido.removeAll(); // Limpiar contenido del chat
+
+	    // Variable para marcar si hemos encontrado el mensaje
+	    final boolean[] mensajeEncontrado = {false};
+	    
+	    // Verificar si ya existe un chat entre el usuario actual y el contacto
+	    Chat chatExistente = AppChat.getUsuarioActual().obtenerChatCon(contacto);
+
+	    if (chatExistente != null && !chatExistente.getMensajes().isEmpty()) {
+	        // Cargar los mensajes existentes en el chat
+	        List<Mensaje> mensajes = chatExistente.getMensajes();
+	        for (int i = 0; i < mensajes.size(); i++) {
+	            Mensaje mensaje = mensajes.get(i);
+	            boolean esMio = mensaje.getEmisor().equals(AppChat.getUsuarioActual());
+	            
+	            // ¿Es este el mensaje que buscamos?
+	            boolean esMensajeBuscado = false;
+	            if (mensajeBuscado != null) {
+	                esMensajeBuscado = mensaje.equals(mensajeBuscado) || 
+	                                 (mensaje.getTexto() != null && 
+	                                  mensaje.getTexto().equals(mensajeBuscado.getTexto()) &&
+	                                  mensaje.getFecha().equals(mensajeBuscado.getFecha()));
+	            }
+	            
+	            if (esMensajeBuscado) {
+	                mensajeEncontrado[0] = true;
+	                
+	                // Crear una marca visual para el mensaje buscado
+	                JPanel panelMarca = new JPanel();
+	                panelMarca.setBackground(new Color(255, 255, 100)); // Amarillo
+	                JLabel etiquetaMarca = new JLabel("↓ MENSAJE BUSCADO ↓");
+	                etiquetaMarca.setForeground(Color.RED);
+	                etiquetaMarca.setFont(new Font("Arial", Font.BOLD, 14));
+	                panelMarca.add(etiquetaMarca);
+	                panelChatContenido.add(panelMarca);
+	                
+	                // Pintar el mensaje con un fondo diferente
+	                String textoOriginal = mensaje.getTexto();
+	                if (textoOriginal != null && textoOriginal.startsWith("EMOJI:")) {
+	                    try {
+	                        int emojiCode = Integer.parseInt(textoOriginal.substring(6));
+	                        // Para emojis, usamos una burbuja especial con borde rojo
+	                        BubbleText burbuja = new BubbleText(panelChatContenido, emojiCode, 
+	                                new Color(255, 235, 130), // Fondo amarillo claro
+	                                "MENSAJE BUSCADO", // Texto adicional
+	                                esMio ? BubbleText.SENT : BubbleText.RECEIVED, 
+	                                18);
+	                        panelChatContenido.add(burbuja);
+	                    } catch (NumberFormatException e) {
+	                        pintarBubblesMensaje(panelChatContenido, mensaje, esMio);
+	                    }
+	                } else {
+	                    // Para texto normal, lo pintamos normal pero se verá destacado por las marcas
+	                    pintarBubblesMensaje(panelChatContenido, mensaje, esMio);
+	                }
+	                
+	                // Crear otra marca después del mensaje
+	                JPanel panelMarcaPost = new JPanel();
+	                panelMarcaPost.setBackground(new Color(255, 255, 100)); // Amarillo
+	                JLabel etiquetaMarcaPost = new JLabel("↑ MENSAJE BUSCADO ↑");
+	                etiquetaMarcaPost.setForeground(Color.RED);
+	                etiquetaMarcaPost.setFont(new Font("Arial", Font.BOLD, 14));
+	                panelMarcaPost.add(etiquetaMarcaPost);
+	                panelChatContenido.add(panelMarcaPost);
+	            } else {
+	                // Pintar mensaje normal
+	                pintarBubblesMensaje(panelChatContenido, mensaje, esMio);
+	            }
+	        }
+	    } else {
+	        // Si no hay chat o mensajes, mostrar mensaje predeterminado
+	        JLabel noMessagesLabel = new JLabel("No hay mensajes con este contacto.");
+	        noMessagesLabel.setHorizontalAlignment(SwingConstants.CENTER);
+	        noMessagesLabel.setForeground(Color.GRAY);
+	        noMessagesLabel.setFont(new Font("Arial", Font.ITALIC, 14));
+	        panelChatContenido.add(noMessagesLabel);
+	    }
+	    
+	    // Refrescar el chat y cambiar a la vista de chat
+	    refrescarChat();
+	    cardLayout.show(panelCentro, "Chat");
+	    
+	    // Si no encontramos el mensaje, mostrar un aviso
+	    if (mensajeBuscado != null && !mensajeEncontrado[0]) {
+	        JOptionPane.showMessageDialog(
+	            this,
+	            "No se pudo encontrar el mensaje exacto en el chat.",
+	            "Mensaje no encontrado",
+	            JOptionPane.WARNING_MESSAGE
+	        );
+	    }
 	}
-	
 	
 	
 	

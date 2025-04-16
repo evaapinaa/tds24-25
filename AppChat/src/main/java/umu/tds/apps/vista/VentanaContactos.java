@@ -133,7 +133,6 @@ public class VentanaContactos extends JPanel {
         add(panelGrupos, gbcGrupos);
 
 
-        // Acción para añadir un contacto
         btnAgregarContacto.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -150,10 +149,33 @@ public class VentanaContactos extends JPanel {
                     return;
                 }
 
+                // Obtener el usuario actual
+                Usuario usuarioActual = AppChat.getUsuarioActual();
+                
+                // 1. Comprobar que no se esté añadiendo a sí mismo
+                if (usuarioActual.getTelefono().equals(nuevoContactoTelefono)) {
+                    JOptionPane.showMessageDialog(null, "No puedes añadirte a ti mismo como contacto.", 
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                // 2. Comprobar si ya existe un contacto con ese número
+                boolean contactoExistente = usuarioActual.getListaContactos().stream()
+                        .filter(c -> c instanceof ContactoIndividual)
+                        .map(c -> (ContactoIndividual) c)
+                        .anyMatch(c -> c.getTelefono().equals(nuevoContactoTelefono));
+                        
+                if (contactoExistente) {
+                    JOptionPane.showMessageDialog(null, "Ya tienes un contacto con este número.", 
+                        "Contacto duplicado", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
                 // Buscar usuario en el repositorio
                 Usuario usuarioExistente = RepositorioUsuarios.getUnicaInstancia().getUsuario(nuevoContactoTelefono);
                 if (usuarioExistente == null) {
-                    JOptionPane.showMessageDialog(null, "El número introducido no pertenece a ningún usuario registrado.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "El número introducido no pertenece a ningún usuario registrado.", 
+                        "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
@@ -164,20 +186,23 @@ public class VentanaContactos extends JPanel {
 
                 // Crear y registrar el contacto
                 ContactoIndividual nuevoContacto = new ContactoIndividual(nuevoContactoNombre, nuevoContactoTelefono, usuarioExistente);
-                AdaptadorContactoIndividualTDS.getUnicaInstancia().registrarContactoIndividual(nuevoContacto);
+                try {
+                    AdaptadorContactoIndividualTDS.getUnicaInstancia().registrarContactoIndividual(nuevoContacto);
 
-                // Asociar el contacto al usuario actual
-                Usuario usuarioActual = AppChat.getUsuarioActual();
-                if (usuarioActual.añadirContacto(nuevoContacto)) {
-                    AdaptadorUsuarioTDS.getUnicaInstancia().modificarUsuario(usuarioActual);
-                    modeloContactos.addElement(nuevoContactoNombre);
-                    JOptionPane.showMessageDialog(null, "Contacto añadido correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(null, "El contacto ya existe.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+                    // Asociar el contacto al usuario actual
+                    if (usuarioActual.añadirContacto(nuevoContacto)) {
+                        AdaptadorUsuarioTDS.getUnicaInstancia().modificarUsuario(usuarioActual);
+                        modeloContactos.addElement(nuevoContactoNombre);
+                        JOptionPane.showMessageDialog(null, "Contacto añadido correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "No se pudo añadir el contacto.", "Error", JOptionPane.WARNING_MESSAGE);
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Error al añadir el contacto: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    ex.printStackTrace();
                 }
             }
         });
-
 
         // Acción para añadir un grupo
         btnAgregarGrupo.addActionListener(new ActionListener() {

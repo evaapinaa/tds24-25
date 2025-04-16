@@ -187,7 +187,7 @@ public class VentanaBusqueda extends JDialog {
 		listaResultados.addMouseListener(new MouseAdapter() {
 		    @Override
 		    public void mouseClicked(MouseEvent e) {
-		        if (e.getClickCount() == 2) { // Double-click to open chat
+		        if (e.getClickCount() == 2) { // Double-click para abrir chat
 		            int index = listaResultados.locationToIndex(e.getPoint());
 		            if (index >= 0) {
 		                Mensaje mensajeSeleccionado = listaResultados.getModel().getElementAt(index);
@@ -198,7 +198,7 @@ public class VentanaBusqueda extends JDialog {
 		                Usuario otroUsuario = emisor.equals(AppChat.getUsuarioActual()) ? receptor : emisor;
 
 		                // Navega al chat y enfoca el mensaje seleccionado
-		                ventanaPrincipal.cargarMensajeEnChat(otroUsuario);
+		                ventanaPrincipal.cargarMensajeEnChat(otroUsuario, mensajeSeleccionado);
 
 		                // Cambiar la tarjeta para mostrar el chat
 		                CardLayout cardLayout = (CardLayout) ventanaPrincipal.getPanelCentro().getLayout();

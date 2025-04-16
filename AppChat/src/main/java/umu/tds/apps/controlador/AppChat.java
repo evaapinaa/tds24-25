@@ -231,28 +231,40 @@ public class AppChat {
 	}
 
 	public boolean añadirContacto(String nombre, String telefono) {
-		Usuario usuarioContacto = repositorioUsuarios.getUsuario(telefono);
-		if (usuarioContacto == null) {
-			return false; // El número no está en el sistema
-		}
-		ContactoIndividual nuevoContacto = new ContactoIndividual(nombre, telefono, usuarioContacto);
-		boolean yaExiste = usuarioActual.getListaContactos().stream().anyMatch(
-				c -> (c instanceof ContactoIndividual) && ((ContactoIndividual) c).getTelefono().equals(telefono));
-		if (yaExiste) {
-			return false;
-		}
-
-		try {
-			usuarioActual.añadirContacto(nuevoContacto);
-			AdaptadorContactoIndividualTDS.getUnicaInstancia().registrarContactoIndividual(nuevoContacto);
-			adaptadorUsuario.modificarUsuario(usuarioActual);
-			return true;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
+	    // Comprobar que no se esté añadiendo a sí mismo
+	    if (getUsuarioActual().getTelefono().equals(telefono)) {
+	        System.err.println("Error: No se puede añadir a uno mismo como contacto");
+	        return false;
+	    }
+	    
+	    // Comprobar si ya existe el contacto
+	    boolean contactoExistente = getUsuarioActual().getListaContactos().stream()
+	            .filter(c -> c instanceof ContactoIndividual)
+	            .map(c -> (ContactoIndividual) c)
+	            .anyMatch(c -> ((ContactoIndividual) c).getTelefono().equals(telefono));
+	            
+	    if (contactoExistente) {
+	        System.err.println("Error: Ya existe un contacto con el número " + telefono);
+	        return false;
+	    }
+	    
+	    Usuario usuarioContacto = repositorioUsuarios.getUsuario(telefono);
+	    if (usuarioContacto == null) {
+	        return false; // El número no está en el sistema
+	    }
+	    
+	    ContactoIndividual nuevoContacto = new ContactoIndividual(nombre, telefono, usuarioContacto);
+	    
+	    try {
+	        usuarioActual.añadirContacto(nuevoContacto);
+	        AdaptadorContactoIndividualTDS.getUnicaInstancia().registrarContactoIndividual(nuevoContacto);
+	        adaptadorUsuario.modificarUsuario(usuarioActual);
+	        return true;
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return false;
+	    }
 	}
-
 	// FUNCION NUEVA
 	public boolean crearGrupo(String nombreGrupo, List<ContactoIndividual> contactos, Optional<ImageIcon> imagenGrupo) {
 		if (nombreGrupo == null || nombreGrupo.trim().isEmpty()) {
@@ -381,9 +393,52 @@ public class AppChat {
 	}
 
 	public boolean enviarEmojiAGrupo(Usuario emisor, Grupo grupo, int emoji) {
-		String texto = "EMOJI:" + emoji;
-		System.out.println("Emoji enviado a grupo: " + emoji);
-		return enviarMensajeAGrupo(emisor, grupo, texto);
+	    String texto = "EMOJI:" + emoji;
+	    System.out.println("Emoji enviado a grupo: " + emoji);
+	    
+	    // Enviar mensaje a todos los miembros del grupo
+	    boolean resultado = enviarMensajeAGrupo(emisor, grupo, texto);
+	    
+	    // Aseguramos que el grupo también almacene este mensaje para su historial
+	    if (resultado) {
+	        // Buscar si existe algún mensaje con este emoji que acabamos de enviar
+	        // en la lista de mensajes del grupo
+	        boolean mensajeYaExistente = false;
+	        for (Mensaje m : grupo.getListaMensajesEnviados()) {
+	            if (m.getTexto().equals(texto) && 
+	                m.getEmisor().equals(emisor) && 
+	                m.getFecha().equals(LocalDate.now())) {
+	                mensajeYaExistente = true;
+	                break;
+	            }
+	        }
+	        
+	        // Solo si no existe, lo agregamos al grupo
+	        if (!mensajeYaExistente) {
+	            // Tomamos el primero de los mensajes que hemos enviado (todos tienen el mismo contenido)
+	            List<ContactoIndividual> miembros = grupo.getListaContactos();
+	            if (!miembros.isEmpty()) {
+	                Usuario primerMiembro = miembros.get(0).getUsuario();
+	                Chat chat = emisor.obtenerChatCon(primerMiembro);
+	                
+	                if (chat != null) {
+	                    // Buscar el último mensaje enviado a este miembro
+	                    List<Mensaje> mensajes = chat.getMensajes();
+	                    for (int i = mensajes.size() - 1; i >= 0; i--) {
+	                        Mensaje m = mensajes.get(i);
+	                        if (m.getTexto().equals(texto) && m.getEmisor().equals(emisor)) {
+	                            // Encontramos el mensaje, lo añadimos al grupo
+	                            grupo.addMensajeEnviado(m);
+	                            AdaptadorGrupoTDS.getUnicaInstancia().modificarGrupo(grupo);
+	                            break;
+	                        }
+	                    }
+	                }
+	            }
+	        }
+	    }
+	    
+	    return resultado;
 	}
 
 	/**
