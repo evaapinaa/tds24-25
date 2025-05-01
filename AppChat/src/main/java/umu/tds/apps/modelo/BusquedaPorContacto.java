@@ -3,17 +3,34 @@ package umu.tds.apps.modelo;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Clase que implementa la búsqueda de mensajes por contacto.
+ * Implementa la interfaz BusquedaMensaje.
+*/
 public class BusquedaPorContacto implements BusquedaMensaje {
     
     private String contactoBuscado;
     private Usuario usuarioActual;
 
     // Constructor actualizado para recibir el usuario actual
+    /**
+     * Crea una nueva instancia de búsqueda por contacto.
+     * 
+     * @param usuarioActual Usuario actual que realiza la búsqueda
+     * @param contactoBuscado Nombre del contacto a buscar
+     */
     public BusquedaPorContacto(Usuario usuarioActual, String contactoBuscado) {
         this.usuarioActual = usuarioActual;
         this.contactoBuscado = contactoBuscado;
     }
     
+    
+    /**
+     * Filtra los mensajes para obtener solo aquellos relacionados con el contacto buscado.
+     * 
+     * @param mensajes Lista de mensajes a filtrar
+     * @return Lista de mensajes filtrados
+     */
     @Override
     public List<Mensaje> buscar(List<Mensaje> mensajes) {
         if (contactoBuscado == null || contactoBuscado.isEmpty()) return mensajes;

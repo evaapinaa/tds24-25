@@ -13,6 +13,10 @@ import umu.tds.apps.persistencia.IAdaptadorUsuarioDAO;
 // Patrón Singleton. No permitir crear más de una instancia de la clase. Impedir que se pueda hacer new RepositorioUsuarios()
 // Constructor privado
 
+/**
+ * Repositorio que gestiona todos los usuarios del sistema.
+ * Implementa el patrón Singleton.
+ */
 
 public class RepositorioUsuarios {
 	private Map<String,Usuario> usuarios; 
@@ -33,11 +37,20 @@ public class RepositorioUsuarios {
   		}
 	}
 	
+    /**
+     * Obtiene la única instancia del repositorio (patrón Singleton).
+     * 
+     * @return Instancia única del repositorio
+     */
 	public static RepositorioUsuarios getUnicaInstancia(){
 		return unicaInstancia;
 	}
 	
-	/*devuelve todos los usuarios*/
+	 /**
+     * Devuelve todos los usuarios registrados en el sistema.
+     * 
+     * @return Lista de todos los usuarios
+     */
 	public List<Usuario> getUsuarios(){
 		ArrayList<Usuario> lista = new ArrayList<Usuario>();
 		for (Usuario u:usuarios.values()) 
@@ -45,19 +58,45 @@ public class RepositorioUsuarios {
 		return lista;
 	}
 	
+	
+    /**
+     * Obtiene un usuario por su código identificador.
+     * 
+     * @param codigo Código del usuario
+     * @return Usuario encontrado o null si no existe
+     */
 	public Usuario getUsuario(int codigo) {
 		for (Usuario c:usuarios.values()) {
 			if (c.getCodigo()==codigo) return c;
 		}
 		return null;
 	}
+	
+    /**
+     * Obtiene un usuario por su número de teléfono.
+     * 
+     * @param telefono Número de teléfono
+     * @return Usuario encontrado o null si no existe
+     */
 	public Usuario getUsuario(String telefono) {
 		return usuarios.get(telefono); 
 	}
 	
+	
+	  /**
+     * Añade un nuevo usuario al repositorio.
+     * 
+     * @param usu Usuario a añadir
+     */
 	public void addUsuario(Usuario usu) {
 		usuarios.put(usu.getTelefono(),usu);
 	}
+	
+    /**
+     * Elimina un usuario del repositorio.
+     * 
+     * @param usu Usuario a eliminar
+     */
 	public void removeCliente (Usuario usu) {
 		usuarios.remove(usu.getTelefono());
 	}
