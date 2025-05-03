@@ -83,6 +83,25 @@ import java.time.LocalTime;
 
 import javax.swing.DefaultComboBoxModel;
 
+
+/**
+ * Ventana principal de la aplicación AppChat que proporciona la interfaz de usuario
+ * para chatear con contactos, administrar grupos y acceder a las funcionalidades de la aplicación.
+ * <p>
+ * Esta clase sirve como la interfaz principal de la aplicación de chat, gestionando:
+ * <ul>
+ *   <li>Visualización de conversaciones de chat (tanto individuales como grupales)</li>
+ *   <li>Funcionalidad de envío y recepción de mensajes</li>
+ *   <li>Gestión de contactos</li>
+ *   <li>Modificación de imágenes de perfil</li>
+ *   <li>Capacidades de búsqueda</li>
+ *   <li>Acceso a funciones premium</li>
+ * </ul>
+ * 
+ * @author TDS-2025
+ * @version 1.0
+ */
+
 public class VentanaPrincipal extends JFrame {
 
 	private static final long serialVersionUID = 1L;
@@ -114,13 +133,23 @@ public class VentanaPrincipal extends JFrame {
 	// lista de chats
 	private JList<Object> list;
 	
+	
+	/**
+     * Obtiene el panel central que muestra la pantalla de bienvenida o el panel de chat.
+     * 
+     * @return El panel central de la interfaz
+     */
+
 	public JPanel getPanelCentro() {
 	    return panelCentro;
 	}
 
-	/**
-	 * Launch the application.
-	 */
+    /**
+     * Inicia la aplicación creando y mostrando la ventana principal.
+     * 
+     * @param args Argumentos de la línea de comandos (no utilizados)
+     */
+
 	public static void main(String[] args) {
 		EventQueue.invokeLater(() -> {
 			try {
@@ -132,6 +161,17 @@ public class VentanaPrincipal extends JFrame {
 		});
 	}
 	
+    /**
+     * Envía un mensaje a todos los miembros de un grupo.
+     * <p>
+     * Este método crea un mensaje individual para cada miembro del grupo y lo registra
+     * en la base de datos, actualizando las listas de mensajes del emisor y receptores.
+     * 
+     * @param emisor El usuario que envía el mensaje
+     * @param grupo El grupo destinatario del mensaje
+     * @param texto El contenido del mensaje a enviar
+     * @return true si el mensaje se envió correctamente a todos los miembros, false en caso contrario
+     */
 	public boolean enviarMensajeAGrupo(Usuario emisor, Grupo grupo, String texto) {
 	    if (texto == null || texto.trim().isEmpty()) {
 	        System.err.println("El mensaje no puede estar vacío.");
@@ -205,9 +245,13 @@ public class VentanaPrincipal extends JFrame {
 	}
 
 
-	/**
-	 * Create the frame.
-	 */
+    /**
+     * Constructor que inicializa la ventana principal y todos sus componentes.
+     * <p>
+     * Configura la interfaz de usuario, incluyendo paneles de chat, lista de conversaciones,
+     * botones de función y manejo de eventos.
+     */
+
 	public VentanaPrincipal() {
 
 		setTitle("AppChat");
@@ -936,9 +980,15 @@ public class VentanaPrincipal extends JFrame {
 	
 	
 
-	/**
-	 * Ejemplo de método para cargar imagen de perfil circular en un JLabel.
-	 */
+    /**
+     * Carga una imagen de perfil circular en un JLabel.
+     * <p>
+     * Si la ruta de la imagen no es válida o está vacía, se carga una imagen por defecto.
+     * 
+     * @param label El JLabel donde se mostrará la imagen
+     * @param path La ruta o URL de la imagen a cargar
+     */
+
 	@SuppressWarnings("deprecation")
 	private void cargarImagenPerfil(JLabel label, String path) {
 		if (path == null || path.isEmpty()) {
@@ -967,6 +1017,13 @@ public class VentanaPrincipal extends JFrame {
 
 		}
 	}
+
+	
+    /**
+     * Permite al usuario seleccionar una nueva imagen de perfil desde una URL o archivo local.
+     * 
+     * @param label El JLabel que muestra la imagen de perfil actual
+     */
 
 	@SuppressWarnings("deprecation")
 	private void seleccionarFotoPerfil(JLabel label) {
@@ -1029,6 +1086,13 @@ public class VentanaPrincipal extends JFrame {
 		}
 	}
 
+	
+    /**
+     * Carga el chat con un usuario específico, mostrando los mensajes intercambiados.
+     * 
+     * @param contacto El usuario con quien se desea iniciar o continuar un chat
+     */
+
 	private void cargarChat(Usuario contacto) {
 	    receptorActual = contacto;
 	    grupoActual = null; // Esta línea es crucial - asegúrate de que grupoActual sea null
@@ -1058,6 +1122,13 @@ public class VentanaPrincipal extends JFrame {
 	    cardLayout.show(panelCentro, "Chat");
 	}
 	
+	
+    /**
+     * Carga el chat de un grupo, mostrando los mensajes enviados al grupo.
+     * 
+     * @param grupo El grupo cuyos mensajes se mostrarán
+     */
+
 	private void cargarChat(Grupo grupo) {
 	    // Guardamos el grupo actual y limpiamos el receptor
 	    this.grupoActual = grupo;
@@ -1105,6 +1176,13 @@ public class VentanaPrincipal extends JFrame {
 	}
 
 
+	
+    /**
+     * Carga un chat existente, determinando automáticamente el receptor según el usuario actual.
+     * 
+     * @param chatSeleccionado El objeto Chat que contiene la conversación a mostrar
+     */
+
 	private void cargarChat(Chat chatSeleccionado) {
 	    Usuario usuarioActual = AppChat.getUsuarioActual();
 	    Usuario usuario1 = chatSeleccionado.getUsuario();
@@ -1149,6 +1227,14 @@ public class VentanaPrincipal extends JFrame {
 	    refrescarChat();
 	}
 
+	
+    /**
+     * Actualiza la lista de chats y grupos mostrados en el panel lateral.
+     * <p>
+     * Ordena los chats por fecha y hora del último mensaje en orden descendente.
+     * 
+     * @param listaChats El componente JList que muestra los chats disponibles
+     */
 	private void actualizarListaChats(JList<Object> listaChats) {
 		
 	    if (listaChats == null) {
@@ -1212,6 +1298,14 @@ public class VentanaPrincipal extends JFrame {
 	}
 
 	
+	
+    /**
+     * Muestra un emoji en una burbuja de chat.
+     * 
+     * @param panel El panel donde se añadirá la burbuja
+     * @param emoji El código del emoji a mostrar
+     * @param esMio Indica si el emoji fue enviado por el usuario actual
+     */
 	public void pintarBubblesEmoji(JPanel panel, int emoji, boolean esMio) {
 	    BubbleText burbuja = new BubbleText(panel, emoji, 
 	            esMio ? Color.GREEN : Color.LIGHT_GRAY, "",
@@ -1219,6 +1313,14 @@ public class VentanaPrincipal extends JFrame {
 	    panel.add(burbuja);
 	}
 	
+	
+    /**
+     * Muestra un mensaje en una burbuja de chat, diferenciando entre texto normal y emojis.
+     * 
+     * @param panel El panel donde se añadirá la burbuja
+     * @param mensaje El mensaje a mostrar
+     * @param esMio Indica si el mensaje fue enviado por el usuario actual
+     */
 	public void pintarBubblesMensaje(JPanel panel, Mensaje mensaje, boolean esMio) {
 	    String texto = mensaje.getTexto();
 	    if (texto != null && texto.startsWith("EMOJI:")) {
@@ -1252,6 +1354,9 @@ public class VentanaPrincipal extends JFrame {
 	}
 
 
+    /**
+     * Actualiza la visualización del panel de chat.
+     */
 	public void refrescarChat() {
 	    SwingUtilities.invokeLater(() -> {
 	        panelChatContenido.revalidate();
@@ -1260,6 +1365,16 @@ public class VentanaPrincipal extends JFrame {
 	}
 
 
+	
+
+    /**
+     * Carga un chat con un contacto y resalta un mensaje específico.
+     * <p>
+     * Útil para la función de búsqueda, permite navegar directamente a un mensaje concreto.
+     * 
+     * @param contacto El usuario con quien se mantiene la conversación
+     * @param mensajeBuscado El mensaje que se desea resaltar en el chat
+     */
 	public void cargarMensajeEnChat(Usuario contacto, Mensaje mensajeBuscado) {
 	    // Cargamos el chat normalmente
 	    receptorActual = contacto;

@@ -48,32 +48,131 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.util.Optional;
 
+/**
+ * Clase que representa la ventana de registro de usuarios para la aplicación AppChat.
+ * Permite a los usuarios crear una nueva cuenta proporcionando información personal
+ * como nombre, apellidos, teléfono, contraseña, fecha de nacimiento, saludo y una 
+ * imagen de perfil.
+ * 
+ * Esta ventana proporciona una interfaz gráfica con campos de entrada para toda la
+ * información requerida y opcional del usuario, y botones para completar o cancelar
+ * el proceso de registro.
+ *
+ * @author TDS-2025
+ * @version 1.0
+ */
 public class VentanaRegistro extends JFrame {
 
+	/**
+	 * Número de serie utilizado para la serialización.
+	 */
 	private static final long serialVersionUID = 1L;
+	
+	/**
+	 * Panel principal que contiene todos los componentes de la ventana.
+	 */
 	private JPanel contentPane;
+	
+	/**
+	 * Campo de texto para introducir los apellidos del usuario.
+	 */
 	private JTextField textField_1;
+	
+	/**
+	 * Campo de texto para introducir el nombre del usuario.
+	 */
 	private JTextField textField;
+	
+	/**
+	 * Etiqueta para el campo de teléfono.
+	 */
 	private JLabel lblNewLabel_2;
+
+	/**
+	 * Campo de texto para introducir el número de teléfono del usuario.
+	 */
 	private JTextField textField_2;
+	
+	/**
+	 * Etiqueta para el campo de contraseña.
+	 */
 	private JLabel lblNewLabel_3;
+	
+	/**
+	 * Campo para introducir la contraseña del usuario.
+	 */
 	private JPasswordField passwordField;
+	
+	/**
+	 * Etiqueta para el campo de confirmación de contraseña.
+	 */
 	private JLabel lblNewLabel_4;
+	
+	/**
+	 * Campo para confirmar la contraseña del usuario.
+	 */
 	private JPasswordField passwordField_1;
+	
+	/**
+	 * Etiqueta para el campo de fecha de nacimiento.
+	 */
 	private JLabel lblNewLabel_5;
+	
+	/**
+	 * Etiqueta para el campo de saludo personalizado.
+	 */
 	private JLabel lblNewLabel_6;
+	
+	/**
+	 * Área de texto para introducir un saludo personalizado del usuario.
+	 */
 	private JTextArea textArea;
+	
+	/**
+	 * Panel para los botones de aceptar y cancelar.
+	 */
 	private JPanel panel;
+
+	/**
+	 * Botón para confirmar el registro del usuario.
+	 */
 	private JButton btnNewButton;
+	
+	/**
+	 * Botón para cancelar el registro y volver a la ventana de inicio de sesión.
+	 */
 	private JButton btnNewButton_1;
+	
+	/**
+	 * Espacio horizontal flexible para el diseño de los botones.
+	 */
 	private Component horizontalGlue;
+	
+	/**
+	 * Etiqueta para el campo de imagen de perfil.
+	 */
 	private JLabel lblNewLabel_7;
+	
+	/**
+	 * Etiqueta que muestra la imagen de perfil seleccionada por el usuario.
+	 */
 	private JLabel lblNewLabel_8;
+	
+	/**
+	 * Panel de desplazamiento para contener el área de texto del saludo.
+	 */
 	private JScrollPane scrollPane;
+	
+	/**
+	 * Selector de fecha para la fecha de nacimiento del usuario.
+	 */
 	private JDateChooser dateChooser;
 
 	/**
-	 * Launch the application.
+	 * Método principal que inicia la aplicación de registro.
+	 * Crea y muestra una nueva instancia de la ventana de registro.
+	 * 
+	 * @param args argumentos de línea de comandos (no utilizados)
 	 */
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -89,7 +188,9 @@ public class VentanaRegistro extends JFrame {
 	}
 
 	/**
-	 * Create the frame.
+	 * Constructor que inicializa la ventana de registro y configura todos sus componentes.
+	 * Establece el diseño, añade los campos de entrada, etiquetas y botones necesarios para
+	 * el registro de un nuevo usuario.
 	 */
 	public VentanaRegistro() {
 		setIconImage(Toolkit.getDefaultToolkit()
@@ -384,6 +485,13 @@ public class VentanaRegistro extends JFrame {
 	}
 	
 	
+	
+	/**
+	 * Permite al usuario seleccionar una imagen de perfil ya sea desde una URL o desde un
+	 * archivo local en el sistema.
+	 * Muestra un diálogo para que el usuario elija el método de carga de la imagen, procesa
+	 * la imagen seleccionada y la muestra en la interfaz.
+	 */
 	private void seleccionarFotoPerfil() {
 	    // Opciones para URL o archivo local
 	    String[] opciones = { "Introducir enlace", "Seleccionar archivo" };
@@ -440,6 +548,14 @@ public class VentanaRegistro extends JFrame {
 	    }
 	}
 
+	
+	/**
+	 * Verifica si las contraseñas introducidas por el usuario coinciden.
+	 * Si no coinciden, cambia el fondo de los campos de contraseña a un color rojo claro
+	 * para indicar el error.
+	 * 
+	 * @return true si las contraseñas coinciden, false en caso contrario
+	 */
 	private boolean contraseñasCoinciden() {
 		@SuppressWarnings("deprecation")
 		boolean coinciden = passwordField.getText().equals(passwordField_1.getText());

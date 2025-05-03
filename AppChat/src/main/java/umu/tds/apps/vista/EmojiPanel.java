@@ -10,13 +10,32 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.border.EtchedBorder;
 
+
+/**
+ * Panel que muestra una colección de emojis para seleccionar.
+ * Esta clase implementa un panel gráfico que permite al usuario seleccionar
+ * emojis para insertarlos en mensajes de chat.
+ * 
+ * <p>El panel se organiza como una cuadrícula de emojis clickeables, donde cada
+ * emoji activa un ActionListener cuando es seleccionado.</p>
+ * 
+ * @author TDS-2025
+ * @version 1.0
+ */
 public class EmojiPanel extends JPanel {
 	
     /**
-	 * 
-	 */
+     * Identificador de serialización.
+     */
 	private static final long serialVersionUID = 1L;
 
+	
+	
+    /**
+     * Constructor que inicializa y configura el panel de emojis.
+     * 
+     * @param emojiClickListener El ActionListener que será notificado cuando un emoji sea seleccionado
+     */
 	public EmojiPanel(ActionListener emojiClickListener) {
         setLayout(new GridLayout(5,3,0,0)); // Grid para organizar los emojis
         setBackground(new Color(0, 128, 128));
