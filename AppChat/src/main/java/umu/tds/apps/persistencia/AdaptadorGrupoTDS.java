@@ -22,10 +22,20 @@ public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
     private static ServicioPersistencia servPersistencia;
     private static AdaptadorGrupoTDS unicaInstancia = null;
 
+    
+     /**
+     * Constructor privado para implementar el patrón Singleton.
+     * Inicializa el servicio de persistencia de la aplicación.
+     */
     private AdaptadorGrupoTDS() {
         servPersistencia = FactoriaServicioPersistencia.getInstance().getServicioPersistencia();
     }
 
+    
+     /**
+     * Método para obtener la única instancia de la clase (patrón Singleton).
+     * @return La única instancia de AdaptadorGrupoTDS.
+     */
     public static AdaptadorGrupoTDS getUnicaInstancia() {
         if (unicaInstancia == null) {
             unicaInstancia = new AdaptadorGrupoTDS();
@@ -33,7 +43,12 @@ public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
         return unicaInstancia;
     }
     
- // Método auxiliar para obtener mensajes desde códigos
+     // Método auxiliar para obtener mensajes desde códigos
+     /**
+     * Recupera una lista de mensajes a partir de una cadena de códigos.
+     * @param codigos Cadena con los códigos de mensajes separados por espacios.
+     * @return Lista de mensajes correspondientes a los códigos.
+     */
     private List<Mensaje> obtenerMensajesDesdeCodigos(String codigos) {
         List<Mensaje> mensajes = new LinkedList<>();
         if (codigos == null || codigos.trim().isEmpty()) return mensajes;
@@ -53,6 +68,12 @@ public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
         return mensajes;
     }
     
+    
+     /**
+     * Convierte una lista de mensajes en una cadena de texto con sus códigos separados por espacios.
+     * @param list Lista de mensajes a convertir.
+     * @return Cadena de texto con los códigos de los mensajes separados por espacios.
+     */
     private String obtenerCodigosMensajes(List<Mensaje> list) {
         StringBuilder sb = new StringBuilder();
         for (Mensaje m : list) {
@@ -61,7 +82,13 @@ public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
         return sb.toString().trim();
     }
 
-
+ 
+     /**
+     * Registra un grupo en la base de datos.
+     * Valida que el nombre del grupo y el creador no sean nulos antes de realizar el registro.
+     * @param grupo El objeto Grupo que se desea registrar.
+     * @throws IllegalArgumentException Si el nombre del grupo o el creador son nulos.
+     */
     @Override
     public void registrarGrupo(Grupo grupo) {
         if (grupo.getNombreGrupo() == null || grupo.getCreador() == null) {
@@ -98,6 +125,13 @@ public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
 
 
 
+     /**
+     * Recupera un grupo de la base de datos por su código.
+     * Si el grupo ya está en el pool de objetos, lo devuelve directamente.
+     * @param codigo El código identificador del grupo a recuperar.
+     * @return El objeto Grupo recuperado, o null si no existe.
+     * @throws IllegalStateException Si el creador del grupo no existe en la base de datos.
+     */
     @Override
     public Grupo recuperarGrupo(int codigo) {
         if (PoolDAO.getUnicaInstancia().contiene(codigo)) {
@@ -160,6 +194,12 @@ public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
         return grupo;
     }
     
+    
+     /**
+     * Modifica un grupo existente en la base de datos.
+     * Verifica y actualiza todas las propiedades del grupo, incluyendo la lista de mensajes enviados.
+     * @param grupo El objeto Grupo con los datos actualizados.
+     */
     @Override
     public void modificarGrupo(Grupo grupo) {
         // 1) Recuperar la entidad del grupo
@@ -229,7 +269,10 @@ public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
 
 
 
-
+     /**
+     * Recupera todos los grupos almacenados en la base de datos.
+     * @return Una lista con todos los objetos Grupo recuperados.
+     */
     @Override
     public List<Grupo> recuperarTodosGrupos() {
         List<Entidad> eGrupos = servPersistencia.recuperarEntidades("grupo");
@@ -245,6 +288,12 @@ public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
     
     // Métodos auxiliares
 
+    
+     /**
+     * Convierte una lista de contactos individuales en una cadena de texto con sus códigos separados por espacios.
+     * @param listaContactos Lista de contactos individuales a convertir.
+     * @return Cadena de texto con los códigos de los contactos separados por espacios.
+     */
     private String obtenerCodigosContactos(List<ContactoIndividual> listaContactos) {
         StringBuilder sb = new StringBuilder();
         for (ContactoIndividual c : listaContactos) {
@@ -253,6 +302,12 @@ public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
         return sb.toString().trim();
     }
 
+    
+     /**
+     * Convierte una cadena de texto con códigos de contactos en una lista de objetos ContactoIndividual.
+     * @param codigos Cadena de texto con los códigos separados por espacios.
+     * @return Lista de objetos ContactoIndividual correspondientes a los códigos.
+     */
     private List<ContactoIndividual> obtenerContactosDesdeCodigos(String codigos) {
         List<ContactoIndividual> contactos = new LinkedList<>();
         if (codigos == null || codigos.trim().isEmpty()) return contactos;

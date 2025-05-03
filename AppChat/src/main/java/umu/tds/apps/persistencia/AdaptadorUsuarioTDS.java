@@ -29,10 +29,20 @@ public class AdaptadorUsuarioTDS implements IAdaptadorUsuarioDAO {
 	private static ServicioPersistencia servPersistencia;
 	private static AdaptadorUsuarioTDS unicaInstancia = null;
 
+	
+	 /**
+	 * Constructor privado para implementar el patrón Singleton.
+	 * Inicializa el servicio de persistencia de la aplicación.
+	 */
 	private AdaptadorUsuarioTDS() {
 		servPersistencia = FactoriaServicioPersistencia.getInstance().getServicioPersistencia();
 	}
 
+	
+	 /**
+	 * Método para obtener la única instancia de la clase (patrón Singleton).
+	 * @return La única instancia de AdaptadorUsuarioTDS.
+	 */
 	public static AdaptadorUsuarioTDS getUnicaInstancia() {
 		if (unicaInstancia == null) {
 			unicaInstancia = new AdaptadorUsuarioTDS();
@@ -40,6 +50,12 @@ public class AdaptadorUsuarioTDS implements IAdaptadorUsuarioDAO {
 		return unicaInstancia;
 	}
 
+	
+	 /**
+	 * Registra un usuario en la base de datos.
+	 * Si el usuario ya existe en la base de datos (tiene código asignado), no se realiza ninguna acción.
+	 * @param usuario El objeto Usuario que se desea registrar en la base de datos.
+	 */
 	@Override
 	public void registrarUsuario(Usuario usuario) {
 		Entidad eUsuario = null;
@@ -73,6 +89,13 @@ public class AdaptadorUsuarioTDS implements IAdaptadorUsuarioDAO {
 		System.out.println("Usuario registrado con ID: " + eUsuario.getId());
 	}
 
+	
+	
+	 /**
+	 * Modifica un usuario existente en la base de datos.
+	 * Actualiza todas las propiedades del usuario en la base de datos.
+	 * @param usuario El objeto Usuario con los datos actualizados.
+	 */
 	@Override
 	public void modificarUsuario(Usuario usuario) {
 		Entidad eUsuario = servPersistencia.recuperarEntidad(usuario.getCodigo());
@@ -125,6 +148,13 @@ public class AdaptadorUsuarioTDS implements IAdaptadorUsuarioDAO {
 		System.out.println("Usuario " + usuario.getTelefono() + " modificado en BD.");
 	}
 
+	
+	/**
+	 * Recupera un usuario de la base de datos por su código.
+	 * Si el usuario ya está en el pool de objetos, lo devuelve directamente.
+	 * @param codigo El código identificador del usuario a recuperar.
+	 * @return El objeto Usuario recuperado, o null si no existe.
+	 */
 	@Override
 	public Usuario recuperarUsuario(int codigo) {
 		if (PoolDAO.getUnicaInstancia().contiene(codigo)) {
@@ -206,6 +236,11 @@ public class AdaptadorUsuarioTDS implements IAdaptadorUsuarioDAO {
 		return usuario;
 	}
 
+	
+	 /**
+	 * Recupera todos los usuarios almacenados en la base de datos.
+	 * @return Una lista con todos los objetos Usuario recuperados.
+	 */
 	@Override
 	public List<Usuario> recuperarTodosUsuarios() {
 		List<Entidad> eUsuarios = servPersistencia.recuperarEntidades("usuario");
@@ -223,6 +258,12 @@ public class AdaptadorUsuarioTDS implements IAdaptadorUsuarioDAO {
 	// Métodos auxiliares
 	// --------------------------------------------------------------------------------
 
+	
+	 /**
+	 * Convierte una lista de contactos en una cadena de texto con sus códigos separados por espacios.
+	 * @param listaContactos Lista de contactos a convertir.
+	 * @return Cadena de texto con los códigos de los contactos separados por espacios.
+	 */
 	private String obtenerCodigosContactos(List<Contacto> listaContactos) {
 		StringBuilder sb = new StringBuilder();
 		for (Contacto c : listaContactos) {
@@ -231,6 +272,13 @@ public class AdaptadorUsuarioTDS implements IAdaptadorUsuarioDAO {
 		return sb.toString().trim();
 	}
 
+	
+	 /**
+	 * Convierte una cadena de texto con códigos de contactos en una lista de objetos Contacto.
+	 * Distingue entre contactos individuales y grupos.
+	 * @param codigos Cadena de texto con los códigos separados por espacios.
+	 * @return Lista de objetos Contacto correspondientes a los códigos.
+	 */
 	private List<Contacto> obtenerContactosDesdeCodigos(String codigos) {
 		List<Contacto> contactos = new LinkedList<>();
 		if (codigos == null || codigos.trim().isEmpty())
@@ -259,6 +307,12 @@ public class AdaptadorUsuarioTDS implements IAdaptadorUsuarioDAO {
 		return contactos;
 	}
 
+	
+	 /**
+	 * Convierte una lista de mensajes en una cadena de texto con sus códigos separados por espacios.
+	 * @param mensajes Lista de mensajes a convertir.
+	 * @return Cadena de texto con los códigos de los mensajes separados por espacios.
+	 */
 	private String obtenerCodigosMensajes(List<Mensaje> mensajes) {
 		StringBuilder sb = new StringBuilder();
 		for (Mensaje m : mensajes) {
@@ -267,6 +321,12 @@ public class AdaptadorUsuarioTDS implements IAdaptadorUsuarioDAO {
 		return sb.toString().trim();
 	}
 
+	
+	 /**
+	 * Convierte una cadena de texto con códigos de mensajes en una lista de objetos Mensaje.
+	 * @param codigos Cadena de texto con los códigos separados por espacios.
+	 * @return Lista de objetos Mensaje correspondientes a los códigos.
+	 */
 	private List<Mensaje> obtenerMensajesDesdeCodigos(String codigos) {
 		List<Mensaje> mensajes = new LinkedList<>();
 		if (codigos == null || codigos.trim().isEmpty())
@@ -283,6 +343,12 @@ public class AdaptadorUsuarioTDS implements IAdaptadorUsuarioDAO {
 		return mensajes;
 	}
 
+	
+	 /**
+	 * Convierte una lista de chats en una cadena de texto con sus códigos separados por espacios.
+	 * @param chats Lista de chats a convertir.
+	 * @return Cadena de texto con los códigos de los chats separados por espacios.
+	 */
 	private String obtenerCodigosChats(List<Chat> chats) {
 		StringBuilder sb = new StringBuilder();
 		for (Chat c : chats) {
@@ -291,6 +357,12 @@ public class AdaptadorUsuarioTDS implements IAdaptadorUsuarioDAO {
 		return sb.toString().trim();
 	}
 
+	
+	 /**
+	 * Convierte una cadena de texto con códigos de chats en una lista de objetos Chat.
+	 * @param codigos Cadena de texto con los códigos separados por espacios.
+	 * @return Lista de objetos Chat correspondientes a los códigos.
+	 */
 	private List<Chat> obtenerChatsDesdeCodigos(String codigos) {
 		List<Chat> listaChats = new LinkedList<>();
 		if (codigos == null || codigos.trim().isEmpty())
