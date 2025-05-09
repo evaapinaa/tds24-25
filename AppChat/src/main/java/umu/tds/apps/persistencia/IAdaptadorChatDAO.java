@@ -4,6 +4,9 @@ import java.util.List;
 
 import umu.tds.apps.modelo.Chat;
 
+/**
+ * Interface que define los métodos para la persistencia de los objetos Chat.
+ */
 public interface IAdaptadorChatDAO {
 
 	/**

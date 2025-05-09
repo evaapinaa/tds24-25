@@ -12,11 +12,40 @@ import umu.tds.apps.controlador.AppChat;
 import umu.tds.apps.modelo.Usuario;
 import umu.tds.apps.vista.customcomponents.VisualUtils;
 
+/**
+ * La clase VentanaPerfil muestra la información personal del usuario actual
+ * y permite modificar algunos aspectos como el saludo personalizado.
+ * <p>
+ * Esta ventana se presenta como un diálogo modal que muestra la foto de perfil,
+ * datos personales y permite la edición del mensaje de saludo.
+ * </p>
+ *
+ * @author TDS-2025
+ * @version 1.0
+ */
 public class VentanaPerfil extends JDialog {
+	
+	/**
+     * Número de versión para la serialización.
+     */
     private static final long serialVersionUID = 1L;
+    
+    /**
+     * Área de texto para mostrar y editar el saludo del usuario.
+     */
     private JTextArea txtSaludo;
+    
+    /**
+     * Referencia al usuario actual cuyo perfil se está visualizando.
+     */
     private Usuario usuarioActual;
 
+    
+    /**
+     * Constructor que crea el diálogo de perfil vinculado a la ventana padre.
+     *
+     * @param parent La ventana padre desde la que se abre este diálogo
+     */
     @SuppressWarnings("deprecation")
 	public VentanaPerfil(JFrame parent) {
         // Configuración básica del diálogo
@@ -152,7 +181,11 @@ public class VentanaPerfil extends JDialog {
         setContentPane(panelPrincipal);
     }
 
-    // Método para guardar el saludo
+    /**
+     * Guarda el saludo ingresado por el usuario en su perfil.
+     * Muestra un mensaje de éxito si la operación es correcta o
+     * un mensaje de error en caso contrario.
+     */
     private void guardarSaludo() {
         String nuevoSaludo = txtSaludo.getText().trim();
         
@@ -186,7 +219,12 @@ public class VentanaPerfil extends JDialog {
         }
     }
 
-    // Método estático para mostrar fácilmente
+    /**
+     * Método estático para mostrar fácilmente la ventana de perfil.
+     * Crea e inicializa un nuevo diálogo de perfil y lo hace visible.
+     *
+     * @param padre La ventana padre desde la que se abre este diálogo
+     */
     public static void mostrarPerfil(JFrame padre) {
         VentanaPerfil ventanaPerfil = new VentanaPerfil(padre);
         ventanaPerfil.setVisible(true);

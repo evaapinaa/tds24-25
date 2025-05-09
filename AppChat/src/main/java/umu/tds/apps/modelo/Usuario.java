@@ -12,6 +12,12 @@ import javax.swing.ImageIcon;
 
 import umu.tds.apps.persistencia.AdaptadorUsuarioTDS;
 
+
+
+/**
+ * Clase que representa un usuario en el sistema AppChat.
+ * Contiene toda la información personal del usuario, sus contactos, chats y mensajes.
+*/
 public class Usuario {
 
 	// ATRIBUTOS
@@ -117,13 +123,24 @@ public class Usuario {
 		this.listaChats = listaChats;
 	}
 
-	// Método para comprobar si la clave es válida
+
+
+	 /**
+     * Verifica si la contraseña proporcionada es válida para este usuario.
+     * 
+     * @param contraseña Contraseña a verificar
+     * @return true si la contraseña es correcta, false en caso contrario
+     */
 	public boolean isClaveValida(String contraseña) {
 		return this.contraseña.equals(contraseña);
 	}
 
-	// Método para obtener el número de mensajes enviados en el último mes
-	// (DESCUENTO)
+	 /**
+     * Obtiene el número de mensajes enviados por el usuario en el último mes.
+     * Usado para calcular descuentos en la suscripción premium.
+     * 
+     * @return Cantidad de mensajes enviados en el último mes
+     */
 	public long getNumeroMensajesUltimoMes() {
 		// Fecha actual
 		LocalDate ahora = LocalDate.now();
@@ -139,7 +156,13 @@ public class Usuario {
 			return !fechaEnvio.isBefore(primerDiaDelMes) && !fechaEnvio.isAfter(ultimoDiaDelMes);
 		}).count();
 	}
-
+	
+	
+	 /**
+     * Obtiene la lista de grupos a los que pertenece el usuario.
+     * 
+     * @return Lista de grupos
+     */
 	public List<Grupo> getGrupos() {
 		return listaContactos.stream().filter(c -> c instanceof Grupo).map(c -> (Grupo) c).toList(); // Cambiar a
 																										// `collect(Collectors.toList())`
@@ -177,7 +200,12 @@ public class Usuario {
 		this.listaMensajesRecibidos = listaMensajesRecibidos;
 	}
 
-	// Cambio
+	 /**
+     * Añade un contacto a la lista de contactos del usuario.
+     * 
+     * @param contacto Contacto a añadir
+     * @return true si el contacto se añadió correctamente, false si ya existía
+     */
 	public boolean añadirContacto(Contacto contacto) {
 		if (!listaContactos.contains(contacto)) {
 			listaContactos.add(contacto);
@@ -190,16 +218,36 @@ public class Usuario {
 		return false;
 	}
 
+	
+	 /**
+     * Añade un chat a la lista de chats del usuario.
+     * 
+     * @param chat Chat a añadir
+     */
 	public void añadirChat(Chat chat) {
 		if (!listaChats.contains(chat)) {
 			listaChats.add(chat);
 		}
 	}
 
+	
+    /**
+     * Obtiene el chat existente con otro usuario, si existe.
+     * 
+     * @param otroUsuario Usuario con el que se busca el chat
+     * @return Chat encontrado o null si no existe
+     */
 	public Chat obtenerChatCon(Usuario otroUsuario) {
 		return listaChats.stream().filter(ch -> ch.involucraUsuario(otroUsuario)).findFirst().orElse(null);
 	}
 
+	
+	 /**
+     * Obtiene todos los mensajes intercambiados con otro usuario.
+     * 
+     * @param otroUsuario Usuario con el que se intercambiaron mensajes
+     * @return Lista de mensajes ordenados cronológicamente
+     */
 	public List<Mensaje> obtenerMensajesCon(Usuario otroUsuario) {
 		List<Mensaje> mensajes = new LinkedList<>();
 
@@ -230,29 +278,62 @@ public class Usuario {
 	}
 
 
+	 
+    /**
+     * Activa la suscripción premium para el usuario.
+     */
 	public void activarPremium() {
 		this.premium = true;
 	}
 
+	 /**
+     * Desactiva la suscripción premium para el usuario.
+     */
 	public void desactivarPremium() {
 		this.premium = false;
 	}
-
+	
+	
+    /**
+     * Obtiene el chat que contiene mensajes con otro usuario.
+     * 
+     * @param otroUsuario Usuario con el que se buscan mensajes
+     * @return Chat encontrado o null si no existe
+     */
 	public Chat getChatMensajes(Usuario otroUsuario) {
 		return listaChats.stream().filter(chat -> chat.getOtroUsuarioChat().equals(otroUsuario)).findFirst()
 				.orElse(null);
 	}
-
-	// Método para añadir un mensaje enviado
+	
+	
+	  /**
+     * Añade un mensaje a la lista de mensajes enviados.
+     * 
+     * @param mensaje Mensaje enviado
+     */
 	public void añadirMensajeEnviado(Mensaje mensaje) {
 		this.listaMensajesEnviados.add(mensaje);
 	}
 
-	// Método para añadir un mensaje recibido
+	
+	   /**
+     * Añade un mensaje a la lista de mensajes recibidos.
+     * 
+     * @param mensaje Mensaje recibido
+     */
 	public void añadirMensajeRecibido(Mensaje mensaje) {
 		this.listaMensajesRecibidos.add(mensaje);
 	}
 
+	
+    /**
+     * Filtra los mensajes según varios criterios.
+     * 
+     * @param texto Texto contenido en el mensaje
+     * @param telefono Teléfono del emisor o receptor
+     * @param contacto Nombre del contacto
+     * @return Lista de mensajes que cumplen los criterios
+     */
 	public List<Mensaje> filtrarMensajes(String texto, String telefono, String contacto) {
 		EstrategiaBusquedaMensaje estrategiaBusqueda = new EstrategiaBusquedaMensaje();
 
@@ -276,6 +357,13 @@ public class Usuario {
 		return estrategiaBusqueda.ejecutarBusqueda(mensajes);
 	}
 	
+	
+	 /**
+     * Crea un nuevo chat con otro usuario o devuelve el existente.
+     * 
+     * @param otroUsuario Usuario con el que crear el chat
+     * @return Chat nuevo o existente
+     */
 	public Chat crearChatCon(Usuario otroUsuario) {
 	    // Verificar si ya existe un chat con este usuario
 	    Chat chatExistente = obtenerChatCon(otroUsuario);
@@ -292,8 +380,21 @@ public class Usuario {
 	    
 	    return nuevoChat;
 	}
+		
 	
-	// CONSTRUCTOR
+		// CONSTRUCTOR
+	 /**
+     * Crea un nuevo usuario con la información básica.
+     * 
+     * @param usuario Nombre de usuario
+     * @param contraseña Contraseña del usuario
+     * @param telefono Número de teléfono (identificador único)
+     * @param email Correo electrónico
+     * @param saludo Mensaje de saludo opcional
+     * @param imagenPerfil Imagen de perfil del usuario
+     * @param fechaNacimiento Fecha de nacimiento del usuario
+     * @param fechaRegistro Fecha de registro en el sistema
+     */
 
 	public Usuario(String usuario, String contraseña, String telefono, String email, Optional<String> saludo,
 			ImageIcon imagenPerfil, LocalDate fechaNacimiento, LocalDate fechaRegistro) {
@@ -333,6 +434,13 @@ public class Usuario {
 		return telefono.hashCode();
 	}
 
+	
+	 /**
+     * Obtiene el contacto asociado a un usuario.
+     * 
+     * @param otroUsuario Usuario del que se busca el contacto
+     * @return Contacto asociado o null si no existe
+     */
 	public Contacto obtenerContactoCon(Usuario otroUsuario) {
 		return listaContactos.stream().filter(c -> {
 			if (c instanceof ContactoIndividual) {

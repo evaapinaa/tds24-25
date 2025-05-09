@@ -37,6 +37,12 @@ public class ChatCellRenderer extends JPanel implements ListCellRenderer<Object>
     private JButton addButton;      
     private Rectangle addButtonBounds;
 
+    
+    /**
+     * Constructor que inicializa y configura el renderizador de celdas para chats y grupos.
+     * Establece el diseño del panel, crea las etiquetas y botones necesarios, y configura
+     * los estilos visuales iniciales.
+     */
     public ChatCellRenderer() {
         setLayout(new BorderLayout(5, 5));
         setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -64,10 +70,27 @@ public class ChatCellRenderer extends JPanel implements ListCellRenderer<Object>
         
     }
     
+    /**
+     * Obtiene el botón para añadir contactos.
+     * 
+     * @return El botón de añadir contacto
+     */
     public JButton getAddButton() {
         return addButton;
     }
 
+    
+    /**
+     * Implementación del método de la interfaz ListCellRenderer que configura la apariencia
+     * de cada elemento de la lista (Chat o Grupo).
+     * 
+     * @param list La lista que contiene el elemento
+     * @param value El objeto a renderizar (Chat o Grupo)
+     * @param index El índice del elemento en la lista
+     * @param isSelected Indica si el elemento está seleccionado
+     * @param cellHasFocus Indica si el elemento tiene el foco
+     * @return El componente configurado para mostrar el elemento
+     */
     @Override
     public Component getListCellRendererComponent(
             JList<? extends Object> list,
@@ -127,7 +150,13 @@ public class ChatCellRenderer extends JPanel implements ListCellRenderer<Object>
     }
 
     /**
-     * Renderiza un Chat (usuario-usuario) con foto, nombre y último mensaje.
+     * Renderiza un objeto de tipo Chat mostrando la información del usuario, 
+     * su foto de perfil y el último mensaje intercambiado.
+     * 
+     * @param list La lista que contiene el elemento
+     * @param chat El objeto Chat a renderizar
+     * @param index El índice del elemento en la lista
+     * @param isSelected Indica si el elemento está seleccionado
      */
     private void renderChat(JList<?> list, Chat chat, int index, boolean isSelected) {
         // 1. Usuario actual y "otro usuario"
@@ -196,8 +225,13 @@ public class ChatCellRenderer extends JPanel implements ListCellRenderer<Object>
     }
 
     /**
-     * Renderiza un Grupo mostrando su nombre, su imagen (si existe) y
-     * un preview simple (ya que no guardas el historial de mensajes en el Grupo).
+     * Renderiza un objeto de tipo Grupo mostrando su nombre, imagen y
+     * una vista previa del último mensaje si existe.
+     * 
+     * @param list La lista que contiene el elemento
+     * @param grupo El objeto Grupo a renderizar
+     * @param index El índice del elemento en la lista
+     * @param isSelected Indica si el elemento está seleccionado
      */
     private void renderGrupo(JList<?> list, Grupo grupo, int index, boolean isSelected) {
         // Asigna nombre del grupo
@@ -280,7 +314,10 @@ public class ChatCellRenderer extends JPanel implements ListCellRenderer<Object>
     }
 
     /**
-     * Aplica colores y fuentes si el elemento está seleccionado o no.
+     * Aplica los colores y estilos visuales dependiendo de si el elemento está seleccionado o no.
+     * 
+     * @param list La lista que contiene el elemento
+     * @param isSelected Indica si el elemento está seleccionado
      */
     private void applySelectionColors(JList<?> list, boolean isSelected) {
         if (isSelected) {
@@ -295,8 +332,10 @@ public class ChatCellRenderer extends JPanel implements ListCellRenderer<Object>
     }
 
     /**
-     * Carga la imagen de perfil (usuario) desde una ruta o URL,
-     * la transforma en circular y la asigna a imageLabel.
+     * Carga y procesa una imagen de perfil desde una ruta o URL,
+     * la transforma en una imagen circular y la asigna al imageLabel.
+     * 
+     * @param path La ruta o URL de la imagen a cargar
      */
     @SuppressWarnings("deprecation")
     private void setProfileImage(String path) {
@@ -323,6 +362,13 @@ public class ChatCellRenderer extends JPanel implements ListCellRenderer<Object>
         }
     }
 
+    
+    /**
+     * Sobrescribe el método paintComponent para dibujar elementos gráficos personalizados,
+     * como una línea separadora entre cada celda de la lista.
+     * 
+     * @param g El contexto gráfico utilizado para pintar
+     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -331,6 +377,12 @@ public class ChatCellRenderer extends JPanel implements ListCellRenderer<Object>
         g.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1);
     }
 
+    
+    /**
+     * Obtiene los límites del botón de añadir contacto.
+     * 
+     * @return Un objeto Rectangle con las coordenadas y dimensiones del botón
+     */
     public Rectangle getAddButtonBounds() {
         return addButtonBounds;
     }

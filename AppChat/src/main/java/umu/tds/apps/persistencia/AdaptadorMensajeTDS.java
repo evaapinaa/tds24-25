@@ -20,10 +20,20 @@ public class AdaptadorMensajeTDS implements IAdaptadorMensajeDAO {
     private static ServicioPersistencia servPersistencia;
     private static AdaptadorMensajeTDS unicaInstancia = null;
 
+    
+     /**
+     * Constructor privado para implementar el patrón Singleton.
+     * Inicializa el servicio de persistencia de la aplicación.
+     */
     private AdaptadorMensajeTDS() {
         servPersistencia = FactoriaServicioPersistencia.getInstance().getServicioPersistencia();
     }
 
+    
+     /**
+     * Método para obtener la única instancia de la clase (patrón Singleton).
+     * @return La única instancia de AdaptadorMensajeTDS.
+     */
     public static AdaptadorMensajeTDS getUnicaInstancia() {
         if (unicaInstancia == null) {
             unicaInstancia = new AdaptadorMensajeTDS();
@@ -31,6 +41,12 @@ public class AdaptadorMensajeTDS implements IAdaptadorMensajeDAO {
         return unicaInstancia;
     }
 
+    
+     /**
+     * Registra un mensaje en la base de datos.
+     * Si el mensaje ya existe en la base de datos (tiene código asignado), no se realiza ninguna acción.
+     * @param mensaje El objeto Mensaje que se desea registrar en la base de datos.
+     */
     @Override
     public void registrarMensaje(Mensaje mensaje) {
         // Ver si ya existe
@@ -59,6 +75,13 @@ public class AdaptadorMensajeTDS implements IAdaptadorMensajeDAO {
         System.out.println("Mensaje registrado con ID: " + eMensaje.getId());
     }
 
+    
+     /**
+     * Recupera un mensaje de la base de datos por su código.
+     * Si el mensaje ya está en el pool de objetos, lo devuelve directamente.
+     * @param codigo El código identificador del mensaje a recuperar.
+     * @return El objeto Mensaje recuperado, o null si no existe.
+     */
     @Override
     public Mensaje recuperarMensaje(int codigo) {
         // 1) PoolDAO check
@@ -110,6 +133,11 @@ public class AdaptadorMensajeTDS implements IAdaptadorMensajeDAO {
         return mensaje;
     }
 
+    
+     /**
+     * Recupera todos los mensajes almacenados en la base de datos.
+     * @return Una lista con todos los objetos Mensaje recuperados.
+     */
     @Override
     public List<Mensaje> recuperarTodosMensajes() {
         List<Entidad> eMensajes = servPersistencia.recuperarEntidades("mensaje");

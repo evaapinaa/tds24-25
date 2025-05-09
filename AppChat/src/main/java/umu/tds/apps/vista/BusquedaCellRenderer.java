@@ -10,6 +10,17 @@ import umu.tds.apps.modelo.ContactoIndividual;
 import umu.tds.apps.modelo.Mensaje;
 import umu.tds.apps.modelo.Usuario;
 
+/**
+ * Componente personalizado que implementa un renderizador de celdas para la lista de resultados de búsqueda.
+ * Esta clase se encarga de mostrar cada mensaje en un formato visual adecuado dentro de una lista,
+ * incluyendo la información del emisor, receptor, texto del mensaje y fecha/hora.
+ * 
+ * <p>El renderizador aplica diferentes estilos visuales para los mensajes, incluyendo formatos
+ * específicos cuando un elemento está seleccionado.</p>
+ * 
+ * @author TDS-2025
+ * @version 1.0
+ */
 public class BusquedaCellRenderer extends JPanel implements ListCellRenderer<Mensaje> {
 
     private static final long serialVersionUID = 1L;
@@ -18,6 +29,12 @@ public class BusquedaCellRenderer extends JPanel implements ListCellRenderer<Men
     private JLabel lblTexto;
     private JLabel lblFecha;
 
+    
+    /**
+     * Constructor que inicializa y configura el renderizador de celdas para mensajes.
+     * Establece el diseño del panel, crea las etiquetas para cada parte del mensaje
+     * y configura los estilos visuales iniciales.
+     */
     public BusquedaCellRenderer() {
         setLayout(new BorderLayout(10, 10));
         setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -49,6 +66,18 @@ public class BusquedaCellRenderer extends JPanel implements ListCellRenderer<Men
         setBorder(new LineBorder(new Color(200, 200, 200), 1, true)); // Bordes redondeados
     }
 
+    
+    /**
+     * Implementación del método de la interfaz ListCellRenderer que configura la apariencia
+     * de cada elemento de la lista de mensajes.
+     * 
+     * @param list La lista que contiene el elemento
+     * @param mensaje El mensaje a renderizar
+     * @param index El índice del elemento en la lista
+     * @param isSelected Indica si el elemento está seleccionado
+     * @param cellHasFocus Indica si el elemento tiene el foco
+     * @return El componente configurado para mostrar el mensaje
+     */
     @Override
     public Component getListCellRendererComponent(
             JList<? extends Mensaje> list,
@@ -94,6 +123,13 @@ public class BusquedaCellRenderer extends JPanel implements ListCellRenderer<Men
         return this;
     }
 
+    
+    /**
+     * Sobrescribe el método paintComponent para dibujar elementos gráficos personalizados,
+     * como una línea separadora entre cada celda de la lista.
+     * 
+     * @param g El contexto gráfico utilizado para pintar
+     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -102,6 +138,15 @@ public class BusquedaCellRenderer extends JPanel implements ListCellRenderer<Men
         g.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1);
     }
     
+    
+    /**
+     * Obtiene el nombre del usuario o contacto para mostrar en la interfaz.
+     * Si el usuario es un contacto registrado, devuelve su nombre; si es el usuario actual,
+     * devuelve "Tú"; si no es un contacto registrado, devuelve el número de teléfono.
+     * 
+     * @param usuario El usuario cuyo nombre o identificador se desea obtener
+     * @return El nombre o identificador del usuario a mostrar
+     */
     private String obtenerNombreOContacto(Usuario usuario) {
         if (usuario == null) {
             return "(Desconocido)";

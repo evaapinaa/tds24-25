@@ -20,11 +20,21 @@ public class AdaptadorChatTDS implements IAdaptadorChatDAO {
 
     private static ServicioPersistencia servPersistencia;
     private static AdaptadorChatTDS unicaInstancia = null;
+    
+     /**
+     * Constructor privado para implementar el patrón Singleton.
+     * Inicializa el servicio de persistencia de la aplicación.
+     */
 
     private AdaptadorChatTDS() {
         servPersistencia = FactoriaServicioPersistencia.getInstance().getServicioPersistencia();
     }
 
+    
+     /**
+     * Método para obtener la única instancia de la clase (patrón Singleton).
+     * @return La única instancia de AdaptadorChatTDS.
+     */
     public static AdaptadorChatTDS getUnicaInstancia() {
         if (unicaInstancia == null) {
             unicaInstancia = new AdaptadorChatTDS();
@@ -32,6 +42,12 @@ public class AdaptadorChatTDS implements IAdaptadorChatDAO {
         return unicaInstancia;
     }
 
+    
+     /**
+     * Registra un chat en la base de datos.
+     * Si el chat ya existe en la base de datos (tiene código asignado), no se realiza ninguna acción.
+     * @param chat El objeto Chat que se desea registrar en la base de datos.
+     */
     @Override
     public void registrarChat(Chat chat) {
         // Ver si ya existe
@@ -54,6 +70,12 @@ public class AdaptadorChatTDS implements IAdaptadorChatDAO {
         System.out.println("Chat registrado con ID: " + eChat.getId());
     }
 
+    
+     /**
+     * Modifica un chat existente en la base de datos.
+     * Actualiza todas las propiedades del chat en la base de datos.
+     * @param chat El objeto Chat con los datos actualizados.
+     */
     @Override
     public void modificarChat(Chat chat) {
         Entidad eChat = servPersistencia.recuperarEntidad(chat.getCodigo());
@@ -78,6 +100,13 @@ public class AdaptadorChatTDS implements IAdaptadorChatDAO {
         System.out.println("Chat " + chat.getCodigo() + " modificado en BD.");
     }
 
+    
+     /**
+     * Recupera un chat de la base de datos por su código.
+     * Si el chat ya está en el pool de objetos, lo devuelve directamente.
+     * @param codigo El código identificador del chat a recuperar.
+     * @return El objeto Chat recuperado, o null si no existe.
+     */
     @Override
     public Chat recuperarChat(int codigo) {
         // 1) Consultar la caché
@@ -121,6 +150,11 @@ public class AdaptadorChatTDS implements IAdaptadorChatDAO {
         return chat;
     }
 
+    
+     /**
+     * Recupera todos los chats almacenados en la base de datos.
+     * @return Una lista con todos los objetos Chat recuperados.
+     */
     @Override
     public List<Chat> recuperarTodosChats() {
         List<Entidad> eChats = servPersistencia.recuperarEntidades("chat");
@@ -138,6 +172,12 @@ public class AdaptadorChatTDS implements IAdaptadorChatDAO {
     // Métodos auxiliares
     // --------------------------------------------------------------------------------
 
+    
+     /**
+     * Convierte una lista de mensajes en una cadena de texto con sus códigos separados por espacios.
+     * @param listaMensajes Lista de mensajes a convertir.
+     * @return Cadena de texto con los códigos de los mensajes separados por espacios.
+     */
     private String obtenerCodigosMensajes(List<Mensaje> listaMensajes) {
         StringBuilder sb = new StringBuilder();
         for (Mensaje m : listaMensajes) {
@@ -146,6 +186,12 @@ public class AdaptadorChatTDS implements IAdaptadorChatDAO {
         return sb.toString().trim();
     }
 
+    
+     /**
+     * Convierte una cadena de texto con códigos de mensajes en una lista de objetos Mensaje.
+     * @param codigos Cadena de texto con los códigos separados por espacios.
+     * @return Lista de objetos Mensaje correspondientes a los códigos.
+     */
     private List<Mensaje> obtenerMensajesDesdeCodigos(String codigos) {
         List<Mensaje> mensajes = new LinkedList<>();
         if (codigos == null || codigos.trim().isEmpty()) return mensajes;

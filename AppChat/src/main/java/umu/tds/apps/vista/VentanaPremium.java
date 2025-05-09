@@ -25,15 +25,43 @@ import umu.tds.apps.modelo.EstrategiaDescuento;
 import java.awt.Color;
 import java.awt.Font;
 
+
+/**
+ * Ventana de activación de cuenta Premium para la aplicación AppChat.
+ * Permite a los usuarios aplicar diferentes tipos de descuentos según
+ * sus características (fecha de registro, cantidad de mensajes enviados)
+ * y realizar el pago para activar la funcionalidad Premium.
+ * 
+ * @author TDS-2025
+ * @version 1.0
+ */
 public class VentanaPremium extends JDialog {
 
+	/** Número de versión para serialización */
 	private static final long serialVersionUID = 1L;
+	
+	/** Panel principal de contenido */
 	private final JPanel contentPanel = new JPanel();
+	
+	/** Etiqueta para mostrar el precio actual */
 	private JLabel lblPrecio;
+	
+	/** Almacena el precio actual después de aplicar descuentos */
 	private double precioActual;
+	
+	/** Indica si ya se ha aplicado el descuento por fecha de registro */
 	private boolean descuentoFechaAplicado = false;
+	
+	/** Indica si ya se ha aplicado el descuento por número de mensajes */
 	private boolean descuentoMensajeAplicado = false;
 
+	
+	/**
+	 * Método principal para pruebas de la ventana.
+	 * Crea y muestra una instancia de la ventana premium.
+	 * 
+	 * @param args Argumentos de línea de comandos (no utilizados)
+	 */
 	public static void main(String[] args) {
 		try {
 			VentanaPremium dialog = new VentanaPremium();
@@ -44,6 +72,12 @@ public class VentanaPremium extends JDialog {
 		}
 	}
 
+	
+	/**
+	 * Constructor de la ventana Premium.
+	 * Inicializa la interfaz gráfica, configura los componentes y
+	 * prepara los listeners para gestionar los eventos de usuario.
+	 */
 	public VentanaPremium() {
 		setTitle("Activar Premium");
 		setBounds(100, 100, 565, 376);
@@ -166,6 +200,12 @@ public class VentanaPremium extends JDialog {
 		}
 	}
 
+	
+	/**
+	 * Aplica un descuento basado en la fecha de registro del usuario.
+	 * Si el usuario se registró hace menos de 7 días, se le aplica
+	 * un descuento del 20% sobre el precio base.
+	 */
 	private void aplicarDescuentoPorFecha() {
 		// Verificar si el descuento ya se aplicó
 		if (descuentoFechaAplicado) {
@@ -209,6 +249,14 @@ public class VentanaPremium extends JDialog {
 		descuentoFechaAplicado = true;
 	}
 
+	
+	/**
+	 * Aplica un descuento basado en el número de mensajes enviados por el usuario.
+	 * Se aplican diferentes porcentajes de descuento según la cantidad de mensajes:
+	 * - Más de 100 mensajes: 15% de descuento
+	 * - Más de 200 mensajes: 20% de descuento
+	 * - Más de 300 mensajes: 30% de descuento
+	 */
 	private void aplicarDescuentoPorMensajes() {
 
 		if (descuentoMensajeAplicado) {
@@ -257,6 +305,12 @@ public class VentanaPremium extends JDialog {
 		descuentoMensajeAplicado = true;
 	}
 
+	
+	/**
+	 * Activa la cuenta Premium para el usuario actual.
+	 * Muestra un diálogo de confirmación con el precio final y,
+	 * si el usuario confirma, procesa la activación.
+	 */
 	private void activarPremium() {
 
 		// Verificar si ya es premium (por si acaso xd

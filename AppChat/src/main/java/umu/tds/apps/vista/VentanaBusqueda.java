@@ -40,26 +40,75 @@ import java.awt.Toolkit;
 import javax.swing.UIManager;
 
 
-
+/**
+ * La clase VentanaBusqueda proporciona una interfaz gráfica para realizar búsquedas de mensajes
+ * en la aplicación de chat. Permite a los usuarios filtrar mensajes por texto, teléfono y contacto.
+ * <p>
+ * Esta ventana muestra los resultados de búsqueda en una lista y permite navegar directamente
+ * a la conversación relacionada con un mensaje específico mediante doble clic.
+ * </p>
+ *
+ * @author TDS-2025
+ * @version 1.0
+ */
 public class VentanaBusqueda extends JDialog {
 
+	 /**
+     * Número de versión para la serialización.
+     */
 	private static final long serialVersionUID = 1L;
+	
+	/**
+     * Panel principal que contiene todos los componentes de la ventana.
+     */
 	private final JPanel contentPanel = new JPanel();
+	
+	 
+    /**
+     * Campo de texto para ingresar el texto a buscar en los mensajes.
+     */
 	private JTextField txtTexto;
+	
+	 /**
+     * Campo de texto para ingresar el número de teléfono a filtrar.
+     */
 	private JTextField textField_1;
+	
+	   /**
+     * Campo de texto para ingresar el nombre del contacto a filtrar.
+     */
 	private JTextField textField_2;
+	
+	  /**
+     * Panel que contendrá los mensajes resultantes de la búsqueda.
+     */
 	private JPanel panelMensajes = new JPanel();
+	
+	 /**
+     * Lista que muestra los resultados de la búsqueda.
+     */
 	private JList<Mensaje> listaResultados;
+	
+    /**
+     * Referencia a la ventana principal para interactuar con ella.
+     */
 	private VentanaPrincipal ventanaPrincipal;
 
 	/**
-	 * Create the dialog.
-	 */
+     * Constructor que crea una nueva ventana de búsqueda.
+     *
+     * @param ventanaPrincipal Referencia a la ventana principal desde donde se abre esta ventana
+     */
 	public VentanaBusqueda(VentanaPrincipal ventanaPrincipal) {
 	    this.ventanaPrincipal = ventanaPrincipal;
 	    initialize();
 	}
 	
+	
+	 /**
+     * Inicializa y configura todos los componentes gráficos de la ventana.
+     * Establece los listeners para manejar eventos y configurar el comportamiento de la interfaz.
+     */
 	public void initialize() {
 		setIconImage(Toolkit.getDefaultToolkit()
 				.getImage(VentanaBusqueda.class.getResource("/umu/tds/apps/resources/lupaGrande.png")));
@@ -216,6 +265,14 @@ public class VentanaBusqueda extends JDialog {
 	}
 
 	// comportamiento de placeholder en un JTextField
+	
+    /**
+     * Configura un campo de texto para mostrar un texto predeterminado (placeholder)
+     * cuando está vacío y sin foco. El texto desaparece cuando el campo obtiene el foco.
+     *
+     * @param textField Campo de texto a configurar
+     * @param placeholder Texto a mostrar cuando el campo está vacío
+     */
 	private void setupPlaceholder(JTextField textField, String placeholder) {
 		textField.setForeground(Color.GRAY);
 		textField.setFont(new Font("Arial", Font.ITALIC, 14));
@@ -242,6 +299,12 @@ public class VentanaBusqueda extends JDialog {
 		});
 	}
 
+	
+	/**
+     * Ejecuta la búsqueda de mensajes según los criterios ingresados en los campos.
+     * Los resultados se muestran en la lista de resultados.
+     * Si un campo contiene su texto placeholder, se considera como vacío para la búsqueda.
+     */
 	private void buscarMensajes() {
 		String texto = txtTexto.getText();
 		String telefono = textField_1.getText();
@@ -268,6 +331,10 @@ public class VentanaBusqueda extends JDialog {
 		refrescar();
 	}
 
+	
+	/**
+     * Actualiza la visualización del panel de mensajes para reflejar cambios.
+     */
 	private void refrescar() {
 		panelMensajes.revalidate();
 		panelMensajes.repaint();

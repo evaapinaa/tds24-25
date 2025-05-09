@@ -42,17 +42,46 @@ import java.awt.SystemColor;
 
 import java.awt.Cursor;
 
+/**
+ * La clase VentanaLogin proporciona la interfaz gráfica para la autenticación de usuarios
+ * en la aplicación AppChat. Permite a los usuarios iniciar sesión con su número de teléfono
+ * y contraseña, y ofrece la opción de registrarse si aún no tienen una cuenta.
+ * <p>
+ * Esta ventana es el punto de entrada principal a la aplicación.
+ * </p>
+ *
+ * @author TDS-2025
+ * @version 1.0
+ */
 public class VentanaLogin {
 
+    /**
+     * Marco principal de la ventana de login.
+     */
 	private JFrame frmAppchat;
+	
+	 /**
+     * Campo de texto para ingresar el número de teléfono del usuario.
+     */
 	private JTextField textField;
+	
+    /**
+     * Campo para ingresar la contraseña del usuario.
+     */
 	private JPasswordField passwordField;
+	
+    /**
+     * Instancia del controlador de la aplicación.
+     */
 	private static AppChat controlador;
 
 
-	/**
-	 * Launch the application.
-	 */
+	  /**
+     * Punto de entrada principal para la aplicación.
+     * Crea e inicializa la ventana de login.
+     *
+     * @param args Argumentos de la línea de comando (no utilizados)
+     */
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -66,10 +95,11 @@ public class VentanaLogin {
 		});
 	}
 
+	
 	/**
-	 * Create the application.
-	 */
-		
+     * Constructor que inicializa el controlador de la aplicación y
+     * configura la interfaz gráfica de login.
+     */
 	public VentanaLogin() {
 		controlador = AppChat.getUnicaInstancia();
 	    if (controlador == null) {
@@ -81,14 +111,19 @@ public class VentanaLogin {
 	}
 	
 	
-	// Metodo publico que permite hacer visible la ventana
+    /**
+     * Hace visible u oculta la ventana de login.
+     *
+     * @param visible true para hacer visible la ventana, false para ocultarla
+     */
 	public void setVisible(boolean visible) {
 		frmAppchat.setVisible(visible);
 	}
 
-	/**
-	 * Initialize the contents of the frame.
-	 */
+    /**
+     * Inicializa y configura todos los componentes gráficos de la ventana de login.
+     * Establece los listeners para manejar eventos de inicio de sesión y registro.
+     */
 	private void initialize() {
 		frmAppchat = new JFrame();
 		frmAppchat.setIconImage(Toolkit.getDefaultToolkit().getImage(VentanaLogin.class.getResource("/umu/tds/apps/resources/icono.png")));

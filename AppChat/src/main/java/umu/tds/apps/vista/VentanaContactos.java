@@ -22,21 +22,73 @@ import umu.tds.apps.persistencia.AdaptadorUsuarioTDS;
 
 import javax.swing.border.EmptyBorder;
 
+
+/**
+ * La clase VentanaContactos proporciona una interfaz gráfica para gestionar contactos y grupos
+ * en la aplicación de chat. Permite añadir nuevos contactos, crear grupos y gestionar
+ * la pertenencia de contactos a distintos grupos.
+ * <p>
+ * Esta ventana presenta dos listas: una para contactos individuales y otra para grupos,
+ * con botones para transferir contactos entre ambas listas al crear un grupo.
+ * </p>
+ *
+ * @author TDS-2025
+ * @version 1.0
+ */
 public class VentanaContactos extends JPanel {
+
+	
     /**
-	 * 
-	 */
+     * Número de versión para la serialización.
+     */
 	private static final long serialVersionUID = 1L;
+	
+	  /**
+     * Lista que muestra los contactos individuales disponibles.
+     */
 	private JList<String> listaContactos;
+	
+    /**
+     * Lista que muestra los grupos o los contactos seleccionados para formar un grupo.
+     */
     private JList<String> listaGrupos;
+    
+    /**
+     * Modelo de datos para la lista de contactos.
+     */
     private DefaultListModel<String> modeloContactos;
+    
+    /**
+     * Modelo de datos para la lista de grupos.
+     */
     private DefaultListModel<String> modeloGrupos;
+    
+    /**
+     * Botón para añadir un nuevo contacto individual.
+     */
     private JButton btnAgregarContacto;
+    
+    /**
+     * Botón para crear un nuevo grupo con los contactos seleccionados.
+     */
     private JButton btnAgregarGrupo;
+    
+    /**
+     * Botón para mover contactos seleccionados de la lista de contactos a la lista de grupo.
+     */
     private JButton btnMoverDerecha;
+    
+    /**
+     * Botón para mover contactos seleccionados de la lista de grupo a la lista de contactos.
+     */
     private JButton btnMoverIzquierda;
 
     // Constructor principal
+    
+    /**
+     * Constructor que inicializa y configura la interfaz de gestión de contactos.
+     * Carga los contactos del usuario actual y configura las listas y botones necesarios.
+     */
     public VentanaContactos() {
         // Obtener el usuario actual desde AppChat
         Usuario usuarioActual = AppChat.getUsuarioActual();
@@ -354,6 +406,12 @@ public class VentanaContactos extends JPanel {
     }
 
     // Método main para visualizar el panel de contactos en un JFrame independiente
+    /**
+     * Método principal que permite ejecutar este panel como una aplicación independiente.
+     * Crea un marco (JFrame) contenedor y muestra el panel de contactos.
+     *
+     * @param args Argumentos de la línea de comando (no utilizados)
+     */
     public static void main(String[] args) {
         EventQueue.invokeLater(new Runnable() {
             public void run() {

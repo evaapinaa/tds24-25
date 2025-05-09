@@ -16,7 +16,12 @@ import beans.Propiedad;
 public class AdaptadorContactoIndividualTDS implements IAdaptadorContactoIndividualDAO {
     private static ServicioPersistencia servPersistencia;
     private static AdaptadorContactoIndividualTDS unicaInstancia = null;
-
+    
+    
+    /**
+     * Método para obtener la única instancia de la clase (patrón Singleton).
+     * @return La única instancia de AdaptadorContactoIndividualTDS.
+     */
     public static AdaptadorContactoIndividualTDS getUnicaInstancia() {
         if (unicaInstancia == null)
             return new AdaptadorContactoIndividualTDS();
@@ -24,10 +29,21 @@ public class AdaptadorContactoIndividualTDS implements IAdaptadorContactoIndivid
             return unicaInstancia;
     }
 
+     /**
+     * Constructor privado para implementar el patrón Singleton.
+     * Inicializa el servicio de persistencia de la aplicación.
+     */
     private AdaptadorContactoIndividualTDS() {
         servPersistencia = FactoriaServicioPersistencia.getInstance().getServicioPersistencia();
     }
 
+    
+     /**
+     * Registra un contacto individual en la base de datos.
+     * Valida que el usuario asociado al contacto sea válido antes de realizar el registro.
+     * @param contacto El objeto ContactoIndividual que se desea registrar.
+     * @throws IllegalArgumentException Si el usuario asociado al contacto no es válido.
+     */
     @Override
     public void registrarContactoIndividual(ContactoIndividual contacto) {
         if (contacto.getUsuario() == null || contacto.getUsuario().getCodigo() <= 0) {
@@ -47,6 +63,12 @@ public class AdaptadorContactoIndividualTDS implements IAdaptadorContactoIndivid
     }
 
 
+    
+    /**
+     * Modifica un contacto individual existente en la base de datos.
+     * Actualiza todas las propiedades del contacto en la base de datos.
+     * @param contacto El objeto ContactoIndividual con los datos actualizados.
+     */
     @Override
     public void modificarContactoIndividual(ContactoIndividual contacto) {
         Entidad eContacto = servPersistencia.recuperarEntidad(contacto.getCodigo());
@@ -67,12 +89,24 @@ public class AdaptadorContactoIndividualTDS implements IAdaptadorContactoIndivid
         }
     }
 
+    
+     /**
+     * Elimina un contacto individual de la base de datos.
+     * @param contacto El objeto ContactoIndividual que se desea eliminar.
+     */
     @Override
     public void borrarContactoIndividual(ContactoIndividual contacto) {
         Entidad eContacto = servPersistencia.recuperarEntidad(contacto.getCodigo());
         servPersistencia.borrarEntidad(eContacto);
     }
 
+    
+     /**
+     * Recupera un contacto individual de la base de datos por su código.
+     * Si el contacto ya está en el pool de objetos, lo devuelve directamente.
+     * @param codigo El código identificador del contacto a recuperar.
+     * @return El objeto ContactoIndividual recuperado, o null si no existe o es un grupo.
+     */
     @Override
     public ContactoIndividual recuperarContactoIndividual(int codigo) {
         if (PoolDAO.getUnicaInstancia().contiene(codigo))
@@ -118,6 +152,11 @@ public class AdaptadorContactoIndividualTDS implements IAdaptadorContactoIndivid
 
 
 
+    
+     /**
+     * Recupera todos los contactos individuales almacenados en la base de datos.
+     * @return Una lista con todos los objetos ContactoIndividual recuperados.
+     */
     @Override
     public List<ContactoIndividual> recuperarTodosContactosIndividuales() {
         List<Entidad> eContactos = servPersistencia.recuperarEntidades("contactoIndividual");
