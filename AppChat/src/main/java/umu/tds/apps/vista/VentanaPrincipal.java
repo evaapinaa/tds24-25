@@ -44,6 +44,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.imageio.ImageIO;
 import javax.swing.AbstractListModel;
+import javax.swing.BorderFactory;
 import javax.swing.JTextField;
 import java.awt.Font;
 import javax.swing.border.TitledBorder;
@@ -57,6 +58,7 @@ import java.awt.Color;
 import javax.swing.ImageIcon;
 import java.awt.Toolkit;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.border.LineBorder;
 import java.awt.Dimension;
 import javax.swing.border.SoftBevelBorder;
@@ -1367,90 +1369,92 @@ public class VentanaPrincipal extends JFrame {
 
 	
 
-    /**
-     * Carga un chat con un contacto y resalta un mensaje específico.
-     * <p>
-     * Útil para la función de búsqueda, permite navegar directamente a un mensaje concreto.
-     * 
-     * @param contacto El usuario con quien se mantiene la conversación
-     * @param mensajeBuscado El mensaje que se desea resaltar en el chat
-     */
+	/**
+	 * Carga un mensaje específico en el chat, resaltándolo visualmente.
+	 * 
+	 * @param contacto       El usuario con quien se desea cargar el chat
+	 * @param mensajeBuscado El mensaje a resaltar
+	 */
 	public void cargarMensajeEnChat(Usuario contacto, Mensaje mensajeBuscado) {
 	    // Cargamos el chat normalmente
 	    receptorActual = contacto;
 	    grupoActual = null;
 	    
+	    // Variable para guardar la posición Y del mensaje buscado
+	    final int[] posicionYMensaje = {-1};
+	    
+	    // Deshabilitar temporalmente cualquier autoscroll que puedas tener configurado
+	    if (scrollPanelChatMensajes.getVerticalScrollBar().getAdjustmentListeners().length > 0) {
+	        // Guardar y desactivar cualquier autoscroll
+	        for (AdjustmentListener listener : scrollPanelChatMensajes.getVerticalScrollBar().getAdjustmentListeners()) {
+	            scrollPanelChatMensajes.getVerticalScrollBar().removeAdjustmentListener(listener);
+	        }
+	    }
+	    
+	    // Asegurarnos de que el scroll horizontal está desactivado
+	    scrollPanelChatMensajes.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+	    
 	    panelChatContenido.removeAll(); // Limpiar contenido del chat
 
-	    // Variable para marcar si hemos encontrado el mensaje
-	    final boolean[] mensajeEncontrado = {false};
-	    
 	    // Verificar si ya existe un chat entre el usuario actual y el contacto
 	    Chat chatExistente = AppChat.getUsuarioActual().obtenerChatCon(contacto);
 
 	    if (chatExistente != null && !chatExistente.getMensajes().isEmpty()) {
 	        // Cargar los mensajes existentes en el chat
 	        List<Mensaje> mensajes = chatExistente.getMensajes();
-	        for (int i = 0; i < mensajes.size(); i++) {
+	        int totalMensajes = mensajes.size();
+	        
+	        // Añadimos un panel para cada mensaje
+	        for (int i = 0; i < totalMensajes; i++) {
 	            Mensaje mensaje = mensajes.get(i);
 	            boolean esMio = mensaje.getEmisor().equals(AppChat.getUsuarioActual());
 	            
-	            // ¿Es este el mensaje que buscamos?
-	            boolean esMensajeBuscado = false;
-	            if (mensajeBuscado != null) {
-	                esMensajeBuscado = mensaje.equals(mensajeBuscado) || 
-	                                 (mensaje.getTexto() != null && 
-	                                  mensaje.getTexto().equals(mensajeBuscado.getTexto()) &&
-	                                  mensaje.getFecha().equals(mensajeBuscado.getFecha()));
-	            }
+	            // Verificar si es el mensaje buscado
+	            boolean esElMensajeBuscado = (mensajeBuscado != null && mensaje.getCodigo() == mensajeBuscado.getCodigo());
 	            
-	            if (esMensajeBuscado) {
-	                mensajeEncontrado[0] = true;
+	            if (esElMensajeBuscado) {
+	                // Si es el mensaje buscado, lo marcamos visualmente
 	                
-	                // Crear una marca visual para el mensaje buscado
-	                JPanel panelMarca = new JPanel();
-	                panelMarca.setBackground(new Color(255, 255, 100)); // Amarillo
-	                JLabel etiquetaMarca = new JLabel("↓ MENSAJE BUSCADO ↓");
-	                etiquetaMarca.setForeground(Color.RED);
-	                etiquetaMarca.setFont(new Font("Arial", Font.BOLD, 14));
-	                panelMarca.add(etiquetaMarca);
-	                panelChatContenido.add(panelMarca);
+	                // 1. Crear un panel de marca superior que ocupe todo el ancho
+	                JPanel panelMarcaSuperior = new JPanel();
+	                panelMarcaSuperior.setBackground(new Color(255, 253, 170)); // Amarillo claro
+	                JLabel etiquetaMarcaSuperior = new JLabel("▼ MENSAJE ENCONTRADO ▼");
+	                etiquetaMarcaSuperior.setFont(new Font("Arial", Font.BOLD, 12));
+	                etiquetaMarcaSuperior.setForeground(new Color(220, 0, 0)); // Rojo oscuro
+	                etiquetaMarcaSuperior.setHorizontalAlignment(SwingConstants.CENTER);
+	                panelMarcaSuperior.setLayout(new BorderLayout());
+	                panelMarcaSuperior.add(etiquetaMarcaSuperior, BorderLayout.CENTER);
+	                // Asegurar que el panel ocupa todo el ancho disponible
+	                panelMarcaSuperior.setMaximumSize(new Dimension(Integer.MAX_VALUE, panelMarcaSuperior.getPreferredSize().height));
+	                panelChatContenido.add(panelMarcaSuperior);
 	                
-	                // Pintar el mensaje con un fondo diferente
-	                String textoOriginal = mensaje.getTexto();
-	                if (textoOriginal != null && textoOriginal.startsWith("EMOJI:")) {
-	                    try {
-	                        int emojiCode = Integer.parseInt(textoOriginal.substring(6));
-	                        // Para emojis, usamos una burbuja especial con borde rojo
-	                        BubbleText burbuja = new BubbleText(panelChatContenido, emojiCode, 
-	                                new Color(255, 235, 130), // Fondo amarillo claro
-	                                "MENSAJE BUSCADO", // Texto adicional
-	                                esMio ? BubbleText.SENT : BubbleText.RECEIVED, 
-	                                18);
-	                        panelChatContenido.add(burbuja);
-	                    } catch (NumberFormatException e) {
-	                        pintarBubblesMensaje(panelChatContenido, mensaje, esMio);
-	                    }
-	                } else {
-	                    // Para texto normal, lo pintamos normal pero se verá destacado por las marcas
-	                    pintarBubblesMensaje(panelChatContenido, mensaje, esMio);
-	                }
+	                // 2. Pintar el mensaje normalmente pero con un borde y fondo especial
+	                // Usando el método existente pero con colores diferentes
+	                // Esto evita modificar la estructura de layout que ya funciona
+	                pintarBubblesMensajeResaltado(panelChatContenido, mensaje, esMio);
 	                
-	                // Crear otra marca después del mensaje
-	                JPanel panelMarcaPost = new JPanel();
-	                panelMarcaPost.setBackground(new Color(255, 255, 100)); // Amarillo
-	                JLabel etiquetaMarcaPost = new JLabel("↑ MENSAJE BUSCADO ↑");
-	                etiquetaMarcaPost.setForeground(Color.RED);
-	                etiquetaMarcaPost.setFont(new Font("Arial", Font.BOLD, 14));
-	                panelMarcaPost.add(etiquetaMarcaPost);
-	                panelChatContenido.add(panelMarcaPost);
+	                // 3. Crear un panel de marca inferior que ocupe todo el ancho
+	                JPanel panelMarcaInferior = new JPanel();
+	                panelMarcaInferior.setBackground(new Color(255, 253, 170)); // Amarillo claro
+	                JLabel etiquetaMarcaInferior = new JLabel("▲ MENSAJE ENCONTRADO ▲");
+	                etiquetaMarcaInferior.setFont(new Font("Arial", Font.BOLD, 12));
+	                etiquetaMarcaInferior.setForeground(new Color(220, 0, 0)); // Rojo oscuro
+	                etiquetaMarcaInferior.setHorizontalAlignment(SwingConstants.CENTER);
+	                panelMarcaInferior.setLayout(new BorderLayout());
+	                panelMarcaInferior.add(etiquetaMarcaInferior, BorderLayout.CENTER);
+	                // Asegurar que el panel ocupa todo el ancho disponible
+	                panelMarcaInferior.setMaximumSize(new Dimension(Integer.MAX_VALUE, panelMarcaInferior.getPreferredSize().height));
+	                panelChatContenido.add(panelMarcaInferior);
+	                
+	                // Guardar la posición para hacer scroll
+	                posicionYMensaje[0] = panelChatContenido.getComponentCount() - 2; // Apuntar al mensaje, no a las marcas
 	            } else {
-	                // Pintar mensaje normal
+	                // Si no es el mensaje buscado, lo pintamos normalmente
 	                pintarBubblesMensaje(panelChatContenido, mensaje, esMio);
 	            }
 	        }
 	    } else {
-	        // Si no hay chat o mensajes, mostrar mensaje predeterminado
+	        // Código para manejar el caso de que no haya mensajes
 	        JLabel noMessagesLabel = new JLabel("No hay mensajes con este contacto.");
 	        noMessagesLabel.setHorizontalAlignment(SwingConstants.CENTER);
 	        noMessagesLabel.setForeground(Color.GRAY);
@@ -1458,25 +1462,98 @@ public class VentanaPrincipal extends JFrame {
 	        panelChatContenido.add(noMessagesLabel);
 	    }
 	    
-	    // Refrescar el chat y cambiar a la vista de chat
+	    // Refrescar la UI
 	    refrescarChat();
 	    cardLayout.show(panelCentro, "Chat");
 	    
-	    // Si no encontramos el mensaje, mostrar un aviso
-	    if (mensajeBuscado != null && !mensajeEncontrado[0]) {
-	        JOptionPane.showMessageDialog(
-	            this,
-	            "No se pudo encontrar el mensaje exacto en el chat.",
-	            "Mensaje no encontrado",
-	            JOptionPane.WARNING_MESSAGE
-	        );
+	    // Realizar el scroll hacia el mensaje buscado después de un retraso
+	    if (posicionYMensaje[0] >= 0) {
+	        // Realizar varios intentos de scroll con retrasos incrementales
+	        for (int delay : new int[] {200, 500, 1000}) {
+	            Timer timer = new Timer(delay, new ActionListener() {
+	                @Override
+	                public void actionPerformed(ActionEvent e) {
+	                    try {
+	                        // Obtener los componentes actuales después del refresco de la UI
+	                        Component[] componentes = panelChatContenido.getComponents();
+	                        
+	                        if (posicionYMensaje[0] < componentes.length) {
+	                            Component targetComponent = componentes[posicionYMensaje[0]];
+	                            
+	                            // Calcular posición en el viewport
+	                            Rectangle bounds = targetComponent.getBounds();
+	                            
+	                            // Hacer scroll solo verticalmente (no horizontalmente)
+	                            scrollPanelChatMensajes.getViewport().setViewPosition(new Point(0, bounds.y));
+	                            
+	                            // Asegurarse de que el panel se actualice
+	                            panelChatContenido.revalidate();
+	                            scrollPanelChatMensajes.revalidate();
+	                        }
+	                    } catch (Exception ex) {
+	                        ex.printStackTrace();
+	                    }
+	                }
+	            });
+	            timer.setRepeats(false);
+	            timer.start();
+	        }
 	    }
 	}
-	
-	
-	
-	
-	
+
+
+	/**
+	 * Pintar un mensaje resaltado en el chat.
+	 * <p>
+	 * Este método se utiliza para mostrar mensajes destacados, como emojis o
+	 * mensajes resaltados, con colores específicos.
+	 * 
+	 * @param panel   El panel donde se añadirá la burbuja
+	 * @param mensaje El mensaje a mostrar
+	 * @param esMio   Indica si el mensaje fue enviado por el usuario actual
+	 */
+	private void pintarBubblesMensajeResaltado(JPanel panel, Mensaje mensaje, boolean esMio) {
+	    String texto = mensaje.getTexto();
+	    
+	    if (texto != null && texto.startsWith("EMOJI:")) {
+	        try {
+	            int emojiCode = Integer.parseInt(texto.substring(6));
+	            // Renderizar emoji con colores especiales para resaltado
+	            BubbleText burbuja = new BubbleText(panel, emojiCode, 
+	                    esMio ? new Color(200, 255, 200) : new Color(255, 253, 170), // Fondo verde claro o amarillo
+	                    "", 
+	                    esMio ? BubbleText.SENT : BubbleText.RECEIVED, 
+	                    18);
+	            panel.add(burbuja);
+	        } catch (NumberFormatException e) {
+	            // Si el código del emoji no es válido, tratarlo como texto normal
+	            BubbleText burbuja = new BubbleText(panel, "[Emoji inválido]", 
+	                    esMio ? new Color(200, 255, 200) : new Color(255, 253, 170),
+	                    "", 
+	                    esMio ? BubbleText.SENT : BubbleText.RECEIVED, 
+	                    18);
+	            panel.add(burbuja);
+	        }
+	    } else if (texto != null) {
+	        // Renderizar texto normal con colores especiales para resaltado
+	        BubbleText burbuja = new BubbleText(panel, texto + "  " +
+	                String.format("%02d:%02d", mensaje.getHora().getHour(), mensaje.getHora().getMinute()),
+	                esMio ? new Color(200, 255, 200) : new Color(255, 253, 170),
+	                "", 
+	                esMio ? BubbleText.SENT : BubbleText.RECEIVED, 
+	                18);
+	        panel.add(burbuja);
+	    } else {
+	        // Texto es null
+	        BubbleText burbuja = new BubbleText(panel, "[Mensaje sin contenido] " +
+	                String.format("%02d:%02d", mensaje.getHora().getHour(), mensaje.getHora().getMinute()),
+	                esMio ? new Color(200, 255, 200) : new Color(255, 253, 170),
+	                "", 
+	                esMio ? BubbleText.SENT : BubbleText.RECEIVED, 
+	                18);
+	        panel.add(burbuja);
+	    }
+	}
 
 
 	
