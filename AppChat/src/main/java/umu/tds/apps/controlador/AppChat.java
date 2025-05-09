@@ -39,6 +39,15 @@ import umu.tds.apps.persistencia.IAdaptadorChatDAO;
 import umu.tds.apps.persistencia.IAdaptadorMensajeDAO;
 import umu.tds.apps.persistencia.IAdaptadorUsuarioDAO;
 
+/**
+ * Controlador principal de la aplicación de chat.
+ * Implementa el patrón Singleton y gestiona todas las operaciones
+ * relacionadas con usuarios, chats, mensajes y contactos.
+ * 
+ * @author Eva Pina		
+ * @author Alejandro Oquendo
+ */
+
 public class AppChat {
 
 	private Usuario usuarioActual;
@@ -49,18 +58,29 @@ public class AppChat {
 
 	private static AppChat unicaInstancia = null;
 
-	public static final double PRECIO_PREMIUM = 50.0; // Precio base de la suscripción premium
+    /** Precio base para la suscripción premium */
+	public static final double PRECIO_PREMIUM = 50.0; 
 
-	// constructor privado (singleton)
+	/**
+     * Constructor privado siguiendo el patrón Singleton.
+     * Inicializa los adaptadores de persistencia y el repositorio de usuarios.
+     */
 	private AppChat() {
 		inicializarAdaptador();
 		inicializarRepositorio();
 	}
-
+	
+	/**
+	 * Inicializa el repositorio de usuarios de la aplicación.
+	 */
 	public void inicializarRepositorio() {
 		repositorioUsuarios = RepositorioUsuarios.getUnicaInstancia();
 	}
 
+	/**
+	 * Inicializa los adaptadores de persistencia necesarios para la aplicación.
+	 * Utiliza la factoría de DAOs para obtener las implementaciones concretas.
+	 */
 	public void inicializarAdaptador() {
 		try {
 			FactoriaDAO factoria = FactoriaDAO.getInstancia(FactoriaDAO.DAO_TDS);
@@ -74,6 +94,13 @@ public class AppChat {
 		}
 	}
 
+	
+	/**
+	 * Obtiene la única instancia de AppChat (patrón Singleton).
+	 * Si no existe, la crea.
+	 * 
+	 * @return La única instancia de AppChat
+	 */
 	public static AppChat getUnicaInstancia() {
 		if (unicaInstancia == null) {
 			// Creamos y guardamos en la variable estática
@@ -81,7 +108,15 @@ public class AppChat {
 		}
 		return unicaInstancia;
 	}
-
+	
+	
+	/**
+	 * Obtiene una lista de todos los mensajes recientes del usuario autenticado.
+	 * Los mensajes se ordenan por fecha y hora de forma descendente.
+	 * 
+	 * @return Lista de mensajes ordenados por fecha y hora (más recientes primero)
+	 * @throws IllegalStateException si no hay un usuario autenticado
+	 */
 	public static List<Mensaje> obtenerListaMensajesRecientesPorUsuario() {
 		Usuario usuarioActual = AppChat.getUsuarioActual();
 		if (usuarioActual == null) {
@@ -107,7 +142,14 @@ public class AppChat {
 		return todosLosMensajes;
 	}
 
-	// iniciar sesion
+	
+	/**
+	 * Inicia sesión de un usuario en la aplicación.
+	 * 
+	 * @param telefono Número de teléfono del usuario
+	 * @param contraseña Contraseña del usuario
+	 * @return true si la autenticación es correcta, false en caso contrario
+	 */
 	public boolean iniciarSesion(String telefono, char[] contraseña) {
 		usuarioActual = repositorioUsuarios.getUsuario(telefono);
 		if (usuarioActual == null || !usuarioActual.isClaveValida(new String(contraseña))) {
@@ -116,7 +158,21 @@ public class AppChat {
 		return true;
 	}
 
-	// registrar usuario
+	
+	
+	/**
+	 * Registra un nuevo usuario en el sistema.
+	 * 
+	 * @param usuario Nombre de usuario
+	 * @param contraseña Contraseña del usuario
+	 * @param telefono Número de teléfono (identificador único)
+	 * @param email Correo electrónico del usuario
+	 * @param saludo Mensaje de saludo opcional
+	 * @param imagenPerfil Imagen de perfil opcional
+	 * @param fechaNacimiento Fecha de nacimiento del usuario
+	 * @param fechaRegistro Fecha de registro en el sistema
+	 * @return true si el registro fue exitoso, false si hubo un error o el teléfono ya existe
+	 */
 	public boolean registrarUsuario(String usuario, char[] contraseña, String telefono, String email,
 			Optional<String> saludo, Icon imagenPerfil, LocalDate fechaNacimiento, LocalDate fechaRegistro) {
 		String rutaImagen = null;
@@ -142,7 +198,14 @@ public class AppChat {
 			return false;
 		}
 	}
-
+	
+	
+	/**
+	 * Cambia la imagen de perfil del usuario actual.
+	 * 
+	 * @param imagenPerfil Nueva imagen de perfil a establecer
+	 * @throws IllegalStateException Si no hay un usuario autenticado (error en consola)
+	 */
 	public void cambiarImagenPerfil(ImageIcon imagenPerfil) {
 		if (usuarioActual != null) {
 			usuarioActual.setImagenPerfil(imagenPerfil);
@@ -152,7 +215,15 @@ public class AppChat {
 			System.err.println("No hay usuario autenticado.");
 		}
 	}
-
+	
+	
+	
+	/**
+	 * Cambia el mensaje de saludo del usuario actual.
+	 * 
+	 * @param saludo Nuevo mensaje de saludo a establecer
+	 * @throws IllegalStateException Si no hay un usuario autenticado
+	 */
 	public void cambiarSaludo(String saludo) {
 		if (usuarioActual == null) {
 			throw new IllegalStateException("No hay un usuario autenticado.");
@@ -160,7 +231,16 @@ public class AppChat {
 		usuarioActual.setSaludo(Optional.of(saludo));
 		adaptadorUsuario.modificarUsuario(usuarioActual);
 	}
-
+	
+	
+	
+	/**
+	 * Calcula el precio de la suscripción premium para el usuario actual,
+	 * aplicando descuentos según la fecha de registro y actividad.
+	 * 
+	 * @return Precio final de la suscripción premium con descuentos aplicados
+	 * @throws IllegalStateException Si no hay un usuario autenticado
+	 */
 	public double calcularPrecioPremium() {
 		if (usuarioActual == null) {
 			throw new IllegalStateException("No hay un usuario autenticado.");
@@ -184,6 +264,13 @@ public class AppChat {
 		return precio;
 	}
 
+	
+	/**
+	 * Activa la suscripción premium para el usuario actual.
+	 * 
+	 * @return true si la activación fue exitosa
+	 * @throws IllegalStateException Si no hay un usuario autenticado
+	 */
 	public boolean activarPremium() {
 	    if (usuarioActual == null) {
 	        throw new IllegalStateException("No hay un usuario autenticado.");
@@ -202,19 +289,40 @@ public class AppChat {
 	    
 	    return true;
 	}
-
+	
+	
+	
+	/**
+	 * Obtiene el usuario que ha iniciado sesión en la aplicación.
+	 * 
+	 * @return El usuario autenticado actualmente, o null si no hay ninguno
+	 */
 	public static Usuario getUsuarioActual() {
 		return (unicaInstancia != null) ? unicaInstancia.usuarioActual : null;
 	}
 
-	// Obtener mensajes
+	
+	
+	/**
+	 * Obtiene la lista de mensajes enviados por el usuario actual.
+	 * 
+	 * @return Lista de mensajes enviados
+	 * @throws IllegalStateException Si no hay un usuario autenticado
+	 */
 	public List<Mensaje> obtenerMensajesEnviados() {
 		if (usuarioActual == null) {
 			throw new IllegalStateException("No hay un usuario autenticado.");
 		}
 		return usuarioActual.getListaMensajesEnviados();
 	}
-
+	
+	
+	/**
+	 * Obtiene la lista de mensajes recibidos por el usuario actual.
+	 * 
+	 * @return Lista de mensajes recibidos
+	 * @throws IllegalStateException Si no hay un usuario autenticado
+	 */
 	public List<Mensaje> obtenerMensajesRecibidos() {
 		if (usuarioActual == null) {
 			throw new IllegalStateException("No hay un usuario autenticado.");
@@ -222,6 +330,15 @@ public class AppChat {
 		return usuarioActual.getListaMensajesRecibidos();
 	}
 
+	
+	/**
+	 * Obtiene la lista de mensajes intercambiados entre el usuario actual y un contacto específico.
+	 * Los mensajes se ordenan cronológicamente.
+	 * 
+	 * @param contacto Usuario con el que se han intercambiado mensajes
+	 * @return Lista de mensajes ordenados por fecha y hora
+	 * @throws IllegalStateException Si no hay un usuario autenticado
+	 */
 	public List<Mensaje> obtenerMensajesConContacto(Usuario contacto) {
 		if (usuarioActual == null) {
 			throw new IllegalStateException("No hay un usuario autenticado.");
@@ -230,6 +347,15 @@ public class AppChat {
 		return usuarioActual.obtenerMensajesCon(contacto);
 	}
 
+	
+	/**
+	 * Añade un nuevo contacto a la lista de contactos del usuario actual.
+	 * 
+	 * @param nombre Nombre que se asignará al contacto
+	 * @param telefono Número de teléfono del contacto
+	 * @return true si se añadió correctamente, false si el contacto no existe en el sistema o ya está añadido
+	 * @throws IllegalStateException Si no hay un usuario autenticado
+	 */
 	public boolean añadirContacto(String nombre, String telefono) {
 	    // Comprobar que no se esté añadiendo a sí mismo
 	    if (getUsuarioActual().getTelefono().equals(telefono)) {
@@ -265,7 +391,18 @@ public class AppChat {
 	        return false;
 	    }
 	}
-	// FUNCION NUEVA
+	
+	
+	/**
+	 * Crea un nuevo grupo de contactos.
+	 * 
+	 * @param nombreGrupo Nombre del grupo a crear
+	 * @param contactos Lista de contactos que formarán parte del grupo
+	 * @param imagenGrupo Imagen opcional para el grupo
+	 * @return true si el grupo se creó correctamente
+	 * @throws IllegalArgumentException Si el nombre del grupo está vacío o ya existe un grupo con ese nombre
+	 * @throws IllegalStateException Si no hay un usuario autenticado
+	 */
 	public boolean crearGrupo(String nombreGrupo, List<ContactoIndividual> contactos, Optional<ImageIcon> imagenGrupo) {
 		if (nombreGrupo == null || nombreGrupo.trim().isEmpty()) {
 			throw new IllegalArgumentException("El nombre del grupo no puede estar vacío.");
@@ -287,12 +424,27 @@ public class AppChat {
 		return true;
 	}
 
-	// Filtrar Mensajes y poder combinar varios filtros
+	
+	/**
+	 * Filtra los mensajes del usuario según varios criterios combinables.
+	 * 
+	 * @param texto Texto a buscar en los mensajes (opcional)
+	 * @param telefono Número de teléfono del emisor o receptor (opcional)
+	 * @param contacto Nombre del contacto (opcional)
+	 * @return Lista de mensajes que cumplen con los criterios de búsqueda
+	 * @throws IllegalStateException Si no hay un usuario autenticado
+	 */
 	public List<Mensaje> filtrarMensajes(String texto, String telefono, String contacto) {
 		return usuarioActual.filtrarMensajes(texto, telefono, contacto);
 	}
 
-	// Crear nuevo chat
+	
+	/**
+	 * Crea un nuevo chat entre el usuario actual y otro usuario si no existe ya.
+	 * 
+	 * @param uActual Usuario actual
+	 * @param otroUsuario Usuario con el que se quiere iniciar un chat
+	 */
 	public void crearNuevoChat(Usuario uActual, Usuario otroUsuario) {
 		// Llamar al método de Usuario y persistir el resultado
 		Chat nuevoChat = uActual.crearChatCon(otroUsuario);
@@ -306,7 +458,17 @@ public class AppChat {
 
 	}
 
-	// Método para enviar mensaje
+	
+	
+	/**
+	 * Envía un mensaje de texto a otro usuario.
+	 * Si no existe un chat entre ambos usuarios, lo crea automáticamente.
+	 * 
+	 * @param uActual Usuario que envía el mensaje
+	 * @param receptor Usuario que recibe el mensaje
+	 * @param texto Contenido del mensaje
+	 * @return true si el mensaje se envió correctamente, false en caso de error
+	 */
 	public boolean enviarMensaje(Usuario uActual, Usuario receptor, String texto) {
 		if (texto == null) {
 			System.err.println("Error: texto null");
@@ -341,32 +503,74 @@ public class AppChat {
 		System.out.println("Mensaje enviado: " + texto);
 		return true;
 	}
-
+	
+	
+	
+	/**
+	 * Envía un emoji a otro usuario.
+	 * 
+	 * @param uActual Usuario que envía el emoji
+	 * @param uDestino Usuario que recibe el emoji
+	 * @param emoji Código del emoji a enviar
+	 * @return true si el emoji se envió correctamente, false en caso de error
+	 */
 	public boolean enviarEmoji(Usuario uActual, Usuario uDestino, int emoji) {
 		String texto = "EMOJI:" + emoji;
 		System.out.println("Emoji enviado: " + emoji);
 		return enviarMensaje(uActual, uDestino, texto);
 
 	}
-
+	
+	
+	/**
+	 * Busca un usuario por su número de teléfono.
+	 * 
+	 * @param telefono Número de teléfono del usuario a buscar
+	 * @return El usuario encontrado o null si no existe
+	 */
 	public Usuario obtenerUsuarioPorTelefono(String telefono) {
 		if (telefono == null)
 			return null;
 		return repositorioUsuarios.getUsuario(telefono.trim());
 	}
 
+	
+	/**
+	 * Busca un usuario por su nombre en la lista de contactos del usuario actual.
+	 * 
+	 * @param nombre Nombre del usuario a buscar
+	 * @return El usuario encontrado o null si no existe entre los contactos
+	 * @throws IllegalStateException Si no hay un usuario autenticado
+	 */
 	public Usuario obtenerUsuarioPorNombre(String nombre) {
 		return usuarioActual.getListaContactos().stream()
 				.filter(c -> c instanceof ContactoIndividual && ((ContactoIndividual) c).getNombre().equals(nombre))
 				.map(c -> ((ContactoIndividual) c).getUsuario()).findFirst().orElse(null);
 	}
 
+	
+	/**
+	 * Busca un contacto individual por su número de teléfono en la lista de contactos del usuario actual.
+	 * 
+	 * @param telefono Número de teléfono del contacto a buscar
+	 * @return El contacto encontrado o null si no existe
+	 * @throws IllegalStateException Si no hay un usuario autenticado
+	 */
 	public ContactoIndividual obtenerContactoPorTelefono(String telefono) {
 		return usuarioActual.getListaContactos().stream()
 				.filter(c -> c instanceof ContactoIndividual && ((ContactoIndividual) c).getTelefono().equals(telefono))
 				.map(c -> (ContactoIndividual) c).findFirst().orElse(null);
 	}
-
+	
+	
+	/**
+	 * Envía un mensaje de texto a todos los miembros de un grupo.
+	 * 
+	 * @param uActual Usuario que envía el mensaje
+	 * @param grupo Grupo al que se envía el mensaje
+	 * @param texto Contenido del mensaje
+	 * @return true si el mensaje se envió correctamente a todos los miembros, false si algún envío falló
+	 */
 	public boolean enviarMensajeAGrupo(Usuario uActual, Grupo grupo, String texto) {
 		if (texto == null || grupo == null) {
 			System.err.println("Error: texto o grupo es null");
@@ -391,7 +595,16 @@ public class AppChat {
 		}
 		return enviado;
 	}
-
+	
+	
+	/**
+	 * Envía un emoji a todos los miembros de un grupo.
+	 * 
+	 * @param emisor Usuario que envía el emoji
+	 * @param grupo Grupo al que se envía el emoji
+	 * @param emoji Código del emoji a enviar
+	 * @return true si el emoji se envió correctamente a todos los miembros, false si algún envío falló
+	 */
 	public boolean enviarEmojiAGrupo(Usuario emisor, Grupo grupo, int emoji) {
 	    String texto = "EMOJI:" + emoji;
 	    System.out.println("Emoji enviado a grupo: " + emoji);
