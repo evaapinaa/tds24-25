@@ -44,7 +44,6 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.imageio.ImageIO;
 import javax.swing.AbstractListModel;
-import javax.swing.BorderFactory;
 import javax.swing.JTextField;
 import java.awt.Font;
 import javax.swing.border.TitledBorder;
@@ -1366,8 +1365,6 @@ public class VentanaPrincipal extends JFrame {
 	    });
 	}
 
-
-	
 
 	/**
 	 * Carga un mensaje específico en el chat, resaltándolo visualmente.
