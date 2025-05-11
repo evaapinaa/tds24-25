@@ -120,7 +120,7 @@ public class AdaptadorMensajeTDS implements IAdaptadorMensajeDAO {
         // 7) Asignar campos
         mensaje.setEmisor(emisor);
         mensaje.setReceptor(receptor);
-        mensaje.setChat(chat);  // Ya no lanza IllegalArgumentException
+        mensaje.setChat(chat);  
         mensaje.setTexto(texto);
 
         // 8) Fecha/Hora

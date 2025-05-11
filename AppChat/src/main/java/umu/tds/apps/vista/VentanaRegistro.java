@@ -510,12 +510,12 @@ public class VentanaRegistro extends JFrame {
 					BufferedImage imagen = ImageIO.read(new URL(urlImagen));
 	                ImageIcon icono = new ImageIcon(imagen.getScaledInstance(100, 100, Image.SCALE_SMOOTH));
 	                icono = VisualUtils.createCircularIcon(imagen, 100);
-	                // Limpiar el prefijo "file:" en caso de que lo tenga (por ejemplo, si se hubiese copiado una URL local)
+
 	                String descripcion = urlImagen;
 	                if(descripcion.startsWith("file:")){
 	                    descripcion = descripcion.substring(5);
 	                }
-	                icono.setDescription(descripcion); // Guardar la URL (limpia) como descripción
+	                icono.setDescription(descripcion); 
 	                lblNewLabel_8.setIcon(icono);
 	            } catch (IOException ex) {
 	                JOptionPane.showMessageDialog(contentPane, "No se pudo cargar la imagen desde el enlace.", "Error",
@@ -534,7 +534,6 @@ public class VentanaRegistro extends JFrame {
 	                icono = VisualUtils.createCircularIcon(imagen, 100);
 	                // Obtenemos la ruta completa
 	                String ruta = fileChooser.getSelectedFile().getAbsolutePath();
-	                // Si por alguna razón la cadena empieza por "file:" (normalmente no ocurre con getAbsolutePath())
 	                if(ruta.startsWith("file:")){
 	                    ruta = ruta.substring(5);
 	                }

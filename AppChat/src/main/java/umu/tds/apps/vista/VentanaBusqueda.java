@@ -236,7 +236,7 @@ public class VentanaBusqueda extends JDialog {
 		listaResultados.addMouseListener(new MouseAdapter() {
 		    @Override
 		    public void mouseClicked(MouseEvent e) {
-		        if (e.getClickCount() == 2) { // Double-click para abrir chat
+		        if (e.getClickCount() == 2) { 
 		            int index = listaResultados.locationToIndex(e.getPoint());
 		            if (index >= 0) {
 		                Mensaje mensajeSeleccionado = listaResultados.getModel().getElementAt(index);

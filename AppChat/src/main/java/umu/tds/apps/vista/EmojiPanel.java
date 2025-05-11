@@ -55,7 +55,7 @@ public class EmojiPanel extends JPanel {
                 public void mouseClicked(MouseEvent evt) {
                     // Llama al ActionListener proporcionado con el índice del emoji seleccionado
                     emojiClickListener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, String.valueOf(emojiIndex)));
-                    setVisible(false); // Ocultar el panel después de seleccionar
+                    setVisible(false);
                 }
             });
             

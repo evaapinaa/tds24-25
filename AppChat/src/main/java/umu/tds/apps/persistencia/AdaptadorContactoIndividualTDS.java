@@ -117,7 +117,7 @@ public class AdaptadorContactoIndividualTDS implements IAdaptadorContactoIndivid
         // Verificar si la entidad es de tipo "grupo"
         if ("grupo".equals(eContacto.getNombre())) {
             System.err.println("La entidad con código " + codigo + " es un grupo, no un contacto individual.");
-            return null; // Ignorar los grupos en este método
+            return null; 
         }
 
         String nombre = servPersistencia.recuperarPropiedadEntidad(eContacto, "nombre");

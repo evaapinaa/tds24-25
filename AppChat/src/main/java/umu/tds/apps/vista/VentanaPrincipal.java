@@ -523,7 +523,7 @@ public class VentanaPrincipal extends JFrame {
 		gbc.weightx = 1.0; // Para que ocupe todo el espacio horizontal disponible
 		gbc.weighty = 1.0; // Para que ocupe todo el espacio vertical disponible
 		gbc.anchor = GridBagConstraints.CENTER; // Centra los elementos en el medio
-		gbc.fill = GridBagConstraints.NONE; // No estira los componentes
+		gbc.fill = GridBagConstraints.NONE; 
 
 		// Etiqueta para el GIF
 		JLabel gifLabel = new JLabel();
@@ -537,7 +537,7 @@ public class VentanaPrincipal extends JFrame {
 		gbcGifLabel.weightx = 1.0; // Para que ocupe todo el espacio horizontal disponible
 		gbcGifLabel.weighty = 1.0; // Para que ocupe todo el espacio vertical disponible
 		gbcGifLabel.anchor = GridBagConstraints.CENTER; // Centra los elementos en el medio
-		gbcGifLabel.fill = GridBagConstraints.NONE; // No estira los componentes
+		gbcGifLabel.fill = GridBagConstraints.NONE; 
 
 		panelBienvenida.add(gifLabel, gbcGifLabel); // Añadimos el logo al panel
 
@@ -660,7 +660,7 @@ public class VentanaPrincipal extends JFrame {
 
 		// Panel flotante de Emojis
 		JLayeredPane layeredPane = getLayeredPane();
-		// En el método que maneja el clic en un emoji (en la clase VentanaPrincipal)
+
 		JPanel panelEmojis = new EmojiPanel(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 		        int numEmoji = Integer.parseInt(e.getActionCommand());
@@ -670,7 +670,6 @@ public class VentanaPrincipal extends JFrame {
 		            boolean enviado = AppChat.getUnicaInstancia()
 		                                .enviarEmojiAGrupo(AppChat.getUsuarioActual(), grupoActual, numEmoji);
 		            if (enviado) {
-		                // Simplemente mostrar el emoji localmente
 		                pintarBubblesEmoji(panelChatContenido, numEmoji, true);
 		                panelChatContenido.revalidate();
 		                panelChatContenido.repaint();
@@ -760,10 +759,8 @@ public class VentanaPrincipal extends JFrame {
 
 		        // 1) Si es un chat de grupo
 		        if (grupoActual != null) {
-		            // Llamar a tu método "enviarMensajeAGrupo(...)"
 		            boolean exito = enviarMensajeAGrupo(AppChat.getUsuarioActual(), grupoActual, textoMensaje);
 		            if (exito) {
-		                // Pintar burbuja local (si quieres)
 		                String textoConHora = textoMensaje + "  " + 
 		                    String.format("%02d:%02d", LocalTime.now().getHour(), LocalTime.now().getMinute());
 		                BubbleText burbuja = new BubbleText(panelChatContenido, textoConHora,
@@ -771,7 +768,7 @@ public class VentanaPrincipal extends JFrame {
 		                panelChatContenido.add(burbuja);
 
 		                refrescarChat();
-		                // También puedes actualizar la lista si lo deseas
+
 		                actualizarListaChats(list);
 		            } else {
 		                JOptionPane.showMessageDialog(this,
@@ -789,7 +786,6 @@ public class VentanaPrincipal extends JFrame {
 		            // Enviar a un usuario
 		            AppChat.getUnicaInstancia().enviarMensaje(AppChat.getUsuarioActual(), receptor, textoMensaje);
 
-		            // Pintar la burbuja local
 		            String textoConHora = textoMensaje + "  " +
 		                String.format("%02d:%02d", LocalTime.now().getHour(), LocalTime.now().getMinute());
 		            BubbleText burbuja = new BubbleText(panelChatContenido, textoConHora,
@@ -843,7 +839,6 @@ public class VentanaPrincipal extends JFrame {
 		                    if (cellBounds != null && cellBounds.contains(e.getPoint())) {
 		                        int relativeX = e.getX() - cellBounds.x;
 		                        
-		                        // Usar coordenadas fijas para el área del botón
 		                        int buttonX = cellBounds.width - 40;
 		                        int buttonWidth = 30;
 		                        
@@ -867,8 +862,7 @@ public class VentanaPrincipal extends JFrame {
 		        }
 		    }
 		});
-		// al iniciar, cargamos tambien la lista de chats
-		//panelCentro.add(panelBienvenida, BorderLayout.CENTER);
+
 		actualizarListaChats(list);
 		refrescarChat();
 		
@@ -973,7 +967,6 @@ public class VentanaPrincipal extends JFrame {
 		    }
 		});
 
-		// Añadir el botón a la interfaz en el lugar adecuado
 		panelNorte.add(btnGenerarPDF);
 
 ;
@@ -1008,7 +1001,6 @@ public class VentanaPrincipal extends JFrame {
 			if (imagen == null) {
 				throw new IOException("La imagen devuelta es nula");
 			}
-			// Redondeamos a forma circular
 			ImageIcon icon = VisualUtils.createCircularIcon(imagen, 50);
 			label.setIcon(icon);
 		} catch (IOException e) {
@@ -1096,7 +1088,7 @@ public class VentanaPrincipal extends JFrame {
 
 	private void cargarChat(Usuario contacto) {
 	    receptorActual = contacto;
-	    grupoActual = null; // Esta línea es crucial - asegúrate de que grupoActual sea null
+	    grupoActual = null; 
 	    
 	    panelChatContenido.removeAll(); // Limpiar contenido del chat
 
@@ -1204,7 +1196,7 @@ public class VentanaPrincipal extends JFrame {
 	    }
 
 	    receptorActual = receptor;
-	    panelChatContenido.removeAll(); // Limpia el área del chat
+	    panelChatContenido.removeAll(); // Limpiar chat
 
 	    // Obtener mensajes del chat seleccionado
 	    List<Mensaje> mensajes = chatSeleccionado.getMensajes();
@@ -1246,7 +1238,6 @@ public class VentanaPrincipal extends JFrame {
 	    // 1) Obtener Chats
 	    List<Chat> chats = AppChat.getUsuarioActual().getListaChats();
 
-	    // Ordenar Chats
 	    chats.sort((c1, c2) -> {
 	        List<Mensaje> m1 = c1.getMensajes();
 	        List<Mensaje> m2 = c2.getMensajes();
@@ -1291,10 +1282,8 @@ public class VentanaPrincipal extends JFrame {
 	        }
 	    };
 	    
-	    // 5) Asignar el modelo a la lista
 	    listaChats.setModel(modelo);
 
-	    // 6) Repintar la lista
 	    listaChats.repaint();
 	}
 

@@ -139,10 +139,9 @@ public class ChatCellRenderer extends JPanel implements ListCellRenderer<Object>
             ContactoIndividual contactoExistente = AppChat.getUnicaInstancia()
                     .obtenerContactoPorTelefono(usuarioOtro.getTelefono());
             
-            // Mostrar u ocultar el botón según corresponda
             addButton.setVisible(contactoExistente == null);
         } else {
-            // No es un Chat, no necesitamos botón
+
             addButton.setVisible(false);
         }
 
@@ -205,7 +204,6 @@ public class ChatCellRenderer extends JPanel implements ListCellRenderer<Object>
                     previewLabel.setIcon(null);
                 }
             } else if (texto != null) {
-                // Acortar si es muy largo
                 if (texto.length() > 20) {
                     texto = texto.substring(0, 20) + "...";
                 }
@@ -241,7 +239,6 @@ public class ChatCellRenderer extends JPanel implements ListCellRenderer<Object>
         // Imagen del grupo
         ImageIcon iconGrupo = grupo.getImagenGrupo(); 
         if (iconGrupo != null) {
-            // Si quieres que sea circular:
             try {
                 Image img = iconGrupo.getImage();
                 BufferedImage buffImg;

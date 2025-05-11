@@ -48,7 +48,6 @@ public class VentanaPerfil extends JDialog {
      */
     @SuppressWarnings("deprecation")
 	public VentanaPerfil(JFrame parent) {
-        // Configuración básica del diálogo
         super(parent, "Mi Perfil", true);
         setSize(400, 550);
         setLocationRelativeTo(parent);
@@ -83,7 +82,7 @@ public class VentanaPerfil extends JDialog {
                 imagen = ImageIO.read(new File(rutaImagen));
             }
             
-            // Crear ícono circular
+            // icono circular
             ImageIcon iconoPerfil = VisualUtils.createCircularIcon(imagen, 200);
             labelFoto.setIcon(iconoPerfil);
         } catch (IOException e) {

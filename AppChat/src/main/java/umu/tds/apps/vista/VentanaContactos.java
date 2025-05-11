@@ -155,7 +155,6 @@ public class VentanaContactos extends JPanel {
         panelBotones.add(btnMoverDerecha);
         panelBotones.add(btnMoverIzquierda);
 
-        // Añadir los paneles al layout con instancias diferentes de GridBagConstraints
         GridBagConstraints gbcContactos = new GridBagConstraints();
         gbcContactos.gridx = 0;
         gbcContactos.gridy = 0;
@@ -281,7 +280,7 @@ public class VentanaContactos extends JPanel {
                     }
                 });
 
-                final String[] nombreGrupo = {null}; // Usamos un arreglo para almacenar el valor mutable
+                final String[] nombreGrupo = {null}; 
 
                 boolean nombreValido = false;
 
@@ -296,7 +295,7 @@ public class VentanaContactos extends JPanel {
                     int option = JOptionPane.showConfirmDialog(null, message, "Crear Grupo", JOptionPane.OK_CANCEL_OPTION);
 
                     if (option == JOptionPane.CANCEL_OPTION || option == JOptionPane.CLOSED_OPTION) {
-                        return; // Salir si el usuario cancela
+                        return; 
                     }
 
                     nombreGrupo[0] = nombreGrupoField.getText().trim();

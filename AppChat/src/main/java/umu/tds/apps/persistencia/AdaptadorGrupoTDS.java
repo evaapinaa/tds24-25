@@ -166,7 +166,6 @@ public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
         if (rutaImagen != null && !rutaImagen.trim().isEmpty()) {
             try {
                 imagenGrupo = new ImageIcon(rutaImagen);
-                // Si la imagen no se carga correctamente (getIconWidth devuelve -1)
                 if (imagenGrupo.getIconWidth() <= 0) {
                     System.err.println("No se pudo cargar la imagen del grupo desde: " + rutaImagen);
                     imagenGrupo = null;
@@ -218,22 +217,22 @@ public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
             }
         }
 
-        // 3) Si no existe la propiedad, crear una lista nueva con todas las propiedades
+        // 3) Si no existe la propiedad, se crea una lista nueva con todas las propiedades
         if (!tienePropiedadMensajes) {
-            // Crear una nueva lista con todas las propiedades existentes
+            // Creaamos una nueva lista con todas las propiedades existentes
             List<Propiedad> propiedadesNuevas = new ArrayList<>(eGrupo.getPropiedades());
             
             // Añadir la nueva propiedad
             propiedadesNuevas.add(new Propiedad("mensajesEnviados", 
                                              obtenerCodigosMensajes(grupo.getListaMensajesEnviados())));
             
-            // Establecer las propiedades actualizadas
+            // Establecemos las propiedades actualizadas
             eGrupo.setPropiedades(propiedadesNuevas);
             
-            // Actualizar la entidad en el servicio de persistencia
+            // Actualizamos la entidad en el servicio de persistencia
             servPersistencia.modificarEntidad(eGrupo);
         } else {
-            // 4) Si ya existe, actualizar las propiedades individualmente
+            // 4) Si ya existe, actualizamos las propiedades individualmente
             for (Propiedad prop : eGrupo.getPropiedades()) {
                 switch (prop.getNombre()) {
                     case "nombreGrupo":
@@ -255,7 +254,6 @@ public class AdaptadorGrupoTDS implements IAdaptadorGrupoDAO {
                         prop.setValor(desc);
                         break;
                     default:
-                        // Si tienes más propiedades, manéjalas aquí.
                         break;
                 }
                 servPersistencia.modificarPropiedad(prop);

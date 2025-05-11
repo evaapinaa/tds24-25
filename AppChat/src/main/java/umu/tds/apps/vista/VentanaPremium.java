@@ -313,7 +313,7 @@ public class VentanaPremium extends JDialog {
 	 */
 	private void activarPremium() {
 
-		// Verificar si ya es premium (por si acaso xd
+		// Verificar si ya es premium 
 		if (AppChat.getUsuarioActual().isPremium()) {
 			JOptionPane.showMessageDialog(this, "Ya eres un usuario Premium.", "Información",
 					JOptionPane.INFORMATION_MESSAGE);
@@ -321,7 +321,6 @@ public class VentanaPremium extends JDialog {
 			return;
 		}
 
-		// Aquí iría la lógica de pago real, ahora solo simulamos
 		int opcion = JOptionPane.showConfirmDialog(this,
 				"¿Confirmar el pago de " + String.format("%.2f", precioActual) + " € para activar Premium?",
 				"Confirmar Pago", JOptionPane.YES_NO_OPTION);
