@@ -1,0 +1,8 @@
+Cuenta 1
+
+Nombre completo: María López 
+Teléfono: 612345678
+Contraseña: 150490
+Saludo: "¡Hola a todos! Disfruto compartiendo momentos especiales y conectando con personas nuevas. ¡Bienvenidos a mi chat!"
+Fecha de nacimiento: 15/04/1990
+
