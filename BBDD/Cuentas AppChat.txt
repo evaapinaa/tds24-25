@@ -6,3 +6,28 @@ Contraseña: 150490
 Saludo: "¡Hola a todos! Disfruto compartiendo momentos especiales y conectando con personas nuevas. ¡Bienvenidos a mi chat!"
 Fecha de nacimiento: 15/04/1990
 
+Cuenta 2
+
+Nombre completo: Carlos Martínez
+Teléfono: 623456789
+Contraseña: carlos2025
+Saludo: "Disponible para conversaciones interesantes."
+Fecha de nacimiento: 23/11/1985
+
+Cuenta 3
+
+Nombre completo: Ana García 
+Teléfono: 634567890
+Contraseña: ana1234
+Saludo: "Estudiante de medicina. Me encanta la fotografía y viajar."
+Fecha de nacimiento: 07/06/1995
+
+
+
+Cuenta 4
+
+Nombre completo: David Rodríguez Torres
+Teléfono: 645678901
+Contraseña: david4321
+Saludo: "Ingeniero informático, amante de la tecnología y los deportes."
+Fecha de nacimiento: 19/02/1988
