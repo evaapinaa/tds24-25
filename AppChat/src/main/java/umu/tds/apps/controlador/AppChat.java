@@ -791,7 +791,7 @@ public class AppChat {
 						documento.add(new Paragraph("No hay mensajes enviados a este grupo.", fontNormal));
 					}
 
-					documento.add(new Paragraph(" ")); // Espacio
+					documento.add(new Paragraph(" ")); 
 				}
 			}
 

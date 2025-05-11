@@ -165,10 +165,7 @@ public class Mensaje {
     public void setCodigo(int codigo) {
         this.codigo = codigo;
     }
-
-    // ----------------------------------------------------------------
-    // CONSTRUCTORES DE USO "NORMAL" (lanzan excepción si chat==null)
-    // ----------------------------------------------------------------
+    
     /**
      * Crea un nuevo mensaje de texto.
      * 
@@ -211,9 +208,6 @@ public class Mensaje {
         this.hora = LocalDateTime.now();
     }
 
-    // ----------------------------------------------------------------
-    // CONSTRUCTORES "SIN chat" (uso normal) => internamente exigen chat
-    // ----------------------------------------------------------------
     /**
      * Constructor "sin chat" para uso normal (internamente exige chat).
      * 
@@ -237,9 +231,6 @@ public class Mensaje {
         this(emisor, emoticono, receptor, null);
     }
 
-    // ----------------------------------------------------------------
-    // CONSTRUCTOR ESPECIAL PARA TDS (NO chequea chat != null)
-    // ----------------------------------------------------------------
     /**
      * Constructor especial para TDS (no chequea chat != null).
      * Usado para la recuperación desde el almacenamiento.

@@ -164,12 +164,7 @@ public class Usuario {
      * @return Lista de grupos
      */
 	public List<Grupo> getGrupos() {
-		return listaContactos.stream().filter(c -> c instanceof Grupo).map(c -> (Grupo) c).toList(); // Cambiar a
-																										// `collect(Collectors.toList())`
-																										// si usas una
-																										// versión de
-																										// Java anterior
-																										// a 16.
+		return listaContactos.stream().filter(c -> c instanceof Grupo).map(c -> (Grupo) c).toList(); 
 	}
 
 	public void setFechaNacimiento(LocalDate fechaNacimiento) {
