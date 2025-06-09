@@ -13,10 +13,6 @@ import umu.tds.apps.modelo.ContactoIndividual;
 import umu.tds.apps.modelo.Grupo;
 import umu.tds.apps.modelo.Mensaje;
 import umu.tds.apps.modelo.Usuario;
-import umu.tds.apps.persistencia.AdaptadorChatTDS;
-import umu.tds.apps.persistencia.AdaptadorGrupoTDS;
-import umu.tds.apps.persistencia.AdaptadorMensajeTDS;
-import umu.tds.apps.persistencia.AdaptadorUsuarioTDS;
 import umu.tds.apps.vista.customcomponents.VisualUtils;
 
 import java.awt.Adjustable;
@@ -162,89 +158,6 @@ public class VentanaPrincipal extends JFrame {
 		});
 	}
 	
-    /**
-     * Envía un mensaje a todos los miembros de un grupo.
-     * <p>
-     * Este método crea un mensaje individual para cada miembro del grupo y lo registra
-     * en la base de datos, actualizando las listas de mensajes del emisor y receptores.
-     * 
-     * @param emisor El usuario que envía el mensaje
-     * @param grupo El grupo destinatario del mensaje
-     * @param texto El contenido del mensaje a enviar
-     * @return true si el mensaje se envió correctamente a todos los miembros, false en caso contrario
-     */
-	public boolean enviarMensajeAGrupo(Usuario emisor, Grupo grupo, String texto) {
-	    if (texto == null || texto.trim().isEmpty()) {
-	        System.err.println("El mensaje no puede estar vacío.");
-	        return false;
-	    }
-
-	    if (grupo == null || grupo.getListaContactos().isEmpty()) {
-	        System.err.println("El grupo no existe o no tiene contactos.");
-	        return false;
-	    }
-
-	    if (emisor == null) {
-	        System.err.println("El emisor no puede ser nulo.");
-	        return false;
-	    }
-
-	    boolean enviado = true;
-	    
-	    // Crear un mensaje representativo para el grupo (usando el primer miembro como referencia)
-	    Mensaje mensajeGrupo = null;
-	    
-	    for (ContactoIndividual miembro : grupo.getListaContactos()) {
-	        Usuario receptor = miembro.getUsuario();
-	        if (receptor != null) {
-	            // Obtener o crear el chat con este receptor
-	            Chat chat = emisor.obtenerChatCon(receptor);
-	            if (chat == null) {
-	                chat = new Chat(emisor, receptor);
-	                AdaptadorChatTDS.getUnicaInstancia().registrarChat(chat);
-	                emisor.añadirChat(chat);
-	                receptor.añadirChat(chat);
-	                AdaptadorUsuarioTDS.getUnicaInstancia().modificarUsuario(emisor);
-	                AdaptadorUsuarioTDS.getUnicaInstancia().modificarUsuario(receptor);
-	            }
-
-	            // Crear mensaje individual para este receptor
-	            Mensaje mensaje = new Mensaje(emisor, texto, receptor, chat);
-	            AdaptadorMensajeTDS.getUnicaInstancia().registrarMensaje(mensaje);
-
-	            // Actualizar listas de emisor y receptor
-	            emisor.añadirMensajeEnviado(mensaje);
-	            receptor.añadirMensajeRecibido(mensaje);
-
-	            // Persistir cambios
-	            AdaptadorUsuarioTDS.getUnicaInstancia().modificarUsuario(emisor);
-	            AdaptadorUsuarioTDS.getUnicaInstancia().modificarUsuario(receptor);
-
-	            // Actualizar chat individual
-	            chat.addMensaje(mensaje);
-	            AdaptadorChatTDS.getUnicaInstancia().modificarChat(chat);
-	            
-	            // Guardar el primer mensaje como representativo para el grupo
-	            if (mensajeGrupo == null) {
-	                mensajeGrupo = mensaje;
-	            }
-	            
-	            enviado &= true;
-	        } else {
-	            System.err.println("No se pudo enviar mensaje a: " + miembro.getNombre());
-	            enviado = false;
-	        }
-	    }
-	    
-	    // Añadir solo una vez el mensaje al grupo
-	    if (mensajeGrupo != null) {
-	        grupo.addMensajeEnviado(mensajeGrupo);
-	        AdaptadorGrupoTDS.getUnicaInstancia().modificarGrupo(grupo);
-	    }
-	    
-	    return enviado;
-	}
-
 
     /**
      * Constructor que inicializa la ventana principal y todos sus componentes.
@@ -1542,7 +1455,18 @@ public class VentanaPrincipal extends JFrame {
 	}
 
 
-	
+	/**
+	 * Método simplificado que delega al controlador el envío de mensajes a grupos.
+	 * Este método mantiene la separación de responsabilidades del patrón MVC.
+	 * 
+	 * @param emisor El usuario que envía el mensaje
+	 * @param grupo El grupo destinatario del mensaje
+	 * @param texto El contenido del mensaje a enviar
+	 * @return true si el mensaje se envió correctamente, false en caso contrario
+	 */
+	public boolean enviarMensajeAGrupo(Usuario emisor, Grupo grupo, String texto) {
+	    return AppChat.getUnicaInstancia().enviarMensajeAGrupo(emisor, grupo, texto);
+	}
 
 
 }

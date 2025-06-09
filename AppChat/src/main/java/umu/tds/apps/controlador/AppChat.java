@@ -564,36 +564,77 @@ public class AppChat {
 	
 	
 	/**
-	 * Envía un mensaje de texto a todos los miembros de un grupo.
+	 * Envía un mensaje a todos los miembros de un grupo.
+	 * Crea un mensaje individual para cada miembro del grupo y lo registra
+	 * en la base de datos, actualizando las listas de mensajes del emisor y receptores.
 	 * 
-	 * @param uActual Usuario que envía el mensaje
-	 * @param grupo Grupo al que se envía el mensaje
-	 * @param texto Contenido del mensaje
-	 * @return true si el mensaje se envió correctamente a todos los miembros, false si algún envío falló
+	 * @param emisor El usuario que envía el mensaje
+	 * @param grupo El grupo destinatario del mensaje
+	 * @param texto El contenido del mensaje a enviar
+	 * @return true si el mensaje se envió correctamente a todos los miembros, false en caso contrario
 	 */
-	public boolean enviarMensajeAGrupo(Usuario uActual, Grupo grupo, String texto) {
-		if (texto == null || grupo == null) {
-			System.err.println("Error: texto o grupo es null");
-			return false;
-		}
+	public boolean enviarMensajeAGrupo(Usuario emisor, Grupo grupo, String texto) {
+	    if (texto == null || texto.trim().isEmpty()) {
+	        System.err.println("El mensaje no puede estar vacío.");
+	        return false;
+	    }
 
-		List<ContactoIndividual> miembros = grupo.getListaContactos();
-		if (miembros.isEmpty()) {
-			System.err.println("El grupo no tiene miembros.");
-			return false;
-		}
+	    if (grupo == null || grupo.getListaContactos().isEmpty()) {
+	        System.err.println("El grupo no existe o no tiene contactos.");
+	        return false;
+	    }
 
-		boolean enviado = true;
-		for (ContactoIndividual miembro : miembros) {
-			Usuario receptor = miembro.getUsuario();
-			if (receptor != null) {
-				enviado &= enviarMensaje(uActual, receptor, texto);
-			} else {
-				System.err.println("No se pudo enviar mensaje a: " + miembro.getNombre());
-				enviado = false;
-			}
-		}
-		return enviado;
+	    if (emisor == null) {
+	        System.err.println("El emisor no puede ser nulo.");
+	        return false;
+	    }
+
+	    boolean enviado = true;
+	    
+	    Mensaje mensajeGrupo = null;
+	    
+	    for (ContactoIndividual miembro : grupo.getListaContactos()) {
+	        Usuario receptor = miembro.getUsuario();
+	        if (receptor != null) {
+	            Chat chat = emisor.obtenerChatCon(receptor);
+	            if (chat == null) {
+	                chat = new Chat(emisor, receptor);
+	                adaptadorChat.registrarChat(chat);
+	                emisor.añadirChat(chat);
+	                receptor.añadirChat(chat);
+	                adaptadorUsuario.modificarUsuario(emisor);
+	                adaptadorUsuario.modificarUsuario(receptor);
+	            }
+
+	            Mensaje mensaje = new Mensaje(emisor, texto, receptor, chat);
+	            adaptadorMensaje.registrarMensaje(mensaje);
+
+	            emisor.añadirMensajeEnviado(mensaje);
+	            receptor.añadirMensajeRecibido(mensaje);
+
+	            adaptadorUsuario.modificarUsuario(emisor);
+	            adaptadorUsuario.modificarUsuario(receptor);
+
+	            chat.addMensaje(mensaje);
+	            adaptadorChat.modificarChat(chat);
+	            
+	            if (mensajeGrupo == null) {
+	                mensajeGrupo = mensaje;
+	            }
+	            
+	            enviado &= true;
+	        } else {
+	            System.err.println("No se pudo enviar mensaje a: " + miembro.getNombre());
+	            enviado = false;
+	        }
+	    }
+	    
+	    if (mensajeGrupo != null) {
+	        grupo.addMensajeEnviado(mensajeGrupo);
+	        AdaptadorGrupoTDS.getUnicaInstancia().modificarGrupo(grupo);
+	    }
+	    
+	    return enviado;
 	}
 	
 	
